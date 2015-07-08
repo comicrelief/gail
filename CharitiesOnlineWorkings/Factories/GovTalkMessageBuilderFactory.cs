@@ -1,56 +1,58 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace CharitiesOnlineWorkings
-//{
-//    public class GovTalkMessageBuilderFactory : IGovTalkMessageBuilderFactory
-//    {
-//        Dictionary<string, Type> messageBuilders;
+using CharitiesOnlineWorkings.Builders;
 
-//        public GovTalkMessageBuilderFactory()
-//        {
-//            throw new NotImplementedException();
-//        }
+namespace CharitiesOnlineWorkings.Factories
+{
+    public class GovTalkMessageBuilderFactory : IGovTalkMessageBuilderFactory
+    {
+        Dictionary<string, Type> messageBuilders;
 
-//        public IGovTalkMessageBuilder CreateInstance(string description)
-//        {
-//            Type t = GetTypeToCreate(description);
+        public GovTalkMessageBuilderFactory()
+        {
+            throw new NotImplementedException();
+        }
 
-//            if(t == null)
-//                return new UnknownMessageBuilder();
+        public GovTalkMessageBuilderBase CreateInstance(string description)
+        {
+            Type t = GetTypeToCreate(description);
 
-//            return Activator.CreateInstance(t) as IGovTalkMessageBuilder;
-//        }
+            if (t == null)
+                return new UnknownMessageBuilder();
 
-//        private Type GetTypeToCreate(string messageBuilderName)
-//        {
-//            foreach(var messageBuilder in messageBuilders)
-//            {
-//                if(messageBuilder.Key.Contains(messageBuilderName))
-//                {
-//                    return messageBuilders[messageBuilder.Key];
-//                }
-//            }
+            return Activator.CreateInstance(t) as GovTalkMessageBuilderBase;
+        }
 
-//            return null;
-//        }
+        private Type GetTypeToCreate(string messageBuilderName)
+        {
+            foreach (var messageBuilder in messageBuilders)
+            {
+                if (messageBuilder.Key.Contains(messageBuilderName))
+                {
+                    return messageBuilders[messageBuilder.Key];
+                }
+            }
 
-//        private void LoadTypesICanReturn()
-//        {
-//            messageBuilders = new Dictionary<string, Type>();
+            return null;
+        }
 
-//            Type[] typesInThisAssembly = System.Reflection.Assembly.GetExecutingAssembly().GetTypes();
+        private void LoadTypesICanReturn()
+        {
+            messageBuilders = new Dictionary<string, Type>();
 
-//            foreach(Type type in typesInThisAssembly)
-//            {
-//                if(type.GetInterface(typeof(IGovTalkMessageBuilder).ToString())!= null)
-//                {
-//                    messageBuilders.Add(type.Name.ToLower(), type);
-//                }
-//            }
-//        }
-//    }
-//}
+            Type[] typesInThisAssembly = System.Reflection.Assembly.GetExecutingAssembly().GetTypes();
+
+            foreach (Type type in typesInThisAssembly)
+            {
+                if (type.GetInterface(typeof(GovTalkMessageBuilderBase).ToString()) != null)
+                {
+                    messageBuilders.Add(type.Name.ToLower(), type);
+                }
+            }
+        }
+    }
+}

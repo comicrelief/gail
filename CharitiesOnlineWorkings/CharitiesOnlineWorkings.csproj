@@ -57,6 +57,7 @@
     <Compile Include="DAL\DataTableRepaymentPopulater.cs" />
     <Compile Include="Factories\GovTalkMessageBuilderFactory.cs" />
     <Compile Include="Builders\HeaderBuilder.cs" />
+    <Compile Include="Factories\IGovTalkMessageBuilderFactory.cs" />
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Builders\IRenvelopeBuilder.cs" />
     <Compile Include="Builders\IRheaderBuilder.cs" />
