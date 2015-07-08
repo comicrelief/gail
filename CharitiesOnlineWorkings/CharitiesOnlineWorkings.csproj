@@ -54,6 +54,7 @@
     <Compile Include="Builders\BodyBuilderBase.cs" />
     <Compile Include="Builders\GovTalkDetailsBuilder.cs" />
     <Compile Include="Builders\GovTalkMessageBuilderBase.cs" />
+    <Compile Include="Builders\UnknownMessageBuilderBase.cs" />
     <Compile Include="DAL\DataTableRepaymentPopulater.cs" />
     <Compile Include="Factories\GovTalkMessageBuilderFactory.cs" />
     <Compile Include="Builders\HeaderBuilder.cs" />
