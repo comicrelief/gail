@@ -6,7 +6,7 @@ using System.Text;
 using System.Configuration;
 using System.Data;
 
-namespace CharitiesOnlineWorkings
+namespace CharitiesOnline
 {
     public static class ReferenceDataManager
     {

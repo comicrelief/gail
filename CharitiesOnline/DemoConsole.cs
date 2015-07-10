@@ -11,12 +11,12 @@ using System.Xml;
 using System.Xml.Linq;
 
 using hmrcclasses;
-using CharitiesOnlineWorkings.Builders;
-using CharitiesOnlineWorkings.Strategies;
+using CharitiesOnline.Builders;
+using CharitiesOnline.Strategies;
 
-namespace CharitiesOnlineWorkings
+namespace CharitiesOnline
 {
-    class Program
+    class DemoConsole
     {
         static void Main(string[] args)
         {
@@ -48,7 +48,7 @@ namespace CharitiesOnlineWorkings
             xd.PreserveWhitespace = true;
             xd.Load(@"C:\Temp\TestCompressedGovTalkMsgWithIrMark_2015_07_07_12_32_12.xml");
 
-            CharitiesOnlineWorkings.MessageService.Client client = new MessageService.Client();
+            CharitiesOnline.MessageService.Client client = new MessageService.Client();
 
             XmlDocument reply = client.SendRequest(xd, uri);
 

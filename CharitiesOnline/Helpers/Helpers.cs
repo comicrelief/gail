@@ -18,9 +18,9 @@ using System.Reflection;
 
 using LumenWorks.Framework.IO.Csv;
 
-using CharitiesOnlineWorkings.XmlWriterExtension;
+using CharitiesOnline.XmlWriterExtension;
 
-namespace CharitiesOnlineWorkings
+namespace CharitiesOnline
 {
     public static class Helpers
     {

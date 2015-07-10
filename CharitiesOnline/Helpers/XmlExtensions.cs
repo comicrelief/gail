@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace CharitiesOnlineWorkings
+namespace CharitiesOnline
 {
     // From http://stackoverflow.com/questions/1508572/converting-xdocument-to-xmldocument-and-vice-versa
     public static class XmlExtensions

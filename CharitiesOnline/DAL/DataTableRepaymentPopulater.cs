@@ -6,9 +6,9 @@ using System.Data;
 using System.Configuration;
 
 using hmrcclasses;
-using CharitiesOnlineWorkings.Builders;
+using CharitiesOnline.Builders;
 
-namespace CharitiesOnlineWorkings
+namespace CharitiesOnline
 {
     public static class DataTableRepaymentPopulater
     {

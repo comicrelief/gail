@@ -7,7 +7,7 @@ using System.Xml;
 
 using hmrcclasses;
 
-namespace CharitiesOnlineWorkings.Builders
+namespace CharitiesOnline.Builders
 {
     public abstract class BodyBuilderBase
     {

@@ -67,7 +67,7 @@
     <Compile Include="MessageService\Client.cs" />
     <Compile Include="MessageService\Request.cs" />
     <Compile Include="MessageService\Response.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="DemoConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Builders\R68Builder.cs" />
     <Compile Include="Builders\R68ClaimBuilder.cs" />
@@ -76,6 +76,7 @@
     <Compile Include="DAL\ReferenceDataManager.cs" />
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
     <Compile Include="Strategies\IMessageReadStrategy.cs" />
+    <Compile Include="Strategies\ReadAcknowledgement.cs" />
     <Compile Include="Strategies\ReadSubmitRequestStrategy.cs" />
   </ItemGroup>
   <ItemGroup>

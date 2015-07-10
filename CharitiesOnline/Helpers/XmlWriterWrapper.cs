@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace CharitiesOnlineWorkings.XmlWriterExtension
+namespace CharitiesOnline.XmlWriterExtension
 {
     // Credit: http://www.tkachenko.com/blog/archives/000584.html
 

@@ -7,7 +7,7 @@ using System.Linq;
 
 using hmrcclasses;
 
-namespace CharitiesOnlineWorkings.Strategies
+namespace CharitiesOnline.Strategies
 {
     public class ReadSubmitRequestStrategy : IMessageReadStrategy
     {

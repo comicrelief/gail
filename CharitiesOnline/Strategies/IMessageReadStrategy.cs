@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-namespace CharitiesOnlineWorkings.Strategies
+namespace CharitiesOnline.Strategies
 {
     interface IMessageReadStrategy
     {

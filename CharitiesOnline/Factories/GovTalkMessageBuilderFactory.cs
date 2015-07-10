@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using CharitiesOnlineWorkings.Builders;
+using CharitiesOnline.Builders;
 
-namespace CharitiesOnlineWorkings.Factories
+namespace CharitiesOnline.Factories
 {
     public class GovTalkMessageBuilderFactory : IGovTalkMessageBuilderFactory
     {

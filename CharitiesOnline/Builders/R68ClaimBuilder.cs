@@ -10,7 +10,7 @@ using System.Configuration;
 
 using hmrcclasses;
 
-namespace CharitiesOnlineWorkings.Builders
+namespace CharitiesOnline.Builders
 {
     public abstract class R68ClaimBuilderBase
     {
