@@ -403,6 +403,12 @@ namespace CharitiesOnlineWorkings
             return dt;
         }
 
+        public static byte[] XmlToBytes(XmlDocument inputDocument)
+        {
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(inputDocument.InnerXml);
+            return bytes;
+        }
+
         #region Alternative
         // from http://stackoverflow.com/questions/258960/how-to-serialize-an-object-to-xml-without-getting-xmlns
 

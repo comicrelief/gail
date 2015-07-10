@@ -21,11 +21,40 @@ namespace CharitiesOnlineWorkings
         static void Main(string[] args)
         {
             Console.WriteLine("Started");
-            Console.ReadKey();
-
-            TestGovTalkCompressedMessageCreation();
-                        
+            // Console.ReadKey();
+            try
+            {
+                TestSend();
+            }
+            catch(System.Net.WebException wex)
+            {
+                Console.WriteLine("Exception occured in connecting to remote machine");
+                Console.WriteLine(wex.InnerException.Message);
+                Console.WriteLine(wex.Message);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+                                    
             Console.ReadKey();                
+        }
+
+        static void TestSend()
+        {
+            string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
+
+            XmlDocument xd = new XmlDocument();
+            xd.PreserveWhitespace = true;
+            xd.Load(@"C:\Temp\TestCompressedGovTalkMsgWithIrMark_2015_07_07_12_32_12.xml");
+
+            CharitiesOnlineWorkings.MessageService.Client client = new MessageService.Client();
+
+            XmlDocument reply = client.SendRequest(xd, uri);
+
+            Console.WriteLine(reply.InnerXml);
+            
+
         }
 
         public static void TestReadMessage()
