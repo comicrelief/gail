@@ -21,7 +21,7 @@ namespace CharitiesOnlineWorkings
         static void Main(string[] args)
         {
             Console.WriteLine("Started");
-            // Console.ReadKey();
+
             try
             {
                 TestSend();
@@ -52,9 +52,7 @@ namespace CharitiesOnlineWorkings
 
             XmlDocument reply = client.SendRequest(xd, uri);
 
-            Console.WriteLine(reply.InnerXml);
-            
-
+            Console.WriteLine(reply.InnerXml);            
         }
 
         public static void TestReadMessage()
