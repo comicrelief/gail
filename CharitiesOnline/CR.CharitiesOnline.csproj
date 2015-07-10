@@ -7,8 +7,8 @@
     <ProjectGuid>{EEB1C9C1-4638-4D30-9750-B5C0414668D1}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CharitiesOnlineWorkings</RootNamespace>
-    <AssemblyName>CharitiesOnlineWorkings</AssemblyName>
+    <RootNamespace>CharitiesOnline</RootNamespace>
+    <AssemblyName>CharitiesOnline</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
