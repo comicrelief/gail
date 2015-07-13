@@ -24,7 +24,7 @@ namespace CharitiesOnline
 
             try
             {
-                TestSend();
+                TestDeserializeSuccessResponse();
             }
             catch(System.Net.WebException wex)
             {
@@ -38,6 +38,21 @@ namespace CharitiesOnline
             }
                                     
             Console.ReadKey();                
+        }
+
+        public static void TestDeserializeSuccessResponse()
+        {
+            XmlDocument successMessage = new XmlDocument();
+            successMessage.Load(@"C:\Temp\livePollMessage2015_02_02_12_41_1853DE80F71CEF4C07B57CD5BDA969D577_response_20150202124118_.xml");
+
+            GovTalkMessage success = Helpers.DeserializeMessage(successMessage);
+
+            XmlDocument successXml = new XmlDocument();
+            successXml.LoadXml(success.Body.Any[0].ToString());
+
+            SuccessResponse successResp = Helpers.DeserializeSuccessResponse(successXml);
+
+            Console.WriteLine(successResp.Message[0].Value);
         }
 
         static void TestSend()

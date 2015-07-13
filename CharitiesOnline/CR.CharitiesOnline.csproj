@@ -77,6 +77,7 @@
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
     <Compile Include="Strategies\IMessageReadStrategy.cs" />
     <Compile Include="Strategies\ReadAcknowledgement.cs" />
+    <Compile Include="Strategies\ReadResponse.cs" />
     <Compile Include="Strategies\ReadSubmitRequestStrategy.cs" />
   </ItemGroup>
   <ItemGroup>

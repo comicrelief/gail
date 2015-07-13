@@ -95,6 +95,19 @@ namespace CharitiesOnline
             return ire;            
         }
 
+        public static SuccessResponse DeserializeSuccessResponse(XmlDocument xmlElement)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(SuccessResponse));
+            MemoryStream xmlStream = new MemoryStream();
+            xmlElement.Save(xmlStream);
+            xmlStream.Seek(0, SeekOrigin.Begin);
+
+            var LocalSuccessResponse = serializer.Deserialize(xmlStream);
+            SuccessResponse success = (SuccessResponse)LocalSuccessResponse;
+
+            return success;
+        }
+
         public static R68Claim DeserializeR68Claim(XmlDocument xmlElement)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(R68Claim));

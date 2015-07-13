@@ -13,9 +13,11 @@ namespace CharitiesOnline.Strategies
     {
         // private IMessageWriter _messageType;
 
+        private GovTalkMessage _message;
+
         public void ReadSubmitRequestMessage()
         {
-            // IMessageWriter _messageType = new SubmitRequestWriter();
+            // IMessageWriter _messageType = new SubmitRequestWriter();           
         }
 
         public bool IsMatch(XDocument inMessage)
@@ -134,6 +136,11 @@ namespace CharitiesOnline.Strategies
 
                 return default(T);
             }                            
+        }
+
+        public GovTalkMessage Message()
+        {
+            return _message;
         }
     }
 }
