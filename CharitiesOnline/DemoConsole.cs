@@ -24,7 +24,9 @@ namespace CharitiesOnline
 
             try
             {
-                TestDeserializeSuccessResponse();
+                IMessageReader reader = new DefaultMessageReader();
+
+                TestReadMessages(reader);
             }
             catch(System.Net.WebException wex)
             {
@@ -48,11 +50,39 @@ namespace CharitiesOnline
             GovTalkMessage success = Helpers.DeserializeMessage(successMessage);
 
             XmlDocument successXml = new XmlDocument();
-            successXml.LoadXml(success.Body.Any[0].ToString());
+
+            successXml.LoadXml(success.Body.Any[0].OuterXml);
 
             SuccessResponse successResp = Helpers.DeserializeSuccessResponse(successXml);
 
             Console.WriteLine(successResp.Message[0].Value);
+        }
+
+        public static void TestReadSuccessResponse()
+        {
+            XmlDocument successResponse = new XmlDocument();
+            successResponse.Load(@"C:\Temp\success_response_78503626913182048.xml");
+
+            ReadResponse reader = new ReadResponse();
+            if (reader.IsMatch(successResponse.ToXDocument()))
+            {
+                SuccessResponse success = reader.GetBody<SuccessResponse>();                
+            }
+        }
+
+        public static void TestReadMessages(IMessageReader messageReader)
+        {
+            IMessageReader _messageReader = messageReader;
+
+            XmlDocument successResponse = new XmlDocument();
+            successResponse.Load(@"C:\Temp\success_response_78503626913182048.xml");
+
+            string results = _messageReader.ReadMessage<string>(successResponse.ToXDocument());
+
+            GovTalkMessage message = _messageReader.Message(successResponse.ToXDocument());
+
+
+
         }
 
         static void TestSend()

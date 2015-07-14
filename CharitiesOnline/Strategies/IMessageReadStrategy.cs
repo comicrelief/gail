@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
+
 using hmrcclasses;
 
 namespace CharitiesOnline.Strategies
@@ -13,6 +14,8 @@ namespace CharitiesOnline.Strategies
         T ReadMessage<T>(XDocument xd);
 
         GovTalkMessage Message();
+
+        T GetBody<T>();
 
     }
 }

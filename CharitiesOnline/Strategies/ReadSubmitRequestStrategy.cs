@@ -14,6 +14,7 @@ namespace CharitiesOnline.Strategies
         // private IMessageWriter _messageType;
 
         private GovTalkMessage _message;
+        private IRenvelope _body;
 
         public void ReadSubmitRequestMessage()
         {
@@ -30,8 +31,16 @@ namespace CharitiesOnline.Strategies
             string function = inMessage.Descendants(ns + "Function").FirstOrDefault().Value;
 
             if (qualifier == "request" && function == "submit")
-                return true;
+            {
+                _message = Helpers.DeserializeMessage(inMessage.ToXmlDocument());
+                XmlElement xmlElement = _message.Body.Any[0];
+                XmlDocument bodyDoc = new XmlDocument();
+                bodyDoc.LoadXml(xmlElement.OuterXml);
+                _body = Helpers.DeserializeIRenvelope(bodyDoc);
 
+                return true;
+            }
+                                       
             return false;
         }
 
@@ -44,25 +53,15 @@ namespace CharitiesOnline.Strategies
         {
             if (typeof(T) == typeof(DataTable))
             {
-                DataTable dt = Helpers.MakeRepaymentTable();
-
-                XmlDocument xmlDoc = inXD.ToXmlDocument();                
-
-                GovTalkMessage message = Helpers.DeserializeMessage(xmlDoc);
-
-                XmlElement xmlElement = message.Body.Any[0];
-                XmlDocument bodyDoc = new XmlDocument();
-                bodyDoc.LoadXml(xmlElement.OuterXml);
-
-                IRenvelope ir = Helpers.DeserializeIRenvelope(bodyDoc);
+                DataTable dt = Helpers.MakeRepaymentTable();                              
 
                 // deal with compression first then load uncompressed repayment & otherinc 
 
                 R68Claim r68claim;
 
-                if(ir.R68.Items[0] is R68CompressedPart)
+                if(_body.R68.Items[0] is R68CompressedPart)
                 {
-                    R68CompressedPart compressedPart = (R68CompressedPart)ir.R68.Items[0];
+                    R68CompressedPart compressedPart = (R68CompressedPart)_body.R68.Items[0];
 
                     string decompressedData = Helpers.DecompressData(compressedPart.Value);
                     XmlDocument decompressedXml = new XmlDocument();              
@@ -80,7 +79,7 @@ namespace CharitiesOnline.Strategies
                 }
                 else
                 {
-                    r68claim = (R68Claim)ir.R68.Items[0];
+                    r68claim = (R68Claim)_body.R68.Items[0];
                 }
 
                 #region GiftAidDonors
@@ -142,5 +141,12 @@ namespace CharitiesOnline.Strategies
         {
             return _message;
         }
+
+        public T GetBody<T>()
+        {
+            //return (IBodyReturnType)_body;
+            return (T)Convert.ChangeType(_body, typeof(T));
+        }
+
     }
 }

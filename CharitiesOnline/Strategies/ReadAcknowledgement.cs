@@ -14,10 +14,16 @@ namespace CharitiesOnline.Strategies
     public class ReadAcknowledgement : IMessageReadStrategy
     {
         private GovTalkMessage _message;
+        
 
         public bool IsMatch(XDocument inMessage)
         {
+            _message = Helpers.DeserializeMessage(inMessage.ToXmlDocument());
 
+            if (_message.Header.MessageDetails.Qualifier == GovTalkMessageHeaderMessageDetailsQualifier.acknowledgement && _message.Header.MessageDetails.Function == GovTalkMessageHeaderMessageDetailsFunction.submit)
+            {
+                return true;
+            }
 
             return false;
         }
@@ -52,6 +58,12 @@ namespace CharitiesOnline.Strategies
         public GovTalkMessage Message()
         {
             return _message;
+        }
+
+        public T GetBody<T>()
+        {
+            return default(T);
+            //return (T)Convert.ChangeType(_body, typeof(T));
         }
     }
 }

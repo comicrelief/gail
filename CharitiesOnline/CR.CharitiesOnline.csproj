@@ -64,9 +64,9 @@
     <Compile Include="Builders\IRenvelopeBuilder.cs" />
     <Compile Include="Builders\IRheaderBuilder.cs" />
     <Compile Include="Helpers\XmlExtensions.cs" />
-    <Compile Include="MessageService\Client.cs" />
-    <Compile Include="MessageService\Request.cs" />
-    <Compile Include="MessageService\Response.cs" />
+    <Compile Include="MessageSending Service\Client.cs" />
+    <Compile Include="MessageSending Service\Request.cs" />
+    <Compile Include="MessageSending Service\Response.cs" />
     <Compile Include="DemoConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Builders\R68Builder.cs" />
@@ -76,6 +76,7 @@
     <Compile Include="DAL\ReferenceDataManager.cs" />
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
     <Compile Include="Strategies\IMessageReadStrategy.cs" />
+    <Compile Include="Strategies\MessageReadingService.cs" />
     <Compile Include="Strategies\ReadAcknowledgement.cs" />
     <Compile Include="Strategies\ReadResponse.cs" />
     <Compile Include="Strategies\ReadSubmitRequestStrategy.cs" />
@@ -89,6 +90,9 @@
       <Project>{a80cdea5-22d9-48b6-853c-5d9fdb9c7d8a}</Project>
       <Name>HMRCServiceClasses</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
