@@ -108,6 +108,19 @@ namespace CharitiesOnline
             return success;
         }
 
+        public static ErrorResponse DeserializeErrorResponse(XmlDocument xmlElement)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(ErrorResponse));
+            MemoryStream xmlStream = new MemoryStream();
+            xmlElement.Save(xmlStream);
+            xmlStream.Seek(0, SeekOrigin.Begin);
+
+            var LocalErrorResponse = serializer.Deserialize(xmlStream);
+            ErrorResponse error = (ErrorResponse)LocalErrorResponse;
+
+            return error;
+        }
+
         public static R68Claim DeserializeR68Claim(XmlDocument xmlElement)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(R68Claim));

@@ -18,6 +18,8 @@ namespace CharitiesOnline.Strategies
             _readers.Add(new ReadSubmitRequestStrategy());
             _readers.Add(new ReadAcknowledgementStrategy());
             _readers.Add(new ReadResponseStrategy());
+            _readers.Add(new ReadErrorStrategy());
+            _readers.Add(new ReadPollStrategy());
         }
 
         public T ReadMessage<T>(XDocument inMessage)
@@ -30,9 +32,9 @@ namespace CharitiesOnline.Strategies
             return _readers.First(r => r.IsMatch(inMessage)).Message();
         }
 
-        public T GetBody<T>()
+        public T GetBody<T>(XDocument inMessage)
         {
-            return default(T);
+            return _readers.First(r => r.IsMatch(inMessage)).GetBody<T>();
         }
     }
 }

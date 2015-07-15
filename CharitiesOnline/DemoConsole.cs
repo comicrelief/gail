@@ -24,8 +24,8 @@ namespace CharitiesOnline
 
             try
             {
+                // TestReadSuccessResponse();
                 IMessageReader reader = new DefaultMessageReader();
-
                 TestReadMessages(reader);
             }
             catch(System.Net.WebException wex)
@@ -74,14 +74,14 @@ namespace CharitiesOnline
         {
             IMessageReader _messageReader = messageReader;
 
-            XmlDocument successResponse = new XmlDocument();
-            successResponse.Load(@"C:\Temp\success_response_78503626913182048.xml");
+            XmlDocument messageXML = new XmlDocument();
+            messageXML.Load(@"C:\Temp\RequestMessage_1422880486_File14393268203594585061_error_20150202123518_.xml");
 
-            string results = _messageReader.ReadMessage<string>(successResponse.ToXDocument());
+            //string results = _messageReader.ReadMessage<string>(messageXML.ToXDocument());
 
-            GovTalkMessage message = _messageReader.Message(successResponse.ToXDocument());
+            // GovTalkMessage message = _messageReader.Message(messageXML.ToXDocument());
 
-
+            ErrorResponse err = _messageReader.GetBody<ErrorResponse>(messageXML.ToXDocument());
 
         }
 
