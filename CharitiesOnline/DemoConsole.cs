@@ -63,7 +63,7 @@ namespace CharitiesOnline
             XmlDocument successResponse = new XmlDocument();
             successResponse.Load(@"C:\Temp\success_response_78503626913182048.xml");
 
-            ReadResponse reader = new ReadResponse();
+            ReadResponseStrategy reader = new ReadResponseStrategy();
             if (reader.IsMatch(successResponse.ToXDocument()))
             {
                 SuccessResponse success = reader.GetBody<SuccessResponse>();                

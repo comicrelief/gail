@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Xml.Linq;
 using System.Data;
 using System.Xml;
@@ -16,16 +15,9 @@ namespace CharitiesOnline.Strategies
         private GovTalkMessage _message;
         private IRenvelope _body;
 
-        public void ReadSubmitRequestMessage()
-        {
-            // IMessageWriter _messageType = new SubmitRequestWriter();           
-        }
-
         public bool IsMatch(XDocument inMessage)
         {
             XNamespace ns = "http://www.govtalk.gov.uk/CM/envelope";
-
-            // var qualifierQuery = from c in inMessage.Descendants(ns + "Qualifier") select c; // no need
 
             string qualifier = inMessage.Descendants(ns + "Qualifier").FirstOrDefault().Value;
             string function = inMessage.Descendants(ns + "Function").FirstOrDefault().Value;
@@ -33,9 +25,12 @@ namespace CharitiesOnline.Strategies
             if (qualifier == "request" && function == "submit")
             {
                 _message = Helpers.DeserializeMessage(inMessage.ToXmlDocument());
+                
                 XmlElement xmlElement = _message.Body.Any[0];
+                
                 XmlDocument bodyDoc = new XmlDocument();
                 bodyDoc.LoadXml(xmlElement.OuterXml);
+                
                 _body = Helpers.DeserializeIRenvelope(bodyDoc);
 
                 return true;

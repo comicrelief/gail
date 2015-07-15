@@ -75,10 +75,13 @@
     <Compile Include="Builders\R68ClaimRepaymentOtherIncBuilder.cs" />
     <Compile Include="DAL\ReferenceDataManager.cs" />
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
+    <Compile Include="Strategies\IMessageReader.cs" />
     <Compile Include="Strategies\IMessageReadStrategy.cs" />
-    <Compile Include="Strategies\MessageReadingService.cs" />
-    <Compile Include="Strategies\ReadAcknowledgement.cs" />
-    <Compile Include="Strategies\ReadResponse.cs" />
+    <Compile Include="Strategies\DefaultMessageReader.cs" />
+    <Compile Include="Strategies\ReadAcknowledgementStrategy.cs" />
+    <Compile Include="Strategies\ReadErrorStrategy.cs" />
+    <Compile Include="Strategies\ReadPollStrategy.cs" />
+    <Compile Include="Strategies\ReadResponseStrategy.cs" />
     <Compile Include="Strategies\ReadSubmitRequestStrategy.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -7,12 +7,6 @@ using hmrcclasses;
 
 namespace CharitiesOnline.Strategies
 {
-    public interface IMessageReader
-    {
-        T ReadMessage<T>(XDocument inMessage);
-        GovTalkMessage Message(XDocument inMessage);
-        T GetBody<T>();
-    }
 
     public class DefaultMessageReader : IMessageReader
     {
@@ -22,8 +16,8 @@ namespace CharitiesOnline.Strategies
         {
             _readers = new List<IMessageReadStrategy>();
             _readers.Add(new ReadSubmitRequestStrategy());
-            _readers.Add(new ReadAcknowledgement());
-            _readers.Add(new ReadResponse());
+            _readers.Add(new ReadAcknowledgementStrategy());
+            _readers.Add(new ReadResponseStrategy());
         }
 
         public T ReadMessage<T>(XDocument inMessage)
