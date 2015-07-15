@@ -59,6 +59,8 @@ namespace CharitiesOnline.Strategies
                 response[1] = _message.Header.MessageDetails.ResponseEndPoint.Value;
                 response[2] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
                 response[3] = _body.Application.Any[0].Name + ":" + _body.Application.Any[0].InnerText;
+
+                return (T)Convert.ChangeType(response, typeof(T));
             }
 
             return default(T);
