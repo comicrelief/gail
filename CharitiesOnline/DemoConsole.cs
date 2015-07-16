@@ -24,9 +24,10 @@ namespace CharitiesOnline
 
             try
             {
+                TestGovTalkMessageCreation();
                 // TestReadSuccessResponse();
-                IMessageReader reader = new DefaultMessageReader();
-                TestReadMessages(reader);
+                //IMessageReader reader = new DefaultMessageReader();
+                //TestReadMessages(reader);
             }
             catch(System.Net.WebException wex)
             {
@@ -75,11 +76,20 @@ namespace CharitiesOnline
             IMessageReader _messageReader = messageReader;
 
             XmlDocument messageXML = new XmlDocument();
-            messageXML.Load(@"C:\Temp\RequestMessage_1422880486_File14393268203594585061_error_20150202123518_.xml");
+            messageXML.Load(@"C:\Temp\livePollMessage2015_02_02_12_41_1853DE80F71CEF4C07B57CD5BDA969D577_response_20150202124118_.xml");
 
-            //string results = _messageReader.ReadMessage<string>(messageXML.ToXDocument());
+            string[] results = _messageReader.ReadMessage<string[]>(messageXML.ToXDocument());
+
+            foreach(var s in results)
+            {
+                Console.WriteLine(s);
+            }
 
             // GovTalkMessage message = _messageReader.Message(messageXML.ToXDocument());
+
+            string bodytype = _messageReader.GetBodyType(messageXML.ToXDocument());
+
+            Console.WriteLine(bodytype);
 
             ErrorResponse err = _messageReader.GetBody<ErrorResponse>(messageXML.ToXDocument());
 
@@ -151,7 +161,7 @@ namespace CharitiesOnline
 
         public static void TestGovTalkMessageCreation()
         {
-            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\enterprise_tfs\GAVIN\CO\test_data\sample2.csv", true);
+            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations-Wrong.csv", true);
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
