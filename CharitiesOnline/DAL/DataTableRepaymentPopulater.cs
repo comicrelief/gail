@@ -14,6 +14,7 @@ namespace CharitiesOnline
     {
         private static DataTable _giftAidDonations;
         private static DataTable _otherIncome;
+        private static readonly List<string> RequiredColumnNames = new List<string>(new string[] { "Fore", "Sur", "House", "Postcode","Date","Total" });
 
         public static DataTable GiftAidDonations
         {
@@ -23,6 +24,19 @@ namespace CharitiesOnline
             }
             set
             {
+                string[] MissingColumns = GetMissingColumns(value, RequiredColumnNames);
+
+                if(MissingColumns.Length > 0)
+                {
+                    string Message = "List of missing Required Columns: \n";
+                    
+                    foreach(var s in MissingColumns)
+                    {
+                        Message += s + "\n";
+                    }
+
+                    throw new Exception(Message);
+                }
                 _giftAidDonations = value;
             }
         }
@@ -37,6 +51,23 @@ namespace CharitiesOnline
             {
                 _otherIncome = value;
             }
+        }
+
+        private static string[] GetMissingColumns(DataTable TableToCheck, List<string> RequiredColumnNames)
+        {
+            string[] columnList = new string[RequiredColumnNames.Count];
+
+            foreach(string colName in RequiredColumnNames)
+            {
+                int count = 0;
+
+                if(!TableToCheck.Columns.Contains(colName))
+                {
+                    columnList[count] = colName;
+                    count++;
+                }
+            }
+            return columnList;
         }
 
         public static hmrcclasses.R68ClaimRepayment CreateRepayments()
