@@ -91,16 +91,28 @@ namespace CharitiesOnline.Builders
             {
                 R68ClaimRepaymentGAD.Date = Convert.ToDateTime(InputDataRow["Date"]);
                 R68ClaimRepaymentGAD.Total = Convert.ToDecimal(InputDataRow["Total"]);
+
+                if(InputDataRow.Table.Columns.Contains("Sponsored"))
+                {
+                    if(InputDataRow["Sponsored"].ToString().ToUpper() == "YES" || InputDataRow["Sponsored"].ToString().ToUpper() == "Y")
+                    {
+                        R68ClaimRepaymentGAD.SponsoredSpecified = true;
+                        R68ClaimRepaymentGAD.Sponsored = r68_YesType.yes;
+                    }
+                }
             }
             catch(ArgumentException argEx)
             {
                 // Trying to catch error caused by row without correct name
-                string msg = String.Format("The column named {0} does not exist in the input row");
-                throw new ArgumentException(msg);
+                // Should've checked this in the RepaymentPopulater class
+                string msg = "The column named does not exist in the input row";
+
+                throw argEx;
             }
             catch(FormatException fEx)
             {
                 // Trying to catch value exceptions for the DateTime and Decimal conversions
+
             }                        
         }
 
