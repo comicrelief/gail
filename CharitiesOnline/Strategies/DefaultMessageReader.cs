@@ -36,5 +36,7 @@ namespace CharitiesOnline.Strategies
         {
             return _readers.First(r => r.IsMatch(inMessage)).GetBody<T>();
         }
+
+        
     }
 }

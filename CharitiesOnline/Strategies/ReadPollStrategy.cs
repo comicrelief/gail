@@ -49,5 +49,11 @@ namespace CharitiesOnline.Strategies
             return default(T);
         }
 
+        public string GetBodyType()
+        {
+            // return Type of _body
+            return String.Empty;
+        }
+
     }
 }

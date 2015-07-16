@@ -53,6 +53,8 @@ namespace CharitiesOnline.Strategies
                 response[2] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
                 response[3] = _body.IRmarkReceipt.Message.Value;
                 response[4] = _body.AcceptedTime.ToString();
+
+                return (T)Convert.ChangeType(response, typeof(T));
             }
 
             return default(T);
@@ -65,7 +67,18 @@ namespace CharitiesOnline.Strategies
 
         public T GetBody<T>()
         {
-            return (T)Convert.ChangeType(_body, typeof(T));
+            if(typeof(T) == typeof(SuccessResponse))
+            {
+                return (T)Convert.ChangeType(_body, typeof(T));
+            }
+
+            return default(T);
+        }
+
+        public string GetBodyType()
+        {
+            // return Type of _body
+            return _body.GetType().ToString();
         }
     }
 }

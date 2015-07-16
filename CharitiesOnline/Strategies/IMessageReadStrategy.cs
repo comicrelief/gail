@@ -17,5 +17,7 @@ namespace CharitiesOnline.Strategies
 
         T GetBody<T>();
 
+        string GetBodyType();
+
     }
 }

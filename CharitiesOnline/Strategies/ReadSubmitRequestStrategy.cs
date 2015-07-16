@@ -140,7 +140,14 @@ namespace CharitiesOnline.Strategies
         public T GetBody<T>()
         {
             //return (IBodyReturnType)_body;
+
             return (T)Convert.ChangeType(_body, typeof(T));
+        }
+
+        public string GetBodyType()
+        {
+            // return Type of _body
+            return _body.GetType().ToString();
         }
 
     }
