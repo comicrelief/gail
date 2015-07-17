@@ -12,5 +12,6 @@ namespace CharitiesOnline.Strategies
         T ReadMessage<T>(XDocument inMessage);
         GovTalkMessage Message(XDocument inMessage);
         T GetBody<T>(XDocument inMessage);
+        string GetBodyType(XDocument inMessage);
     }
 }
