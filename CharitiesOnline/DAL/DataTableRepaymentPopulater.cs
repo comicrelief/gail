@@ -28,14 +28,14 @@ namespace CharitiesOnline
 
                 if(MissingColumns.Length > 0)
                 {
-                    string Message = "List of missing Required Columns: \n";
+                    string Message = "One or more Required Columns is missing from the input datatable. List of missing columns: \n";
                     
                     foreach(var s in MissingColumns)
                     {
                         Message += s + "\n";
                     }
 
-                    throw new Exception(Message);
+                    throw new ArgumentException(Message);
                 }
                 _giftAidDonations = value;
             }
@@ -55,18 +55,20 @@ namespace CharitiesOnline
 
         private static string[] GetMissingColumns(DataTable TableToCheck, List<string> RequiredColumnNames)
         {
-            string[] columnList = new string[RequiredColumnNames.Count];
+            List<string> MissingColumns = new List<string>();
+
+            string[] columnList;
 
             foreach(string colName in RequiredColumnNames)
-            {
-                int count = 0;
-
+            {                
                 if(!TableToCheck.Columns.Contains(colName))
                 {
-                    columnList[count] = colName;
-                    count++;
+                    MissingColumns.Add(colName);                    
                 }
             }
+
+            columnList = MissingColumns.ToArray();
+
             return columnList;
         }
 
@@ -74,21 +76,18 @@ namespace CharitiesOnline
         {
             R68ClaimRepaymentGAD[] GADs = new R68ClaimRepaymentGAD[GiftAidDonations.Rows.Count];
 
-            // throw exception if no column named Type
-            // or use Donor method if no column named Type exists
-
             for (int i = 0; i < GiftAidDonations.Rows.Count; i++)
             {
                 if (GiftAidDonations.Columns.Contains("Type"))
                 {
-                    if (GiftAidDonations.Rows[i]["Type"].ToString() == "Agg")
+                    if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "AGG")
                     {
                         R68ClaimRepaymentGADCreator aggDonationCreator = new R68ClaimRepaymentGADCreator(new AggDonationR68ClaimRepaymentGADBuilder());
                         aggDonationCreator.SetInputRow(GiftAidDonations.Rows[i]);
                         aggDonationCreator.CreateR68ClaimRepaymentGAD();
                         GADs[i] = aggDonationCreator.GetR68ClaimRepaymentGAD();
                     }
-                    if (GiftAidDonations.Rows[i]["Type"].ToString() == "GAD")
+                    if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "GAD")
                     {
                         R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
                         donorCreator.SetInputRow(GiftAidDonations.Rows[i]);
