@@ -24,10 +24,12 @@ namespace CharitiesOnline
 
             try
             {
-                TestGovTalkMessageCreation();
+                TestLocalProcess();
+
+                // TestGovTalkMessageCreation();
                 // TestReadSuccessResponse();
-                //IMessageReader reader = new DefaultMessageReader();
-                //TestReadMessages(reader);
+                // IMessageReader reader = new DefaultMessageReader();
+                // TestReadMessages(reader);
             }
             catch(System.Net.WebException wex)
             {
@@ -41,6 +43,58 @@ namespace CharitiesOnline
             }
                                     
             Console.ReadKey();                
+        }
+
+        public static void TestLocalProcess()
+        {
+            // Create a file
+            // Send to the LTS
+            // Read response
+            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
+            ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
+
+            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder());
+            submitMessageCreator.CreateGovTalkMessage();
+            hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
+
+            XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
+
+            XmlDocument finalXd = Helpers.SetIRmark(xd);
+
+            string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
+
+            CharitiesOnline.MessageService.Client client = new MessageService.Client();
+
+            XmlDocument reply = client.SendRequest(xd, uri);
+
+            // @TODO Need a method in the reader for generating a good filepath for messages
+            reply.Save(@"C:\Temp\localreply.xml");
+
+            IMessageReader _messageReader = new DefaultMessageReader();
+
+            string bodytype = _messageReader.GetBodyType(reply.ToXDocument());
+            
+            // This bit, bunch of if-thens, should be covered by the reader strategy ...
+
+            if(bodytype == null)
+            {
+                //acknowledgment
+                Console.WriteLine("CorrelationId is {0}",_messageReader.ReadMessage<string>(reply.ToXDocument()));
+            }
+            else if(bodytype == "hmrcclasses.SuccessResponse")
+            {
+                //success
+                string[] success = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+                Console.WriteLine(string.Join("\n", success));
+            }
+            else if(bodytype == "hmrcclasses.ErrorResponse")
+            {
+                //error
+                string[] error = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+                Console.WriteLine(string.Join("\n", error));
+            }
+                   
+
         }
 
         public static void TestDeserializeSuccessResponse()
