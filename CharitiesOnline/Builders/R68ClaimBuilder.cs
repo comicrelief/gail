@@ -31,33 +31,7 @@ namespace CharitiesOnline.Builders
         }
 
         public abstract void SetClaimDetails();
-        //public void SetRepayment(DataTable InputDataTable)
-        //{
-        //    R68ClaimRepaymentGAD[] GADs = new R68ClaimRepaymentGAD[InputDataTable.Rows.Count];
-        //    // throw exception if no column named Type
-        //    for(int i = 0; i < InputDataTable.Rows.Count; i++)
-        //    {
-        //        if(InputDataTable.Rows[i]["Type"].ToString() == "")
-        //        {
-        //            R68ClaimRepaymentGADCreator aggDonationCreator = new R68ClaimRepaymentGADCreator(new AggDonationR68ClaimRepaymentGADBuilder());
-        //            aggDonationCreator.CreateR68ClaimRepaymentGAD();
-        //            GADs[i] = aggDonationCreator.GetR68ClaimRepaymentGAD();
-        //        }
-        //        if(InputDataTable.Rows[i]["Type"].ToString() == "")
-        //        {
-        //            R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
-        //            donorCreator.CreateR68ClaimRepaymentGAD();
-        //            GADs[i] = donorCreator.GetR68ClaimRepaymentGAD();
-        //        }
-        //    }
 
-        //    var repayment = new R68ClaimRepayment();
-        //    repayment.GAD = GADs;
-        //    repayment.EarliestGAdate = Convert.ToDateTime(InputDataTable.Compute("min(Date)", string.Empty));
-        //    repayment.EarliestGAdateSpecified = true;
-
-        //    R68Claim.Repayment = repayment;
-        //}
         public abstract void SetGASDS();
         public abstract void SetRepayment();
     }
@@ -131,31 +105,6 @@ namespace CharitiesOnline.Builders
 
     public class RepaymentBuilder : DefaultR68ClaimBuilder
     {
-        private DataTable _donationsDataTable;
-        public DataTable DonationsDataTable
-        {
-            get
-            {
-                return _donationsDataTable;
-            }
-            set
-            {
-                _donationsDataTable = value;
-            }
-        }
-        
-        private DataTable _otherIncomeDataTable;
-        public DataTable OtherIncomeDataTable
-        {
-            get
-            {
-                return _otherIncomeDataTable;
-            }
-            set
-            {
-                _otherIncomeDataTable = value;
-            }
-        }
         public override void SetRepayment()
         {
             R68Claim.Repayment = DataTableRepaymentPopulater.CreateRepayments();
