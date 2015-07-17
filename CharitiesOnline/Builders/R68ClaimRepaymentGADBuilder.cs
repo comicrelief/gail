@@ -42,8 +42,6 @@ namespace CharitiesOnline.Builders
         }
 
         public abstract void SetDonationDetails();
-        // public abstract void SetDonor();
-        // public abstract void SetAggDonation();
         public abstract void SetDonation();
     }
 
@@ -61,9 +59,6 @@ namespace CharitiesOnline.Builders
             _r68ClaimRepaymentGADBuilder.InitialiseR68ClaimRepaymentGAD();
             _r68ClaimRepaymentGADBuilder.SetDonationDetails();
             _r68ClaimRepaymentGADBuilder.SetDonation();
-//Choice here depending on whether it's an Agg or a Donor
-            //_r68ClaimRepaymentGADBuilder.SetDonor();
-            //_r68ClaimRepaymentGADBuilder.SetAggDonation();
         }
 
         public hmrcclasses.R68ClaimRepaymentGAD GetR68ClaimRepaymentGAD()
@@ -87,33 +82,36 @@ namespace CharitiesOnline.Builders
 
         public override void SetDonationDetails()
         {
-            try
+            DateTime donationDate;
+            if (DateTime.TryParse(InputDataRow["Date"].ToString(), out donationDate))
             {
-                R68ClaimRepaymentGAD.Date = Convert.ToDateTime(InputDataRow["Date"]);
-                R68ClaimRepaymentGAD.Total = Convert.ToDecimal(InputDataRow["Total"]);
+                R68ClaimRepaymentGAD.Date = donationDate;
+            }
+            else
+            {
+                throw new FormatException(String.Format("Donation Date format incorrect for record {0}", InputDataRow.Table.Rows.IndexOf(InputDataRow) + 1));
+            }
+            
+            Decimal donationAmount;
+            if(Decimal.TryParse(InputDataRow["Total"].ToString(), out donationAmount))
+            {
+                R68ClaimRepaymentGAD.Total = donationAmount;
+            }
+            else
+            {
+                throw new FormatException(String.Format("Donation Amount format incorrect for record {0}", InputDataRow.Table.Rows.IndexOf(InputDataRow) + 1));
+            }
 
-                if(InputDataRow.Table.Columns.Contains("Sponsored"))
+            R68ClaimRepaymentGAD.Total = Convert.ToDecimal(InputDataRow["Total"]);
+
+            if (InputDataRow.Table.Columns.Contains("Sponsored"))
+            {
+                if (InputDataRow["Sponsored"].ToString().ToUpper() == "YES" || InputDataRow["Sponsored"].ToString().ToUpper() == "Y")
                 {
-                    if(InputDataRow["Sponsored"].ToString().ToUpper() == "YES" || InputDataRow["Sponsored"].ToString().ToUpper() == "Y")
-                    {
-                        R68ClaimRepaymentGAD.SponsoredSpecified = true;
-                        R68ClaimRepaymentGAD.Sponsored = r68_YesType.yes;
-                    }
+                    R68ClaimRepaymentGAD.SponsoredSpecified = true;
+                    R68ClaimRepaymentGAD.Sponsored = r68_YesType.yes;
                 }
-            }
-            catch(ArgumentException argEx)
-            {
-                // Trying to catch error caused by row without correct name
-                // Should've checked this in the RepaymentPopulater class
-                string msg = "The column named does not exist in the input row";
-
-                throw argEx;
-            }
-            catch(FormatException fEx)
-            {
-                // Trying to catch value exceptions for the DateTime and Decimal conversions
-
-            }                        
+            }                                               
         }
 
         public override void SetDonation()
@@ -121,14 +119,6 @@ namespace CharitiesOnline.Builders
             throw new NotImplementedException();
         }
 
-        //public override void SetDonor()
-        //{
-        //    throw new NotImplementedException();
-        //}
-        //public override void SetAggDonation()
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 
     public class DonorR68ClaimRepaymentGADBuilder : DefaultR68ClaimRepaymentGADBuilder
