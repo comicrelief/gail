@@ -50,35 +50,28 @@ namespace CharitiesOnline
 
         public static XmlElement SerializeIREnvelope(IRenvelope ire)
         {
-            try
+            using (MemoryStream memStream = new MemoryStream())
             {
-                using (MemoryStream memStream = new MemoryStream())
-                {
-                    XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
-                    ns.Add(String.Empty, "http://www.govtalk.gov.uk/taxation/charities/r68/2");
+                XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
+                ns.Add(String.Empty, "http://www.govtalk.gov.uk/taxation/charities/r68/2");
 
-                    var knownTypes = new Type[] { typeof(IRenvelope), typeof(R68Claim) };
+                var knownTypes = new Type[] { typeof(IRenvelope), typeof(R68Claim) };
 
-                    XmlSerializer serializer =
-                        new XmlSerializer(typeof(IRenvelope), knownTypes);
+                XmlSerializer serializer =
+                    new XmlSerializer(typeof(IRenvelope), knownTypes);
 
-                    XmlTextWriter tw = new XmlTextWriter(memStream, UTF8Encoding.UTF8);
+                XmlTextWriter tw = new XmlTextWriter(memStream, UTF8Encoding.UTF8);
 
-                    XmlDocument doc = new XmlDocument();
-                    tw.Formatting = Formatting.Indented;
-                    // tw.IndentChar = '\x09'; //tab
-                    tw.IndentChar = ' ';
-                    serializer.Serialize(tw, ire, ns);
-                    memStream.Seek(0, SeekOrigin.Begin);
-                    doc.Load(memStream);
-                    XmlElement returnVal = doc.DocumentElement;
+                XmlDocument doc = new XmlDocument();
+                tw.Formatting = Formatting.Indented;
+                // tw.IndentChar = '\x09'; //tab
+                tw.IndentChar = ' ';
+                serializer.Serialize(tw, ire, ns);
+                memStream.Seek(0, SeekOrigin.Begin);
+                doc.Load(memStream);
+                XmlElement returnVal = doc.DocumentElement;
 
-                    return returnVal;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
+                return returnVal;
             }
         }
 
