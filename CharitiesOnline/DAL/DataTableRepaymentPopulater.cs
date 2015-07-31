@@ -74,20 +74,32 @@ namespace CharitiesOnline
 
         public static hmrcclasses.R68ClaimRepayment CreateRepayments()
         {
-            R68ClaimRepaymentGAD[] GADs = new R68ClaimRepaymentGAD[GiftAidDonations.Rows.Count];
+            // @TODO: log this
 
-            for (int i = 0; i < GiftAidDonations.Rows.Count; i++)
+            if(GiftAidDonations != null)
             {
-                if (GiftAidDonations.Columns.Contains("Type"))
+                R68ClaimRepaymentGAD[] GADs = new R68ClaimRepaymentGAD[GiftAidDonations.Rows.Count];
+
+                for (int i = 0; i < GiftAidDonations.Rows.Count; i++)
                 {
-                    if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "AGG")
+                    if (GiftAidDonations.Columns.Contains("Type"))
                     {
-                        R68ClaimRepaymentGADCreator aggDonationCreator = new R68ClaimRepaymentGADCreator(new AggDonationR68ClaimRepaymentGADBuilder());
-                        aggDonationCreator.SetInputRow(GiftAidDonations.Rows[i]);
-                        aggDonationCreator.CreateR68ClaimRepaymentGAD();
-                        GADs[i] = aggDonationCreator.GetR68ClaimRepaymentGAD();
+                        if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "AGG")
+                        {
+                            R68ClaimRepaymentGADCreator aggDonationCreator = new R68ClaimRepaymentGADCreator(new AggDonationR68ClaimRepaymentGADBuilder());
+                            aggDonationCreator.SetInputRow(GiftAidDonations.Rows[i]);
+                            aggDonationCreator.CreateR68ClaimRepaymentGAD();
+                            GADs[i] = aggDonationCreator.GetR68ClaimRepaymentGAD();
+                        }
+                        if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "GAD")
+                        {
+                            R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
+                            donorCreator.SetInputRow(GiftAidDonations.Rows[i]);
+                            donorCreator.CreateR68ClaimRepaymentGAD();
+                            GADs[i] = donorCreator.GetR68ClaimRepaymentGAD();
+                        }
                     }
-                    if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "GAD")
+                    else
                     {
                         R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
                         donorCreator.SetInputRow(GiftAidDonations.Rows[i]);
@@ -95,21 +107,17 @@ namespace CharitiesOnline
                         GADs[i] = donorCreator.GetR68ClaimRepaymentGAD();
                     }
                 }
-                else
-                {
-                    R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
-                    donorCreator.SetInputRow(GiftAidDonations.Rows[i]);
-                    donorCreator.CreateR68ClaimRepaymentGAD();
-                    GADs[i] = donorCreator.GetR68ClaimRepaymentGAD();
-                }
+
+                var repayment = new R68ClaimRepayment();
+                repayment.GAD = GADs;
+                repayment.EarliestGAdate = Convert.ToDateTime(GiftAidDonations.Compute("min(Date)", string.Empty));
+                repayment.EarliestGAdateSpecified = true;
+
+                return repayment;
             }
 
-            var repayment = new R68ClaimRepayment();
-            repayment.GAD = GADs;
-            repayment.EarliestGAdate = Convert.ToDateTime(GiftAidDonations.Compute("min(Date)", string.Empty));
-            repayment.EarliestGAdateSpecified = true;
-
-            return repayment;
+            return null;
+            
         }
 
         public static hmrcclasses.R68ClaimRepaymentOtherInc[] CreateOtherIncome()

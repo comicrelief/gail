@@ -104,15 +104,16 @@ namespace CharitiesOnline.Builders
                 return doc;
             }            
         }
-       
 
+        public XmlDocument CompressClaim()
+        {
+            return new XmlDocument();
+        }
 
         public void SetCorrelationId(string correlationId)
         {
             _govTalkMessageBuilder.CorrelationId = correlationId;
-        }
-
-        
+        }        
     }
 
     public class DefaultGovTalkMessageBuilder : GovTalkMessageBuilderBase
@@ -160,13 +161,12 @@ namespace CharitiesOnline.Builders
             govTalkDetailsCreatoor.CreateGovTalkDetails();
             GovTalkMessage.GovTalkDetails = govTalkDetailsCreatoor.GetGovTalkDetails();
         }
-
         public override void SetBody()
         {
             BodyCreator bodyCreator = new BodyCreator(new SubmitRequestBodyBuilder());
             bodyCreator.CreateBody();
             GovTalkMessage.Body = bodyCreator.GetBody();
-        }
+        }       
     }
 
     public class SubmitRequestCompressedMessageBuilder : DefaultGovTalkMessageBuilder
@@ -254,7 +254,6 @@ namespace CharitiesOnline.Builders
             GovTalkMessage.Body = deleteBodyCreator.GetBody();
         }
     }
-
 
     // @TODO: ADDPASSWORD properly ...
     public class ListRequestMessageBuilder : DefaultGovTalkMessageBuilder

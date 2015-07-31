@@ -24,7 +24,8 @@ namespace CharitiesOnline
 
             try
             {
-                TestLocalProcess();
+                TestSerialize();
+//                 TestLocalProcess();
 
                 // TestGovTalkMessageCreation();
                 // TestReadSuccessResponse();
@@ -215,15 +216,17 @@ namespace CharitiesOnline
 
         public static void TestGovTalkMessageCreation()
         {
-            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations-Wrong.csv", true);
+            // DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations-Wrong.csv", true);
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
             GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder());
+            
             submitMessageCreator.CreateGovTalkMessage();
+
             hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
-            XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();           
+            XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();         
 
             XmlDocument finalXd = Helpers.SetIRmark(xd);
 
@@ -392,6 +395,15 @@ namespace CharitiesOnline
             gad.TotalString = "12.00";
             gad.Date = Convert.ToDateTime("2014-10-03");
 
+            XmlDocument xmlGad =
+                Helpers.SerializeItem(gad);
+
+            byte[] bytes = Encoding.UTF8.GetBytes(xmlGad.OuterXml);
+
+
+
+            xmlGad.Save(@"C:\Temp\GAD.xml");
+
             R68ClaimRepaymentGAD[] GADS = new R68ClaimRepaymentGAD[1];
             GADS[0] = gad;
 
@@ -414,6 +426,8 @@ namespace CharitiesOnline
 
             XmlDocument claimXml =
                 Helpers.SerializeItem(claim);
+
+            
 
             claimXml.Save(@"C:\Temp\R68Claim.xml");
         }
