@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
-using System.Configuration;
 using System.Data;
+
+using CR.Infrastructure.Configuration;
 
 namespace CharitiesOnline
 {
@@ -12,6 +13,8 @@ namespace CharitiesOnline
     {
         // a class that wraps access to either a config file or a database as a source of
         // data for reference values
+
+        private static IConfigurationRepository _configurationRepository = new ConfigFileConfigurationRepository();
 
         private static NameValueCollection _settings;
         private static bool _sourceIsSet;
@@ -63,9 +66,9 @@ namespace CharitiesOnline
             switch (sourceType)
             {
                 case SourceTypes.ConfigFile:
-                    foreach (var setting in ConfigurationManager.AppSettings.Keys)
+                    foreach (var setting in _configurationRepository.AllEntries().Keys)
                     {
-                        _settings.Set(setting.ToString(), ConfigurationManager.AppSettings[setting.ToString()]);
+                        _settings.Set(setting.ToString(), _configurationRepository.GetConfigurationValue<string>(setting.ToString()));
                     }
                     SourceIsSet = true;
                     break;

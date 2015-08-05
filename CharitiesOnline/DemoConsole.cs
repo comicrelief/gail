@@ -14,35 +14,51 @@ using hmrcclasses;
 using CharitiesOnline.Builders;
 using CharitiesOnline.Strategies;
 
+using CR.Infrastructure.Configuration;
+using CR.Infrastructure.Logging;
+using CR.Infrastructure.ContextProvider;
+
 namespace CharitiesOnline
 {
     class DemoConsole
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Started");
-
             try
             {
-                TestSerialize();
-//                 TestLocalProcess();
+                Console.WriteLine("Started");
+
+                IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+                ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+                LogProviderContext.Current = loggingService;
+
+                Type type = typeof(DemoConsole);
+                    //System.Reflection.MethodBase.GetCurrentMethod().DeclaringType;
+
+                loggingService.LogInfo(type, "Logging!");
+
+                LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");
+
+                // TestSerialize();
+                //                 TestLocalProcess();
 
                 // TestGovTalkMessageCreation();
                 // TestReadSuccessResponse();
                 // IMessageReader reader = new DefaultMessageReader();
                 // TestReadMessages(reader);
             }
-            catch(System.Net.WebException wex)
+            catch (System.Net.WebException wex)
             {
                 Console.WriteLine("Exception occured in connecting to remote machine");
                 Console.WriteLine(wex.InnerException.Message);
                 Console.WriteLine(wex.Message);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
-                                    
+
             Console.ReadKey();                
         }
 
