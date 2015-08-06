@@ -10,7 +10,7 @@ using System.IO;
 
 using hmrcclasses;
 using CR.Infrastructure.Logging;
-
+using CharitiesOnline.Helpers;
 
 namespace CharitiesOnline.Builders
 {
@@ -93,7 +93,7 @@ namespace CharitiesOnline.Builders
                 XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
                 ns.Add(string.Empty, "http://www.govtalk.gov.uk/CM/envelope");
 
-                XmlSerializer serializer = new XmlSerializer(typeof(hmrcclasses.GovTalkMessage));
+                XmlSerializer serializer = new XmlSerializer(typeof(GovTalkMessage));
                 serializer.Serialize(XmlWriter.Create(memStream,settings), _govTalkMessageBuilder.GovTalkMessage, ns);
                 
                 memStream.Seek(0, SeekOrigin.Begin);
@@ -116,7 +116,39 @@ namespace CharitiesOnline.Builders
 
         public XmlDocument CompressClaim()
         {
-            return new XmlDocument();
+            _loggingService.LogInfo(this, "Compressing Claim.");
+
+            XmlElement bodyElement = _govTalkMessageBuilder.GovTalkMessage.Body.Any[0];
+            XmlDocument bodyDocument = new XmlDocument();
+            bodyDocument.LoadXml(bodyElement.OuterXml);
+
+            //deserialize body
+            IRenvelope irEnvelope = XmlSerializationHelpers.DeserializeIRenvelope(bodyDocument);
+
+            R68 uncompressedR68 = irEnvelope.R68;
+            XmlDocument r68xmlDoc = XmlSerializationHelpers.SerializeItem(uncompressedR68);
+
+            System.Xml.XmlDocument claimXmlDoc = GovTalkMessageHelpers.GetClaim(r68xmlDoc);
+
+            irEnvelope.R68.Items = null;
+
+            R68CompressedPart compressedPart = new R68CompressedPart();
+            compressedPart.Type = R68CompressedPartType.gzip;
+            compressedPart.Value = CommonUtilityHelpers.CompressData(claimXmlDoc.OuterXml, _loggingService);
+
+            R68CompressedPart[] compressedParts = new R68CompressedPart[1];
+            compressedParts[0] = compressedPart;
+
+            irEnvelope.R68.Items = compressedParts;
+
+            bodyElement = XmlSerializationHelpers.SerializeIREnvelope(irEnvelope);
+
+            _govTalkMessageBuilder.GovTalkMessage.Body.Any[0] = null;
+            _govTalkMessageBuilder.GovTalkMessage.Body.Any[0] = bodyElement;
+
+            XmlDocument compressedVersion = SerializeGovTalkMessage();
+
+            return compressedVersion;
         }
 
         public void SetCorrelationId(string correlationId)
