@@ -25,6 +25,8 @@ namespace CharitiesOnline
     {
         static void Main(string[] args)
         {
+
+
             try
             {
                 Console.WriteLine("Started");
@@ -242,12 +244,15 @@ namespace CharitiesOnline
 
         public static void TestGovTalkMessageCreation()
         {
-            // DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations-Wrong.csv", true);
+            
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            DataTableRepaymentPopulater.SetLogger(loggingService);
+            // DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations-Wrong.csv", true);
 
             GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService), loggingService);
             
@@ -259,7 +264,15 @@ namespace CharitiesOnline
 
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
-            finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+            byte[] xmlDocumentSize = finalXd.XmlToBytes();
+
+            Console.WriteLine("The document is {0}bytes big", xmlDocumentSize.Length);
+
+            XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
+
+            finalXd = GovTalkMessageHelpers.SetIRmark(compressedVersion);
+
+            finalXd.Save(@"C:\Temp\testGovTalkMsgCompressedWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
             #region old
             //BodyCreator bodyCreator = new BodyCreator(new SubmitRequestBodyBuilder());
