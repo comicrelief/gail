@@ -30,6 +30,9 @@ namespace CharitiesOnline
             }
             set
             {
+                if (_loggingService == null)
+                    throw new ArgumentNullException("LoggingService");
+
                 string[] MissingColumns = GetMissingColumns(value, RequiredColumnNames);
 
                 if(MissingColumns.Length > 0)
