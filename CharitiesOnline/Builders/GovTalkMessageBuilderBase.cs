@@ -8,17 +8,18 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 
-
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 
 namespace CharitiesOnline.Builders
 {
     public abstract class GovTalkMessageBuilderBase
     {
-        private hmrcclasses.GovTalkMessage _govTalkMessage;
-        
+        private GovTalkMessage _govTalkMessage;  
         private string _correlationId;
+        private ILoggingService _loggingService;
+
         public string CorrelationId
         {
             get
@@ -30,16 +31,20 @@ namespace CharitiesOnline.Builders
                 _correlationId = value;
             }
         }
-        public hmrcclasses.GovTalkMessage GovTalkMessage
+        public GovTalkMessage GovTalkMessage
         {
             get
             {
                 return _govTalkMessage;
             }
         }
-        public void InitialiseGovTalkMessage()
+        public void InitialiseGovTalkMessage(ILoggingService loggingService)
         {
-            _govTalkMessage = new hmrcclasses.GovTalkMessage();
+            _govTalkMessage = new GovTalkMessage();
+            _loggingService = loggingService;
+
+            loggingService.LogInfo(this, "Initialised GovTalkMessage.");
+
         }
 
         public abstract void SetEnvelopeVersion();
@@ -51,27 +56,31 @@ namespace CharitiesOnline.Builders
     public class GovTalkMessageCreator
     {
         private GovTalkMessageBuilderBase _govTalkMessageBuilder;
-        public GovTalkMessageCreator(GovTalkMessageBuilderBase govTalkMessageBuilder)
+        private ILoggingService _loggingService;
+        public GovTalkMessageCreator(GovTalkMessageBuilderBase govTalkMessageBuilder, ILoggingService loggingService)
         {
             _govTalkMessageBuilder = govTalkMessageBuilder;
+            _loggingService = loggingService;
         }
 
         public void CreateGovTalkMessage()
         {
-            _govTalkMessageBuilder.InitialiseGovTalkMessage();
+            _govTalkMessageBuilder.InitialiseGovTalkMessage(_loggingService);
             _govTalkMessageBuilder.SetEnvelopeVersion();
             _govTalkMessageBuilder.SetHeader();
             _govTalkMessageBuilder.SetGovTalkDetails();
             _govTalkMessageBuilder.SetBody();
         }
 
-        public hmrcclasses.GovTalkMessage GetGovTalkMessage()
+        public GovTalkMessage GetGovTalkMessage()
         {
             return _govTalkMessageBuilder.GovTalkMessage;
         }
 
         public XmlDocument SerializeGovTalkMessage()
         {
+            _loggingService.LogInfo(this, "Serializing GovTalkMessage.");
+
             using(MemoryStream memStream = new MemoryStream())
             {
                 XmlWriterSettings settings = new XmlWriterSettings
@@ -118,9 +127,15 @@ namespace CharitiesOnline.Builders
 
     public class DefaultGovTalkMessageBuilder : GovTalkMessageBuilderBase
     {
+        public DefaultGovTalkMessageBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
+
+        private ILoggingService _loggingService;
         public void CreateGovTalkMessage()
         {
-            InitialiseGovTalkMessage();
+            InitialiseGovTalkMessage(_loggingService);
             SetEnvelopeVersion();
             SetHeader();
             SetGovTalkDetails();
@@ -128,8 +143,9 @@ namespace CharitiesOnline.Builders
         }
 
         public override void SetEnvelopeVersion()
-        {
+        {            
             GovTalkMessage.EnvelopeVersion = ReferenceDataManager.Settings["GovTalkMessageEnvelopeVersion"];
+            _loggingService.LogInfo(this, "Envelope Version set");
         }
         public override void SetHeader()
         {
@@ -147,10 +163,15 @@ namespace CharitiesOnline.Builders
 
     public class SubmitRequestMessageBuilder : DefaultGovTalkMessageBuilder
     {
+        private ILoggingService _loggingService;
+        public SubmitRequestMessageBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetHeader()
         {
             // get values from config
-            HeaderCreator submitRequestHeaderCreator = new HeaderCreator(new RequestHeaderBuilder());
+            HeaderCreator submitRequestHeaderCreator = new HeaderCreator(new RequestHeaderBuilder(_loggingService), _loggingService);
             submitRequestHeaderCreator.CreateHeader();
             GovTalkMessage.Header = submitRequestHeaderCreator.GetHeader();
         }
@@ -163,7 +184,7 @@ namespace CharitiesOnline.Builders
         }
         public override void SetBody()
         {
-            BodyCreator bodyCreator = new BodyCreator(new SubmitRequestBodyBuilder());
+            BodyCreator bodyCreator = new BodyCreator(new SubmitRequestBodyBuilder(_loggingService), _loggingService);
             bodyCreator.CreateBody();
             GovTalkMessage.Body = bodyCreator.GetBody();
         }       
@@ -171,10 +192,17 @@ namespace CharitiesOnline.Builders
 
     public class SubmitRequestCompressedMessageBuilder : DefaultGovTalkMessageBuilder
     {
+        private ILoggingService _loggingService;
+
+        public SubmitRequestCompressedMessageBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
+        
         public override void SetHeader()
         {
             // get values from config
-            HeaderCreator submitRequestHeaderCreator = new HeaderCreator(new RequestHeaderBuilder());
+            HeaderCreator submitRequestHeaderCreator = new HeaderCreator(new RequestHeaderBuilder(_loggingService),_loggingService);
             submitRequestHeaderCreator.CreateHeader();
             GovTalkMessage.Header = submitRequestHeaderCreator.GetHeader();
         }
@@ -188,7 +216,7 @@ namespace CharitiesOnline.Builders
 
         public override void SetBody()
         {
-            BodyCreator bodyCreator = new BodyCreator(new SubmitRequestCompressedBodyBuilder());
+            BodyCreator bodyCreator = new BodyCreator(new SubmitRequestCompressedBodyBuilder(_loggingService), _loggingService);
             bodyCreator.CreateBody();
             GovTalkMessage.Body = bodyCreator.GetBody();
         }
@@ -196,13 +224,18 @@ namespace CharitiesOnline.Builders
 
     public class SubmitPollMesageBuilder : DefaultGovTalkMessageBuilder
     {
-        
+        private ILoggingService _loggingService;
+
+        public SubmitPollMesageBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetHeader()
         {
-            PollHeaderBuilder pollHeaderBuilder = new PollHeaderBuilder();
+            PollHeaderBuilder pollHeaderBuilder = new PollHeaderBuilder(_loggingService);
             pollHeaderBuilder.CorrelationId = CorrelationId;
 
-            HeaderCreator pollHeaderCreator = new HeaderCreator(pollHeaderBuilder);
+            HeaderCreator pollHeaderCreator = new HeaderCreator(pollHeaderBuilder, _loggingService);
             pollHeaderCreator.CreateHeader();
 
             GovTalkMessage.Header = pollHeaderCreator.GetHeader();
@@ -219,7 +252,7 @@ namespace CharitiesOnline.Builders
         
         public override void SetBody()
         {
-            BodyCreator pollBodyCreator = new BodyCreator(new EmptyBodyBuilder());
+            BodyCreator pollBodyCreator = new BodyCreator(new EmptyBodyBuilder(_loggingService), _loggingService);
             pollBodyCreator.CreateBody();
 
             GovTalkMessage.Body = pollBodyCreator.GetBody();
@@ -228,11 +261,17 @@ namespace CharitiesOnline.Builders
 
     public class DeleteRequestMessageBuilder : DefaultGovTalkMessageBuilder
     {
+        private ILoggingService _loggingService;
+
+        public DeleteRequestMessageBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetHeader()
         {
-            DeleteHeaderBuilder deleteHeaderBuilder = new DeleteHeaderBuilder();
+            DeleteHeaderBuilder deleteHeaderBuilder = new DeleteHeaderBuilder(_loggingService);
             deleteHeaderBuilder.CorrelationId = CorrelationId;
-            HeaderCreator deleteHeaderCreator = new HeaderCreator(deleteHeaderBuilder);
+            HeaderCreator deleteHeaderCreator = new HeaderCreator(deleteHeaderBuilder, _loggingService);
             deleteHeaderCreator.CreateHeader();
 
             GovTalkMessage.Header = deleteHeaderCreator.GetHeader();
@@ -248,7 +287,7 @@ namespace CharitiesOnline.Builders
 
         public override void SetBody()
         {
-            BodyCreator deleteBodyCreator = new BodyCreator(new EmptyBodyBuilder());
+            BodyCreator deleteBodyCreator = new BodyCreator(new EmptyBodyBuilder(_loggingService), _loggingService);
             deleteBodyCreator.CreateBody();
 
             GovTalkMessage.Body = deleteBodyCreator.GetBody();
@@ -258,9 +297,15 @@ namespace CharitiesOnline.Builders
     // @TODO: ADDPASSWORD properly ...
     public class ListRequestMessageBuilder : DefaultGovTalkMessageBuilder
     {
+        private ILoggingService _loggingService;
+
+        public ListRequestMessageBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetHeader()
         {
-            HeaderCreator listRequestHeaderCreator = new HeaderCreator(new ListRequestHeaderBuilder());
+            HeaderCreator listRequestHeaderCreator = new HeaderCreator(new ListRequestHeaderBuilder(_loggingService), _loggingService);
             listRequestHeaderCreator.CreateHeader();
 
             GovTalkMessage.Header = listRequestHeaderCreator.GetHeader();
@@ -275,7 +320,7 @@ namespace CharitiesOnline.Builders
 
         public override void SetBody()
         {
-            BodyCreator listRequestBodyCreator = new BodyCreator(new EmptyBodyBuilder());
+            BodyCreator listRequestBodyCreator = new BodyCreator(new EmptyBodyBuilder(_loggingService), _loggingService);
             listRequestBodyCreator.CreateBody();
 
             GovTalkMessage.Body = listRequestBodyCreator.GetBody();

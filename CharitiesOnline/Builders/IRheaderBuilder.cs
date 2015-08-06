@@ -4,18 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// Only need this in the Config implementation
-using System.Configuration;
-
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
     public abstract class IRheaderBuilderBase
     {
-        private hmrcclasses.IRheader _irHeader;
+        private IRheader _irHeader;
+        private ILoggingService _loggingService;
 
-        public hmrcclasses.IRheader IRHeader
+        public IRheader IRHeader
         {
             get
             {
@@ -23,9 +22,11 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseIRHeader()
+        public void InitialiseIRHeader(ILoggingService loggingService)
         {
-            _irHeader = new hmrcclasses.IRheader();
+            _irHeader = new IRheader();
+            _loggingService = loggingService;
+            
         }
 
         public abstract void SetKeys();
@@ -38,15 +39,17 @@ namespace CharitiesOnline.Builders
     public class IRHeaderCreator
     {
         private IRheaderBuilderBase _irHeaderBuilder;
+        private ILoggingService _loggingService;
 
-        public IRHeaderCreator(IRheaderBuilderBase irHeaderBuilder)
+        public IRHeaderCreator(IRheaderBuilderBase irHeaderBuilder, ILoggingService loggingService)
         {
             _irHeaderBuilder = irHeaderBuilder;
+            _loggingService = loggingService;
         }
 
         public void CreateIRHeader()
         {
-            _irHeaderBuilder.InitialiseIRHeader();
+            _irHeaderBuilder.InitialiseIRHeader(_loggingService);
             _irHeaderBuilder.SetKeys();
             _irHeaderBuilder.SetIRCurrency();
             _irHeaderBuilder.SetIRPeriodEnd();
@@ -54,7 +57,7 @@ namespace CharitiesOnline.Builders
             _irHeaderBuilder.SetIRMark();
         }
 
-        public hmrcclasses.IRheader GetIRHeader()
+        public IRheader GetIRHeader()
         {
             return _irHeaderBuilder.IRHeader;
         }
@@ -62,11 +65,16 @@ namespace CharitiesOnline.Builders
 
     public class DefaultIRHeaderBuilder : IRheaderBuilderBase
     {
-        // Use a config file to create the IR header
+        private ILoggingService _loggingService;
+
+        public DefaultIRHeaderBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
 
         public void CreateIRheader()
         {
-            InitialiseIRHeader();
+            InitialiseIRHeader(_loggingService);
             SetKeys();
             SetIRPeriodEnd();
             SetIRCurrency();
@@ -147,9 +155,4 @@ namespace CharitiesOnline.Builders
             IRHeader.IRmark = irmark;
         }
     }
-
-    //public class DbIRHeaderBuilder : IRheaderBuilderBase
-    //{
-    //    // Use a DB to create the IR header
-    //}
 }

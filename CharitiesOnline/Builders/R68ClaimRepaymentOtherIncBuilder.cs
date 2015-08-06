@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Data;
 
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
@@ -14,6 +15,7 @@ namespace CharitiesOnline.Builders
     {
         private R68ClaimRepaymentOtherInc _r68ClaimRepaymentOtherInc;
         private DataRow _inputDataRow;
+        private ILoggingService _loggingService;
 
         public DataRow InputDataRow
         {
@@ -35,9 +37,10 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseR68ClaimRepyamentOtherInc()
+        public void InitialiseR68ClaimRepyamentOtherInc(ILoggingService loggingService)
         {
             _r68ClaimRepaymentOtherInc = new R68ClaimRepaymentOtherInc();
+            _loggingService = loggingService;
         }
 
         public abstract void SetOtherIncome();
@@ -46,14 +49,16 @@ namespace CharitiesOnline.Builders
     public class R68ClaimRepaymentOtherIncomeCreator
     {
         private R68ClaimRepaymentOtherIncBuilderBase _r68ClaimRepaymentOtherIncBuilder;
+        private ILoggingService _loggingService;
 
-        public R68ClaimRepaymentOtherIncomeCreator(R68ClaimRepaymentOtherIncBuilderBase r68ClaimRepaymentOtherIncBuilder)
+        public R68ClaimRepaymentOtherIncomeCreator(R68ClaimRepaymentOtherIncBuilderBase r68ClaimRepaymentOtherIncBuilder, ILoggingService loggingService)
         {
             _r68ClaimRepaymentOtherIncBuilder = r68ClaimRepaymentOtherIncBuilder;
+            _loggingService = loggingService;
         }
         public void CreateR68ClaiMRepaymentOtherInc()
         {
-            _r68ClaimRepaymentOtherIncBuilder.InitialiseR68ClaimRepyamentOtherInc();
+            _r68ClaimRepaymentOtherIncBuilder.InitialiseR68ClaimRepyamentOtherInc(_loggingService);
             _r68ClaimRepaymentOtherIncBuilder.SetOtherIncome();
         }
 
@@ -70,9 +75,15 @@ namespace CharitiesOnline.Builders
 
     public class DefaultR68ClaimRepaymentOtherIncomeBuilder : R68ClaimRepaymentOtherIncBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public DefaultR68ClaimRepaymentOtherIncomeBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateR68ClaimRepaymentOtherInc()
         {
-            InitialiseR68ClaimRepyamentOtherInc();
+            InitialiseR68ClaimRepyamentOtherInc(_loggingService);
             SetOtherIncome();
         }
         public override void SetOtherIncome()

@@ -8,12 +8,14 @@ using System.Xml.Serialization;
 using System.IO;
 
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
     public abstract class IRenvelopeBuilderBase
     {
         private hmrcclasses.IRenvelope _irEnvelope;
+        private ILoggingService _loggingService;
 
         public hmrcclasses.IRenvelope IREnvelope
         {
@@ -23,15 +25,16 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseIRenvelope()
+        public void InitialiseIRenvelope(ILoggingService loggingService)
         {
             _irEnvelope = new hmrcclasses.IRenvelope();
+            _loggingService = loggingService;
         }
 
         public abstract void SetIRHeader();
         public abstract void SetR68();
 
-        public XmlElement SerializeIREnvelope(hmrcclasses.IRenvelope ire)
+        public XmlElement SerializeIREnvelope(IRenvelope irEnvelope)
         {
             // Always the same regardless of nature of IRenvelope, right?
             // Is this the right place for it - does the builder of IRenvelopes also serialize them?
@@ -41,17 +44,17 @@ namespace CharitiesOnline.Builders
                 XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
                 ns.Add(String.Empty, "http://www.govtalk.gov.uk/taxation/charities/r68/1");
 
-                var knownTypes = new Type[] { typeof(hmrcclasses.IRenvelope), typeof(R68Claim) };
+                var knownTypes = new Type[] { typeof(IRenvelope), typeof(R68Claim) };
 
                 XmlSerializer serializer =
-                    new XmlSerializer(typeof(hmrcclasses.IRenvelope), knownTypes);
+                    new XmlSerializer(typeof(IRenvelope), knownTypes);
 
                 XmlTextWriter tw = new XmlTextWriter(memStream, UTF8Encoding.UTF8);
 
                 XmlDocument doc = new XmlDocument();
                 tw.Formatting = Formatting.Indented;
                 tw.IndentChar = ' ';
-                serializer.Serialize(tw, ire, ns);
+                serializer.Serialize(tw, irEnvelope, ns);
                 memStream.Seek(0, SeekOrigin.Begin);
                 doc.Load(memStream);
                 XmlElement returnVal = doc.DocumentElement;
@@ -64,20 +67,22 @@ namespace CharitiesOnline.Builders
     public class IRenvelopeCreator
     {
         private IRenvelopeBuilderBase _irEnvelopeBuilder;
+        private ILoggingService _loggingService;
 
-        public IRenvelopeCreator(IRenvelopeBuilderBase irEnvelopeBuilder)
+        public IRenvelopeCreator(IRenvelopeBuilderBase irEnvelopeBuilder, ILoggingService loggingService)
         {
             _irEnvelopeBuilder = irEnvelopeBuilder;
+            _loggingService = loggingService;
         }
 
         public void CreateIRenvelope()
         {
-            _irEnvelopeBuilder.InitialiseIRenvelope();
+            _irEnvelopeBuilder.InitialiseIRenvelope(_loggingService);
             _irEnvelopeBuilder.SetIRHeader();
             _irEnvelopeBuilder.SetR68();
         }
 
-        public hmrcclasses.IRenvelope GetIRenvelope()
+        public IRenvelope GetIRenvelope()
         {
             return _irEnvelopeBuilder.IREnvelope;
         }
@@ -90,16 +95,22 @@ namespace CharitiesOnline.Builders
 
     public class DefaultIRenvelopeBuilder : IRenvelopeBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public DefaultIRenvelopeBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateIRenvelope()
         {
-            InitialiseIRenvelope();
+            InitialiseIRenvelope(_loggingService);
             SetIRHeader();
             SetR68();
         }
 
         public override void SetIRHeader()
         {
-            IRHeaderCreator irHeaderCreator = new IRHeaderCreator(new DefaultIRHeaderBuilder());
+            IRHeaderCreator irHeaderCreator = new IRHeaderCreator(new DefaultIRHeaderBuilder(_loggingService), _loggingService);
 
             irHeaderCreator.CreateIRHeader();
 
@@ -110,7 +121,7 @@ namespace CharitiesOnline.Builders
 
         public override void SetR68()
         {
-            R68Creator r68Creator = new R68Creator(new ClaimR68Builder());
+            R68Creator r68Creator = new R68Creator(new ClaimR68Builder(_loggingService), _loggingService);
 
             r68Creator.CreateR68();
 
@@ -120,16 +131,22 @@ namespace CharitiesOnline.Builders
 
     public class CompressedIRenvelopeBuilder : IRenvelopeBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public CompressedIRenvelopeBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateIRenvelope()
         {
-            InitialiseIRenvelope();
+            InitialiseIRenvelope(_loggingService);
             SetIRHeader();
             SetR68();
         }
 
         public override void SetIRHeader()
         {
-            IRHeaderCreator irHeaderCreator = new IRHeaderCreator(new DefaultIRHeaderBuilder());
+            IRHeaderCreator irHeaderCreator = new IRHeaderCreator(new DefaultIRHeaderBuilder(_loggingService), _loggingService);
 
             irHeaderCreator.CreateIRHeader();
 
@@ -140,7 +157,7 @@ namespace CharitiesOnline.Builders
 
         public override void SetR68()
         {
-            R68Creator r68Creator = new R68Creator(new CompressedPartR68Builder());
+            R68Creator r68Creator = new R68Creator(new CompressedPartR68Builder(_loggingService), _loggingService);
 
             r68Creator.CreateR68();
 

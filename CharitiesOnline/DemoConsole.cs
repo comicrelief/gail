@@ -41,9 +41,9 @@ namespace CharitiesOnline
                 LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");
 
                 // TestSerialize();
-                //                 TestLocalProcess();
+                // TestLocalProcess();
 
-                // TestGovTalkMessageCreation();
+                TestGovTalkMessageCreation();
                 // TestReadSuccessResponse();
                 // IMessageReader reader = new DefaultMessageReader();
                 // TestReadMessages(reader);
@@ -70,8 +70,13 @@ namespace CharitiesOnline
             DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
-            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder());
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService),loggingService);
             submitMessageCreator.CreateGovTalkMessage();
+            
+            
             hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
@@ -109,9 +114,7 @@ namespace CharitiesOnline
                 //error
                 string[] error = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
                 Console.WriteLine(string.Join("\n", error));
-            }
-                   
-
+            }                   
         }
 
         public static void TestDeserializeSuccessResponse()
@@ -236,7 +239,10 @@ namespace CharitiesOnline
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
-            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder());
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService), loggingService);
             
             submitMessageCreator.CreateGovTalkMessage();
 
@@ -265,8 +271,11 @@ namespace CharitiesOnline
             DataTableRepaymentPopulater.OtherIncome = Helpers.GetDataTableFromCsv(@"C:\Temp\OtherInc.csv", true);
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
+            
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder());
+            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService), loggingService);
             submitMessageCreator.CreateGovTalkMessage();
             hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
@@ -287,7 +296,10 @@ namespace CharitiesOnline
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
-            GovTalkMessageCreator compressedSubmissionCreator = new GovTalkMessageCreator(new SubmitRequestCompressedMessageBuilder());
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            GovTalkMessageCreator compressedSubmissionCreator = new GovTalkMessageCreator(new SubmitRequestCompressedMessageBuilder(loggingService), loggingService);
             compressedSubmissionCreator.CreateGovTalkMessage();
 
             XmlDocument xd = compressedSubmissionCreator.SerializeGovTalkMessage();
@@ -316,7 +328,10 @@ namespace CharitiesOnline
         {
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
-            GovTalkMessageCreator submitPollCreator = new GovTalkMessageCreator(new SubmitPollMesageBuilder());
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            GovTalkMessageCreator submitPollCreator = new GovTalkMessageCreator(new SubmitPollMesageBuilder(loggingService), loggingService);
             
             submitPollCreator.SetCorrelationId("52CB8A8AA58148859377830BAE5B99C9");
                         
@@ -331,8 +346,10 @@ namespace CharitiesOnline
         public static void TestDeleterequest()
         {
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-            GovTalkMessageCreator deleteRequestCreator = new GovTalkMessageCreator(new DeleteRequestMessageBuilder());
+            GovTalkMessageCreator deleteRequestCreator = new GovTalkMessageCreator(new DeleteRequestMessageBuilder(loggingService), loggingService);
             deleteRequestCreator.SetCorrelationId("hjcjc");
             deleteRequestCreator.CreateGovTalkMessage();
 
@@ -344,7 +361,10 @@ namespace CharitiesOnline
         {
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
-            GovTalkMessageCreator listRequestCreator = new GovTalkMessageCreator(new ListRequestMessageBuilder());
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            GovTalkMessageCreator listRequestCreator = new GovTalkMessageCreator(new ListRequestMessageBuilder(loggingService), loggingService);
             listRequestCreator.CreateGovTalkMessage();
 
             XmlDocument xd = listRequestCreator.SerializeGovTalkMessage();

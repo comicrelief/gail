@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 using System.Data;
 
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
     public abstract class R68ClaimRepaymentGADBuilderBase
     {
         private R68ClaimRepaymentGAD _r68ClaimRepaymentGAD;
-
-        private DataRow _inputDataRow;
+        private ILoggingService _loggingService;
+        private DataRow _inputDataRow;        
 
         public DataRow InputDataRow
         {
@@ -36,9 +37,10 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseR68ClaimRepaymentGAD()
+        public void InitialiseR68ClaimRepaymentGAD(ILoggingService loggingService)
         {
             _r68ClaimRepaymentGAD = new R68ClaimRepaymentGAD();
+            _loggingService = loggingService;
         }
 
         public abstract void SetDonationDetails();
@@ -48,15 +50,17 @@ namespace CharitiesOnline.Builders
     public class R68ClaimRepaymentGADCreator
     {
         private R68ClaimRepaymentGADBuilderBase _r68ClaimRepaymentGADBuilder;
+        private ILoggingService _loggingService;
 
-        public R68ClaimRepaymentGADCreator(R68ClaimRepaymentGADBuilderBase r68ClaimRepaymentGADBuilder)
+        public R68ClaimRepaymentGADCreator(R68ClaimRepaymentGADBuilderBase r68ClaimRepaymentGADBuilder, ILoggingService loggingService)
         {
             _r68ClaimRepaymentGADBuilder = r68ClaimRepaymentGADBuilder;
+            _loggingService = loggingService;
         }
 
         public void CreateR68ClaimRepaymentGAD()
         {
-            _r68ClaimRepaymentGADBuilder.InitialiseR68ClaimRepaymentGAD();
+            _r68ClaimRepaymentGADBuilder.InitialiseR68ClaimRepaymentGAD(_loggingService);
             _r68ClaimRepaymentGADBuilder.SetDonationDetails();
             _r68ClaimRepaymentGADBuilder.SetDonation();
         }
@@ -67,16 +71,21 @@ namespace CharitiesOnline.Builders
         }
 
         public void SetInputRow(DataRow inputRow)
-        {
+        {           
             _r68ClaimRepaymentGADBuilder.InputDataRow = inputRow;
         }
     }
 
     public class DefaultR68ClaimRepaymentGADBuilder : R68ClaimRepaymentGADBuilderBase
     {
+        private ILoggingService _loggingService;
+        public DefaultR68ClaimRepaymentGADBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateR68ClaimRepaymentGAD()
         {
-            InitialiseR68ClaimRepaymentGAD();
+            InitialiseR68ClaimRepaymentGAD(_loggingService);
             SetDonationDetails();
         }
 
@@ -122,7 +131,13 @@ namespace CharitiesOnline.Builders
     }
 
     public class DonorR68ClaimRepaymentGADBuilder : DefaultR68ClaimRepaymentGADBuilder
-    {        
+    {
+        private ILoggingService _loggingService;
+
+        public DonorR68ClaimRepaymentGADBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public new void CreateR68ClaimRepaymentGAD()
         {
             SetDonation();
@@ -153,6 +168,12 @@ namespace CharitiesOnline.Builders
 
     public class AggDonationR68ClaimRepaymentGADBuilder : DefaultR68ClaimRepaymentGADBuilder
     {
+        private ILoggingService _loggingService;
+        public AggDonationR68ClaimRepaymentGADBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
+        #region old
         //private DataRow _inputDataRow;
         //public new DataRow InputDataRow
         //{
@@ -165,6 +186,7 @@ namespace CharitiesOnline.Builders
         //        _inputDataRow = value;
         //    }
         //}
+        #endregion old
         public new void CreateR68ClaimRepaymentGAD()
         {
             SetDonation();

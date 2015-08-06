@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-using System.Configuration;
 
 using hmrcclasses;
 using CharitiesOnline.Builders;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline
 {
@@ -15,6 +15,12 @@ namespace CharitiesOnline
         private static DataTable _giftAidDonations;
         private static DataTable _otherIncome;
         private static readonly List<string> RequiredColumnNames = new List<string>(new string[] { "Fore", "Sur", "House", "Postcode","Date","Total" });
+        private static ILoggingService _loggingService;
+
+        public static void SetLogger(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
 
         public static DataTable GiftAidDonations
         {
@@ -72,7 +78,7 @@ namespace CharitiesOnline
             return columnList;
         }
 
-        public static hmrcclasses.R68ClaimRepayment CreateRepayments()
+        public static R68ClaimRepayment CreateRepayments()
         {
             // @TODO: log this
 
@@ -86,14 +92,14 @@ namespace CharitiesOnline
                     {
                         if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "AGG")
                         {
-                            R68ClaimRepaymentGADCreator aggDonationCreator = new R68ClaimRepaymentGADCreator(new AggDonationR68ClaimRepaymentGADBuilder());
+                            R68ClaimRepaymentGADCreator aggDonationCreator = new R68ClaimRepaymentGADCreator(new AggDonationR68ClaimRepaymentGADBuilder(_loggingService), _loggingService);
                             aggDonationCreator.SetInputRow(GiftAidDonations.Rows[i]);
                             aggDonationCreator.CreateR68ClaimRepaymentGAD();
                             GADs[i] = aggDonationCreator.GetR68ClaimRepaymentGAD();
                         }
                         if (GiftAidDonations.Rows[i]["Type"].ToString().ToUpper() == "GAD")
                         {
-                            R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
+                            R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder(_loggingService), _loggingService);
                             donorCreator.SetInputRow(GiftAidDonations.Rows[i]);
                             donorCreator.CreateR68ClaimRepaymentGAD();
                             GADs[i] = donorCreator.GetR68ClaimRepaymentGAD();
@@ -101,7 +107,7 @@ namespace CharitiesOnline
                     }
                     else
                     {
-                        R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder());
+                        R68ClaimRepaymentGADCreator donorCreator = new R68ClaimRepaymentGADCreator(new DonorR68ClaimRepaymentGADBuilder(_loggingService), _loggingService);
                         donorCreator.SetInputRow(GiftAidDonations.Rows[i]);
                         donorCreator.CreateR68ClaimRepaymentGAD();
                         GADs[i] = donorCreator.GetR68ClaimRepaymentGAD();
@@ -120,13 +126,13 @@ namespace CharitiesOnline
             
         }
 
-        public static hmrcclasses.R68ClaimRepaymentOtherInc[] CreateOtherIncome()
+        public static R68ClaimRepaymentOtherInc[] CreateOtherIncome()
         {
-            hmrcclasses.R68ClaimRepaymentOtherInc[] OtherIncs = new R68ClaimRepaymentOtherInc[OtherIncome.Rows.Count];
+            R68ClaimRepaymentOtherInc[] OtherIncs = new R68ClaimRepaymentOtherInc[OtherIncome.Rows.Count];
 
             for (int i = 0; i < OtherIncome.Rows.Count; i++)
             {
-                R68ClaimRepaymentOtherIncomeCreator otherIncCreator = new R68ClaimRepaymentOtherIncomeCreator(new DefaultR68ClaimRepaymentOtherIncomeBuilder());
+                R68ClaimRepaymentOtherIncomeCreator otherIncCreator = new R68ClaimRepaymentOtherIncomeCreator(new DefaultR68ClaimRepaymentOtherIncomeBuilder(_loggingService), _loggingService);
                 otherIncCreator.SetInputRow(OtherIncome.Rows[i]);
                 otherIncCreator.CreateR68ClaiMRepaymentOtherInc();
                 OtherIncs[i] = otherIncCreator.GetR68ClaimRepaymentOtherInc();

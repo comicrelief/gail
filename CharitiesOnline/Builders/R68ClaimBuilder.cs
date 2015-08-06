@@ -4,20 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.Data;
-
-using System.Configuration;
-
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
     public abstract class R68ClaimBuilderBase
     {
-        private hmrcclasses.R68Claim _r68Claim;
-        // datastore here, multiple ways of getting the base data in
+        private R68Claim _r68Claim;
+        private ILoggingService _loggingService;
 
-        public hmrcclasses.R68Claim R68Claim
+        public R68Claim R68Claim
         {
             get
             {
@@ -25,9 +22,10 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseR68Claim()
+        public void InitialiseR68Claim(ILoggingService loggingService)
         {
-            _r68Claim = new hmrcclasses.R68Claim();
+            _r68Claim = new R68Claim();
+            _loggingService = loggingService;
         }
 
         public abstract void SetClaimDetails();
@@ -39,20 +37,25 @@ namespace CharitiesOnline.Builders
     public class R68ClaimCreator
     {
         private R68ClaimBuilderBase _r68ClaimBuilder;
+        private ILoggingService _loggingService;
 
+        public R68ClaimCreator(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public R68ClaimCreator(R68ClaimBuilderBase r68ClaimBuilder)
         {
             _r68ClaimBuilder = r68ClaimBuilder;
         }
         public void CreateR68Claim()
         {
-            _r68ClaimBuilder.InitialiseR68Claim();
+            _r68ClaimBuilder.InitialiseR68Claim(_loggingService);
             _r68ClaimBuilder.SetClaimDetails();
             _r68ClaimBuilder.SetGASDS();
             _r68ClaimBuilder.SetRepayment();
         }
 
-        public hmrcclasses.R68Claim GetR68Claim()
+        public R68Claim GetR68Claim()
         {
             return _r68ClaimBuilder.R68Claim;
         }
@@ -60,9 +63,15 @@ namespace CharitiesOnline.Builders
 
     public class DefaultR68ClaimBuilder : R68ClaimBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public DefaultR68ClaimBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateR68Claim()
         {
-            InitialiseR68Claim();
+            InitialiseR68Claim(_loggingService);
             SetClaimDetails();
             SetGASDS();
         }
@@ -105,6 +114,12 @@ namespace CharitiesOnline.Builders
 
     public class RepaymentBuilder : DefaultR68ClaimBuilder
     {
+        private ILoggingService _loggingService;
+
+        public RepaymentBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetRepayment()
         {
             R68Claim.Repayment = DataTableRepaymentPopulater.CreateRepayments();
@@ -118,6 +133,11 @@ namespace CharitiesOnline.Builders
 
     public class ConfigFileRepaymentBuilder : DefaultR68ClaimBuilder
     {
+        private ILoggingService _loggingService;
+        public ConfigFileRepaymentBuilder(ILoggingService loggingService) : base(loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetRepayment()
         {
             base.SetRepayment();

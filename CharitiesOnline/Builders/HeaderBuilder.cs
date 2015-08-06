@@ -4,13 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using hmrcclasses;
+using CR.Infrastructure.Logging;
+
 namespace CharitiesOnline.Builders
 {
     public abstract class HeaderBuilderBase
     {
-        private hmrcclasses.GovTalkMessageHeader _header;
+        private GovTalkMessageHeader _header;
+        private ILoggingService _loggingService;
 
-        public hmrcclasses.GovTalkMessageHeader Header
+        public GovTalkMessageHeader Header
         {
             get
             {
@@ -18,9 +22,10 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseHeader()
+        public void InitialiseHeader(ILoggingService loggingService)
         {
-            _header = new hmrcclasses.GovTalkMessageHeader();
+            _header = new GovTalkMessageHeader();
+            _loggingService = loggingService;
         }
 
         public abstract void SetMessageDetails();
@@ -30,20 +35,22 @@ namespace CharitiesOnline.Builders
     public class HeaderCreator
     {
         private HeaderBuilderBase _headerBuilder;
+        private ILoggingService _loggingService;
 
-        public HeaderCreator(HeaderBuilderBase headerBuilder)
+        public HeaderCreator(HeaderBuilderBase headerBuilder, ILoggingService loggingService)
         {
             _headerBuilder = headerBuilder;
+            _loggingService = loggingService;
         }
 
         public void CreateHeader()
         {
-            _headerBuilder.InitialiseHeader();
+            _headerBuilder.InitialiseHeader(_loggingService);
             _headerBuilder.SetMessageDetails();
             _headerBuilder.SetSenderDetails();
         }
 
-        public hmrcclasses.GovTalkMessageHeader GetHeader()
+        public GovTalkMessageHeader GetHeader()
         {
             return _headerBuilder.Header;
         }
@@ -51,22 +58,28 @@ namespace CharitiesOnline.Builders
 
     public class RequestHeaderBuilder : HeaderBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public RequestHeaderBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateHeader()
         {
-            InitialiseHeader();
+            InitialiseHeader(_loggingService);
             SetMessageDetails();
             SetSenderDetails();
         }
 
         public override void SetMessageDetails()
         {
-            hmrcclasses.GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
+            GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
             MessageDetails.Class = ReferenceDataManager.Settings["MessageDetailsClass"];
-            MessageDetails.Qualifier = hmrcclasses.GovTalkMessageHeaderMessageDetailsQualifier.request;
+            MessageDetails.Qualifier = GovTalkMessageHeaderMessageDetailsQualifier.request;
             MessageDetails.FunctionSpecified = true;
-            MessageDetails.Function = hmrcclasses.GovTalkMessageHeaderMessageDetailsFunction.submit;
+            MessageDetails.Function = GovTalkMessageHeaderMessageDetailsFunction.submit;
             MessageDetails.TransformationSpecified = true;
-            MessageDetails.Transformation = hmrcclasses.GovTalkMessageHeaderMessageDetailsTransformation.XML;
+            MessageDetails.Transformation = GovTalkMessageHeaderMessageDetailsTransformation.XML;
 
             // @TODO: Does GatewayTest need to be omitted for live submit requests?
 
@@ -105,14 +118,14 @@ namespace CharitiesOnline.Builders
             Authentication.Role = ReferenceDataManager.Settings["SenderAuthenticationRole"];
             Authentication.Item = ReferenceDataManager.Settings["SenderAuthenticationValue"];
 
-            hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthentication IDAuthentication = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthentication();
+            GovTalkMessageHeaderSenderDetailsIDAuthentication IDAuthentication = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthentication();
             IDAuthentication.SenderID = ReferenceDataManager.Settings["SenderID"];
 
-            hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[] Authentications = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[1];
+            GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[] Authentications = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[1];
             Authentications[0] = Authentication;
             IDAuthentication.Authentication = Authentications;
 
-            hmrcclasses.GovTalkMessageHeaderSenderDetails SenderDetails = new hmrcclasses.GovTalkMessageHeaderSenderDetails();
+            GovTalkMessageHeaderSenderDetails SenderDetails = new hmrcclasses.GovTalkMessageHeaderSenderDetails();
             SenderDetails.IDAuthentication = IDAuthentication;
 
             Header.SenderDetails = SenderDetails;
@@ -122,6 +135,12 @@ namespace CharitiesOnline.Builders
     public class PollHeaderBuilder : HeaderBuilderBase
     {
         private string _correlationId;
+        private ILoggingService _loggingService;
+
+        public PollHeaderBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public string CorrelationId
         {
             get
@@ -135,7 +154,7 @@ namespace CharitiesOnline.Builders
         }
         public void CreateHeader()
         {
-            InitialiseHeader();
+            InitialiseHeader(_loggingService);
             SetMessageDetails();
             SetSenderDetails();
         }
@@ -143,7 +162,7 @@ namespace CharitiesOnline.Builders
         public override void SetSenderDetails() {}
         public override void SetMessageDetails()
         {
-            hmrcclasses.GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
+            GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
             MessageDetails.Class = ReferenceDataManager.Settings["MessageDetailsClass"];
             MessageDetails.Qualifier = hmrcclasses.GovTalkMessageHeaderMessageDetailsQualifier.poll;
             MessageDetails.FunctionSpecified = true;
@@ -165,6 +184,12 @@ namespace CharitiesOnline.Builders
     public class DeleteHeaderBuilder : HeaderBuilderBase
     {
         private string _correlationId;
+        private ILoggingService _loggingService;
+
+        public DeleteHeaderBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public string CorrelationId
         {
             get
@@ -178,7 +203,7 @@ namespace CharitiesOnline.Builders
         }
         public void CreateHeader()
         {
-            InitialiseHeader();
+            InitialiseHeader(_loggingService);
             SetMessageDetails();
             SetSenderDetails();
         }
@@ -187,7 +212,7 @@ namespace CharitiesOnline.Builders
 
         public override void SetMessageDetails()
         {
-            hmrcclasses.GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
+            GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
             MessageDetails.Class = ReferenceDataManager.Settings["MessageDetailsClass"];
             MessageDetails.Qualifier = hmrcclasses.GovTalkMessageHeaderMessageDetailsQualifier.request;
             MessageDetails.FunctionSpecified = true;
@@ -208,15 +233,21 @@ namespace CharitiesOnline.Builders
 
     public class ListRequestHeaderBuilder : HeaderBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public ListRequestHeaderBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateHeader()
         {
-            InitialiseHeader();
+            InitialiseHeader(_loggingService);
             SetMessageDetails();
             SetSenderDetails();
         }
         public override void SetMessageDetails()
         {
-            hmrcclasses.GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
+            GovTalkMessageHeaderMessageDetails MessageDetails = new hmrcclasses.GovTalkMessageHeaderMessageDetails();
             MessageDetails.Class = ReferenceDataManager.Settings["MessageDetailsClass"];
             MessageDetails.Qualifier = hmrcclasses.GovTalkMessageHeaderMessageDetailsQualifier.request;
             MessageDetails.FunctionSpecified = true;
@@ -235,7 +266,7 @@ namespace CharitiesOnline.Builders
         }
         public override void SetSenderDetails()
         {
-            hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication Authentication = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication();
+            GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication Authentication = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication();
             switch (ReferenceDataManager.Settings["SenderAuthenticationMethod"])
             {
                 case "MD5":
@@ -251,14 +282,14 @@ namespace CharitiesOnline.Builders
             Authentication.Role = ReferenceDataManager.Settings["SenderAuthenticationRole"];
             Authentication.Item = ReferenceDataManager.Settings["SenderAuthenticationValue"];
 
-            hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthentication IDAuthentication = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthentication();
+            GovTalkMessageHeaderSenderDetailsIDAuthentication IDAuthentication = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthentication();
             IDAuthentication.SenderID = ReferenceDataManager.Settings["SenderID"];
 
-            hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[] Authentications = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[1];
+            GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[] Authentications = new hmrcclasses.GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthentication[1];
             Authentications[0] = Authentication;
             IDAuthentication.Authentication = Authentications;
 
-            hmrcclasses.GovTalkMessageHeaderSenderDetails SenderDetails = new hmrcclasses.GovTalkMessageHeaderSenderDetails();
+            GovTalkMessageHeaderSenderDetails SenderDetails = new hmrcclasses.GovTalkMessageHeaderSenderDetails();
             SenderDetails.IDAuthentication = IDAuthentication;
 
             Header.SenderDetails = SenderDetails;

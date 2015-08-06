@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 using System.Configuration;
 
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
     public abstract class R68BuilderBase
     {
-        private hmrcclasses.R68 _r68;
-        public hmrcclasses.R68 R68
+        private R68 _r68;
+        private ILoggingService _loggingService;
+        public R68 R68
         {
             get
             {
@@ -20,9 +22,10 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseR68()
+        public void InitialiseR68(ILoggingService loggingService)
         {
-            _r68 = new hmrcclasses.R68();
+            _r68 = new R68();
+            _loggingService = loggingService;
         }
 
         public abstract void SetAuthOfficial();
@@ -33,21 +36,23 @@ namespace CharitiesOnline.Builders
     public class R68Creator
     {
         private R68BuilderBase _r68Builder;
+        private ILoggingService _loggingService;
 
-        public R68Creator(R68BuilderBase r68Builder)
+        public R68Creator(R68BuilderBase r68Builder, ILoggingService loggingService)
         {
             _r68Builder = r68Builder;
+            _loggingService = loggingService;
         }
 
         public void CreateR68()
         {
-            _r68Builder.InitialiseR68();
+            _r68Builder.InitialiseR68(_loggingService);
             _r68Builder.SetAuthOfficial();
             _r68Builder.SetDeclaration();
             _r68Builder.SetItems();
         }
 
-        public hmrcclasses.R68 GetR68()
+        public R68 GetR68()
         {
             return _r68Builder.R68;
         }
@@ -55,9 +60,15 @@ namespace CharitiesOnline.Builders
 
     public class ClaimR68Builder : R68BuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public ClaimR68Builder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateR68()
         {
-            InitialiseR68();
+            InitialiseR68(_loggingService);
             SetAuthOfficial();
             SetDeclaration();
             SetItems();
@@ -88,9 +99,7 @@ namespace CharitiesOnline.Builders
         }
         public override void SetItems()
         {
-            RepaymentBuilder dtRepaymenBuilder = new RepaymentBuilder();
-
-            // dtRepaymenBuilder.InputData = DataTableRepaymentPopulater.InputDataTable;
+            RepaymentBuilder dtRepaymenBuilder = new RepaymentBuilder(_loggingService);
 
             R68ClaimCreator r68ClaimCreator = new R68ClaimCreator(dtRepaymenBuilder);
 
@@ -111,7 +120,12 @@ namespace CharitiesOnline.Builders
 
     public class CompressedPartR68Builder: R68BuilderBase
     {
+        private ILoggingService _loggingService;
 
+        public CompressedPartR68Builder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public override void SetDeclaration()
         {
             // @TODO Low priority make configurable
@@ -138,13 +152,13 @@ namespace CharitiesOnline.Builders
         }
         public override void SetItems()
         {
-            RepaymentBuilder dtRepaymenBuilder = new RepaymentBuilder();
+            RepaymentBuilder dtRepaymenBuilder = new RepaymentBuilder(_loggingService);
 
             R68ClaimCreator r68ClaimCreator = new R68ClaimCreator(dtRepaymenBuilder);
 
             r68ClaimCreator.CreateR68Claim();
             
-            hmrcclasses.R68Claim[] r68claim = new R68Claim[1];                
+            R68Claim[] r68claim = new R68Claim[1];                
             r68claim[0] = r68ClaimCreator.GetR68Claim();
 
             R68.Items = r68claim;

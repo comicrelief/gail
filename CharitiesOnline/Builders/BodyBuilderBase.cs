@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using hmrcclasses;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Builders
 {
     public abstract class BodyBuilderBase
     {
         private GovTalkMessageBody _body;
+        private ILoggingService _loggingService;
 
         public GovTalkMessageBody Body
         {
@@ -21,9 +23,10 @@ namespace CharitiesOnline.Builders
             }
         }
 
-        public void InitialiseBody()
+        public void InitialiseBody(ILoggingService loggingService)
         {
             _body = new GovTalkMessageBody();
+            _loggingService = loggingService;
         }
 
         public abstract void BuildBody();
@@ -32,9 +35,14 @@ namespace CharitiesOnline.Builders
 
     public class SubmitRequestBodyBuilder : BodyBuilderBase
     {
+        private ILoggingService _loggingService;
+        public SubmitRequestBodyBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateBody()
         {
-            InitialiseBody();
+            InitialiseBody(_loggingService);
             BuildBody();
         }
 
@@ -49,7 +57,7 @@ namespace CharitiesOnline.Builders
             //ire = ir68.CreateIRBody();
             #endregion old
 
-            IRenvelopeCreator irEnvelopeCreator = new IRenvelopeCreator(new DefaultIRenvelopeBuilder());
+            IRenvelopeCreator irEnvelopeCreator = new IRenvelopeCreator(new DefaultIRenvelopeBuilder(_loggingService), _loggingService);
             irEnvelopeCreator.CreateIRenvelope();
 
             hmrcclasses.IRenvelope ire = irEnvelopeCreator.GetIRenvelope();
@@ -60,14 +68,14 @@ namespace CharitiesOnline.Builders
 
             Body.Any = XmlElementIRenvelope;
 
-            Console.WriteLine("Built a SubmitRequestBody");
+            _loggingService.LogInfo(this, "Built a SubmitRequestBody");
             
             // throw new NotImplementedException();
         }
 
         public override void AddBodyElements()
         {
-            Console.WriteLine("Added some Elements to a SubmitRequest Body");
+            _loggingService.LogInfo(this, "Added some Elements to a SubmitRequest Body");
 
             // throw new NotImplementedException();
         }
@@ -75,9 +83,14 @@ namespace CharitiesOnline.Builders
 
     public class SubmitRequestCompressedBodyBuilder : BodyBuilderBase
     {
+        private ILoggingService _loggingService;
+        public SubmitRequestCompressedBodyBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateBody()
         {
-            InitialiseBody();
+            InitialiseBody(_loggingService);
             BuildBody();
         }
 
@@ -92,7 +105,7 @@ namespace CharitiesOnline.Builders
             //ire = ir68.CreateIRBody();
             #endregion old
 
-            IRenvelopeCreator irEnvelopeCreator = new IRenvelopeCreator(new CompressedIRenvelopeBuilder());
+            IRenvelopeCreator irEnvelopeCreator = new IRenvelopeCreator(new CompressedIRenvelopeBuilder(_loggingService), _loggingService);
             irEnvelopeCreator.CreateIRenvelope();
 
             hmrcclasses.IRenvelope ire = irEnvelopeCreator.GetIRenvelope();
@@ -103,7 +116,7 @@ namespace CharitiesOnline.Builders
 
             Body.Any = XmlElementIRenvelope;
 
-            Console.WriteLine("Built a SubmitRequestBody");
+           _loggingService.LogInfo(this, "Built a SubmitRequestBody");
 
             // throw new NotImplementedException();
         }
@@ -114,9 +127,15 @@ namespace CharitiesOnline.Builders
 
     public class EmptyBodyBuilder : BodyBuilderBase
     {
+        private ILoggingService _loggingService;
+
+        public EmptyBodyBuilder(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         public void CreateBody()
         {
-            InitialiseBody();
+            InitialiseBody(_loggingService);
             BuildBody();
         }
 
@@ -132,14 +151,16 @@ namespace CharitiesOnline.Builders
     public class BodyCreator
     {
         private BodyBuilderBase _bodyBuilder;
-        public BodyCreator(BodyBuilderBase bodyBuilder)
+        private ILoggingService _loggingService;
+        public BodyCreator(BodyBuilderBase bodyBuilder, ILoggingService loggingService)
         {
             _bodyBuilder = bodyBuilder;
+            _loggingService = loggingService;
         }
 
         public void CreateBody()
         {
-            _bodyBuilder.InitialiseBody();
+            _bodyBuilder.InitialiseBody(_loggingService);
             _bodyBuilder.BuildBody();
             _bodyBuilder.AddBodyElements();
 
