@@ -180,7 +180,7 @@ namespace CharitiesOnline.Builders
 
             R68CompressedPart compressedPart = new R68CompressedPart();
             compressedPart.Type = R68CompressedPartType.gzip;          
-            compressedPart.Value = CommonUtilityHelpers.CompressData(claimXmlDoc.OuterXml);
+            compressedPart.Value = CommonUtilityHelpers.CompressData(claimXmlDoc.OuterXml, _loggingService);
 
             R68CompressedPart[] compressedParts = new R68CompressedPart[1];
             compressedParts[0] = compressedPart;
