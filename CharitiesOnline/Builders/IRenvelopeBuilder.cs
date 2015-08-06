@@ -125,6 +125,8 @@ namespace CharitiesOnline.Builders
 
             r68Creator.CreateR68();
 
+            _loggingService.LogInfo(this, "R68 Envelope created.");
+
             IREnvelope.R68 = r68Creator.GetR68();
         }
     }
@@ -160,6 +162,8 @@ namespace CharitiesOnline.Builders
             R68Creator r68Creator = new R68Creator(new CompressedPartR68Builder(_loggingService), _loggingService);
 
             r68Creator.CreateR68();
+
+            _loggingService.LogInfo(this, "Compressed R68 Envelope created.");
 
             IREnvelope.R68 = r68Creator.GetR68();
         }

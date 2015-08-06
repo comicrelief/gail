@@ -5,12 +5,20 @@ using System.Xml;
 using System.Xml.Linq;
 
 using hmrcclasses;
+using CharitiesOnline.Helpers;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Strategies
 {
     public class ReadAcknowledgementStrategy : IMessageReadStrategy
     {
         private GovTalkMessage _message;
+        private ILoggingService _loggingService;
+
+        public ReadAcknowledgementStrategy(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
         
         public bool IsMatch(XDocument inMessage)
         {
@@ -21,7 +29,10 @@ namespace CharitiesOnline.Strategies
 
             if (qualifier == "acknowledgement" && function == "submit")
             {
-                _message = Helpers.DeserializeMessage(inMessage.ToXmlDocument());
+                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
+
+                _loggingService.LogInfo(this, "Message read. Response type is Acknowledgment.");
+
                 return true;
             }
 
@@ -36,6 +47,8 @@ namespace CharitiesOnline.Strategies
             if(typeof(T) == typeof(string))
             {
                 correlationId = _message.Header.MessageDetails.CorrelationID;
+                
+                _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ",correlationId));
 
                 return (T)Convert.ChangeType(correlationId, typeof(T));
             }
@@ -46,6 +59,8 @@ namespace CharitiesOnline.Strategies
                 acknowledgmentResults[1] = _message.Header.MessageDetails.ResponseEndPoint.Value;
                 acknowledgmentResults[2] = _message.Header.MessageDetails.ResponseEndPoint.PollInterval;
                 acknowledgmentResults[3] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
+
+                _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ", acknowledgmentResults[0]));
 
                 return (T)Convert.ChangeType(acknowledgmentResults, typeof(T));
             }

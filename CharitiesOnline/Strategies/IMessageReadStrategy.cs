@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 
 using hmrcclasses;
+using CharitiesOnline.Helpers;
 
 namespace CharitiesOnline.Strategies
 {

@@ -7,20 +7,30 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
+using CharitiesOnline.Helpers;
+using CR.Infrastructure.Logging;
+
 namespace CharitiesOnline.MessageService
 {
     public class Client
     {
-        public XmlDocument SendRequest(XmlDocument InputDocument, string SendURI)
-        {            
-            byte[] xmlBytes = Helpers.XmlToBytes(InputDocument);
+        private ILoggingService _loggingService;
 
-            Request request = new Request();
-            Response response = new Response();
+        public Client(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
+        public XmlDocument SendRequest(XmlDocument InputDocument, string SendURI)
+        {
+            byte[] xmlBytes = InputDocument.XmlToBytes();
+
+            Request request = new Request(_loggingService);
+            Response response = new Response(_loggingService);
             
             XmlDocument xmlResponse = response.ProcessResponse(
                 response.GetResponse(
                     request.PrepareRequest(xmlBytes, SendURI)));
+            
 
             return xmlResponse;
                         

@@ -80,11 +80,13 @@ namespace CharitiesOnline
 
         public static R68ClaimRepayment CreateRepayments()
         {
-            // @TODO: log this
 
             if(GiftAidDonations != null)
             {
                 R68ClaimRepaymentGAD[] GADs = new R68ClaimRepaymentGAD[GiftAidDonations.Rows.Count];
+
+                _loggingService.LogInfo(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType
+                    , String.Concat("Processing ",GiftAidDonations.Rows.Count," donation records."));
 
                 for (int i = 0; i < GiftAidDonations.Rows.Count; i++)
                 {
@@ -119,16 +121,22 @@ namespace CharitiesOnline
                 repayment.EarliestGAdate = Convert.ToDateTime(GiftAidDonations.Compute("min(Date)", string.Empty));
                 repayment.EarliestGAdateSpecified = true;
 
+                _loggingService.LogInfo(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType
+                    , "ClaimRepayment object created.");
+
                 return repayment;
             }
-
+            _loggingService.LogWarning(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "No records for GiftAid repayment");
             return null;
-            
+           
         }
 
         public static R68ClaimRepaymentOtherInc[] CreateOtherIncome()
         {
             R68ClaimRepaymentOtherInc[] OtherIncs = new R68ClaimRepaymentOtherInc[OtherIncome.Rows.Count];
+
+            _loggingService.LogInfo(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType
+                , String.Concat("Processing ", OtherIncome.Rows.Count, " OtherIncome records."));
 
             for (int i = 0; i < OtherIncome.Rows.Count; i++)
             {

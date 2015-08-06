@@ -11,6 +11,7 @@ using System.Xml;
 using System.Xml.Linq;
 
 using hmrcclasses;
+using CharitiesOnline.Helpers;
 using CharitiesOnline.Builders;
 using CharitiesOnline.Strategies;
 
@@ -67,7 +68,7 @@ namespace CharitiesOnline
             // Create a file
             // Send to the LTS
             // Read response
-            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
+            DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
@@ -81,18 +82,18 @@ namespace CharitiesOnline
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
 
-            XmlDocument finalXd = Helpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
             string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
 
-            CharitiesOnline.MessageService.Client client = new MessageService.Client();
+            CharitiesOnline.MessageService.Client client = new MessageService.Client(loggingService);
 
             XmlDocument reply = client.SendRequest(xd, uri);
 
             // @TODO Need a method in the reader for generating a good filepath for messages
             reply.Save(@"C:\Temp\localreply.xml");
 
-            IMessageReader _messageReader = new DefaultMessageReader();
+            IMessageReader _messageReader = new DefaultMessageReader(loggingService);
 
             string bodytype = _messageReader.GetBodyType(reply.ToXDocument());
             
@@ -122,23 +123,26 @@ namespace CharitiesOnline
             XmlDocument successMessage = new XmlDocument();
             successMessage.Load(@"C:\Temp\livePollMessage2015_02_02_12_41_1853DE80F71CEF4C07B57CD5BDA969D577_response_20150202124118_.xml");
 
-            GovTalkMessage success = Helpers.DeserializeMessage(successMessage);
+            GovTalkMessage success = XmlSerializationHelpers.DeserializeMessage(successMessage);
 
             XmlDocument successXml = new XmlDocument();
 
             successXml.LoadXml(success.Body.Any[0].OuterXml);
 
-            SuccessResponse successResp = Helpers.DeserializeSuccessResponse(successXml);
+            SuccessResponse successResp = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
 
             Console.WriteLine(successResp.Message[0].Value);
         }
 
         public static void TestReadSuccessResponse()
         {
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
             XmlDocument successResponse = new XmlDocument();
             successResponse.Load(@"C:\Temp\success_response_78503626913182048.xml");
 
-            ReadResponseStrategy reader = new ReadResponseStrategy();
+            ReadResponseStrategy reader = new ReadResponseStrategy(loggingService);
             if (reader.IsMatch(successResponse.ToXDocument()))
             {
                 SuccessResponse success = reader.GetBody<SuccessResponse>();                
@@ -171,13 +175,16 @@ namespace CharitiesOnline
 
         static void TestSend()
         {
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
             string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
 
             XmlDocument xd = new XmlDocument();
             xd.PreserveWhitespace = true;
             xd.Load(@"C:\Temp\TestCompressedGovTalkMsgWithIrMark_2015_07_07_12_32_12.xml");
 
-            CharitiesOnline.MessageService.Client client = new MessageService.Client();
+            CharitiesOnline.MessageService.Client client = new MessageService.Client(loggingService);
 
             XmlDocument reply = client.SendRequest(xd, uri);
 
@@ -250,7 +257,7 @@ namespace CharitiesOnline
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();         
 
-            XmlDocument finalXd = Helpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
             finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
@@ -267,8 +274,8 @@ namespace CharitiesOnline
 
         public static void TestOtherIncome()
         {
-            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
-            DataTableRepaymentPopulater.OtherIncome = Helpers.GetDataTableFromCsv(@"C:\Temp\OtherInc.csv", true);
+            DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
+            DataTableRepaymentPopulater.OtherIncome = DataHelpers.GetDataTableFromCsv(@"C:\Temp\OtherInc.csv", true);
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
             
@@ -281,7 +288,7 @@ namespace CharitiesOnline
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
 
-            XmlDocument finalXd = Helpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
             finalXd.Save(@"C:\Temp\TestGovTalkMsgWithOtherIncome" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
@@ -289,8 +296,8 @@ namespace CharitiesOnline
 
         public static void TestGovTalkCompressedMessageCreation()
         {
-            DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\enterprise_tfs\GAVIN\CO\test_data\sample2.csv", true);
-            DataTableRepaymentPopulater.OtherIncome = Helpers.GetDataTableFromCsv(@"C:\Temp\OtherInc.csv", true);
+            DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(@"C:\enterprise_tfs\GAVIN\CO\test_data\sample2.csv", true);
+            DataTableRepaymentPopulater.OtherIncome = DataHelpers.GetDataTableFromCsv(@"C:\Temp\OtherInc.csv", true);
 
             // C:\Temp\Donations.csv
 
@@ -304,7 +311,7 @@ namespace CharitiesOnline
 
             XmlDocument xd = compressedSubmissionCreator.SerializeGovTalkMessage();
 
-            XmlDocument finalXd = Helpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
             finalXd.Save(@"C:\Temp\TestCompressedGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
@@ -380,7 +387,7 @@ namespace CharitiesOnline
             xd.PreserveWhitespace = true;            
             xd.Load(@"C:\Temp\TestGovTalkMsgWithOtherIncome_2015_06_30_11_32_29.xml");
 
-            XmlDocument finalXd = Helpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
             finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
         }
@@ -390,7 +397,7 @@ namespace CharitiesOnline
             XmlDocument xd = new XmlDocument();
             xd.Load(@"C:\CharitiesOnline\CharitiesValidSamples_February_2015\Compressed Data Samples\GAValidSample_GZIP.xml");
 
-            GovTalkMessage gtm = Helpers.DeserializeMessage(xd);
+            GovTalkMessage gtm = XmlSerializationHelpers.DeserializeMessage(xd);
 
             XmlElement xelement = gtm.Body.Any[0];
 
@@ -398,11 +405,11 @@ namespace CharitiesOnline
             XmlDocument bodyDoc = new XmlDocument();
             bodyDoc.LoadXml(xelement.OuterXml);
 
-            IRenvelope ire = Helpers.DeserializeIRenvelope(bodyDoc);
+            IRenvelope ire = XmlSerializationHelpers.DeserializeIRenvelope(bodyDoc);
 
             R68CompressedPart compressedPart = (R68CompressedPart)ire.R68.Items[0];
 
-            string decompressed = Helpers.DecompressData(compressedPart.Value);
+            string decompressed = CommonUtilityHelpers.DecompressData(compressedPart.Value);
         }
 
         public static void TestSerialize()
@@ -432,7 +439,7 @@ namespace CharitiesOnline
             gad.Date = Convert.ToDateTime("2014-10-03");
 
             XmlDocument xmlGad =
-                Helpers.SerializeItem(gad);
+                XmlSerializationHelpers.SerializeItem(gad);
 
             byte[] bytes = Encoding.UTF8.GetBytes(xmlGad.OuterXml);
 
@@ -461,7 +468,7 @@ namespace CharitiesOnline
             claim.Repayment = repayment;
 
             XmlDocument claimXml =
-                Helpers.SerializeItem(claim);
+                XmlSerializationHelpers.SerializeItem(claim);
 
             
 
@@ -473,7 +480,7 @@ namespace CharitiesOnline
             XmlDocument claimXml = new XmlDocument();
             claimXml.Load(@"C:\Temp\R68Claim.xml");
 
-            R68Claim r68claim = Helpers.DeserializeR68Claim(claimXml);
+            R68Claim r68claim = XmlSerializationHelpers.DeserializeR68Claim(claimXml);
                 
                 //Helpers.Deserialize<R68Claim>(claimXml.OuterXml, "R68Claim");
 

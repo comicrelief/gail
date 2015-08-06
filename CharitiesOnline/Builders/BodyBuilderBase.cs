@@ -7,6 +7,7 @@ using System.Xml;
 
 using hmrcclasses;
 using CR.Infrastructure.Logging;
+using CharitiesOnline.Helpers;
 
 namespace CharitiesOnline.Builders
 {
@@ -62,7 +63,7 @@ namespace CharitiesOnline.Builders
 
             hmrcclasses.IRenvelope ire = irEnvelopeCreator.GetIRenvelope();
             
-            XmlElement xe = Helpers.SerializeIREnvelope(ire);
+            XmlElement xe = XmlSerializationHelpers.SerializeIREnvelope(ire);
             XmlElement[] XmlElementIRenvelope = new XmlElement[1];
             XmlElementIRenvelope[0] = xe;
 
@@ -110,7 +111,7 @@ namespace CharitiesOnline.Builders
 
             hmrcclasses.IRenvelope ire = irEnvelopeCreator.GetIRenvelope();
 
-            XmlElement xe = Helpers.SerializeIREnvelope(ire);
+            XmlElement xe = XmlSerializationHelpers.SerializeIREnvelope(ire);
             XmlElement[] XmlElementIRenvelope = new XmlElement[1];
             XmlElementIRenvelope[0] = xe;
 

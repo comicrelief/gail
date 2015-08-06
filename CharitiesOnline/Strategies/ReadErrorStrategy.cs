@@ -4,6 +4,8 @@ using System.Xml;
 using System.Linq;
 
 using hmrcclasses;
+using CharitiesOnline.Helpers;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Strategies
 {
@@ -11,6 +13,13 @@ namespace CharitiesOnline.Strategies
     {
         private GovTalkMessage _message;
         private ErrorResponse _body;
+        private ILoggingService _loggingService;
+
+        public ReadErrorStrategy(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
+        
         public bool IsMatch(XDocument inMessage)
         {
             XNamespace ns = "http://www.govtalk.gov.uk/CM/envelope";
@@ -20,12 +29,14 @@ namespace CharitiesOnline.Strategies
 
             if (qualifier == "error" && function == "submit")
             {
-                _message = Helpers.DeserializeMessage(inMessage.ToXmlDocument());
+                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
                 
                 XmlDocument errorXml = new XmlDocument();
                 errorXml.LoadXml(_message.Body.Any[0].OuterXml);
 
-                _body = Helpers.DeserializeErrorResponse(errorXml);
+                _body = XmlSerializationHelpers.DeserializeErrorResponse(errorXml);
+
+                _loggingService.LogInfo(this, string.Concat("Message read. Response type is Error."));
 
                 return true;
             }
@@ -49,6 +60,8 @@ namespace CharitiesOnline.Strategies
             {
                 string correlationId = _message.Header.MessageDetails.CorrelationID;
 
+                _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", correlationId));
+
                 return (T)Convert.ChangeType(correlationId, typeof(T));
             }
             if (typeof(T) == typeof(string[]))
@@ -59,6 +72,8 @@ namespace CharitiesOnline.Strategies
                 response[1] = _message.Header.MessageDetails.ResponseEndPoint.Value;
                 response[2] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
                 response[3] = _body.Application.Any[0].Name + ":" + _body.Application.Any[0].InnerText;
+
+                _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", response[0]));
 
                 return (T)Convert.ChangeType(response, typeof(T));
             }

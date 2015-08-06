@@ -98,7 +98,7 @@ namespace CharitiesOnline.Builders
             }
             else
             {
-                throw new FormatException(String.Format("Donation Date format incorrect for record {0}", InputDataRow.Table.Rows.IndexOf(InputDataRow) + 1));
+                throw new FormatException(String.Concat("Donation Date format incorrect for record ", InputDataRow.Table.Rows.IndexOf(InputDataRow) + 1));
             }
             
             Decimal donationAmount;
@@ -108,7 +108,7 @@ namespace CharitiesOnline.Builders
             }
             else
             {
-                throw new FormatException(String.Format("Donation Amount format incorrect for record {0}", InputDataRow.Table.Rows.IndexOf(InputDataRow) + 1));
+                throw new FormatException(String.Concat("Donation Amount format incorrect for record ", InputDataRow.Table.Rows.IndexOf(InputDataRow) + 1));
             }
 
             R68ClaimRepaymentGAD.Total = Convert.ToDecimal(InputDataRow["Total"]);

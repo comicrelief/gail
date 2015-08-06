@@ -7,6 +7,7 @@ using System.Configuration;
 
 using hmrcclasses;
 using CR.Infrastructure.Logging;
+using CharitiesOnline.Helpers;
 
 namespace CharitiesOnline.Builders
 {
@@ -165,11 +166,11 @@ namespace CharitiesOnline.Builders
 
             // Serialize R68 to get XmlDocument with Claim element
 
-            System.Xml.XmlDocument r68xmlDoc = Helpers.SerializeItem(R68);
+            System.Xml.XmlDocument r68xmlDoc = XmlSerializationHelpers.SerializeItem(R68);
 
             // Then extract Claim itself
 
-            System.Xml.XmlDocument claimXmlDoc = Helpers.GetClaim(r68xmlDoc);
+            System.Xml.XmlDocument claimXmlDoc = GovTalkMessageHelpers.GetClaim(r68xmlDoc);
             
             // Reset R68 Items
 
@@ -179,7 +180,7 @@ namespace CharitiesOnline.Builders
 
             R68CompressedPart compressedPart = new R68CompressedPart();
             compressedPart.Type = R68CompressedPartType.gzip;          
-            compressedPart.Value = Helpers.CompressData(claimXmlDoc.OuterXml);
+            compressedPart.Value = CommonUtilityHelpers.CompressData(claimXmlDoc.OuterXml);
 
             R68CompressedPart[] compressedParts = new R68CompressedPart[1];
             compressedParts[0] = compressedPart;

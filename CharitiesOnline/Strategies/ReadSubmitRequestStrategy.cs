@@ -5,6 +5,7 @@ using System.Xml;
 using System.Linq;
 
 using hmrcclasses;
+using CharitiesOnline.Helpers;
 
 namespace CharitiesOnline.Strategies
 {
@@ -24,14 +25,14 @@ namespace CharitiesOnline.Strategies
 
             if (qualifier == "request" && function == "submit")
             {
-                _message = Helpers.DeserializeMessage(inMessage.ToXmlDocument());
+                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
                 
                 XmlElement xmlElement = _message.Body.Any[0];
                 
                 XmlDocument bodyDoc = new XmlDocument();
                 bodyDoc.LoadXml(xmlElement.OuterXml);
                 
-                _body = Helpers.DeserializeIRenvelope(bodyDoc);
+                _body = XmlSerializationHelpers.DeserializeIRenvelope(bodyDoc);
 
                 return true;
             }
@@ -48,7 +49,7 @@ namespace CharitiesOnline.Strategies
         {
             if (typeof(T) == typeof(DataTable))
             {
-                DataTable dt = Helpers.MakeRepaymentTable();                              
+                DataTable dt = DataHelpers.MakeRepaymentTable();                              
 
                 // deal with compression first then load uncompressed repayment & otherinc 
 
@@ -58,7 +59,7 @@ namespace CharitiesOnline.Strategies
                 {
                     R68CompressedPart compressedPart = (R68CompressedPart)_body.R68.Items[0];
 
-                    string decompressedData = Helpers.DecompressData(compressedPart.Value);
+                    string decompressedData = CommonUtilityHelpers.DecompressData(compressedPart.Value);
                     XmlDocument decompressedXml = new XmlDocument();              
                     decompressedXml.LoadXml(decompressedData);
 
@@ -70,7 +71,7 @@ namespace CharitiesOnline.Strategies
                     r68ClaimXmlDoc.AppendChild(r68root);
                     r68root.InnerXml = decompressedXml.DocumentElement.InnerXml;
                     
-                    r68claim = Helpers.Deserialize <R68Claim> (r68ClaimXmlDoc.OuterXml, "R68Claim");                                                  
+                    r68claim = XmlSerializationHelpers.Deserialize <R68Claim> (r68ClaimXmlDoc.OuterXml, "R68Claim");                                                  
                 }
                 else
                 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
@@ -26,6 +25,12 @@ namespace CharitiesOnline
                 nodeReader.MoveToContent();
                 return XDocument.Load(nodeReader);
             }
+        }
+
+        public static byte[] XmlToBytes(this XmlDocument inputDocument)
+        {
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(inputDocument.InnerXml);
+            return bytes;
         }
 
     }
