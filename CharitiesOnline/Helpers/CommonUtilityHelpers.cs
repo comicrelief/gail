@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.IO.Compression;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Helpers
 {
@@ -21,7 +22,7 @@ namespace CharitiesOnline.Helpers
             }
         }
 
-        public static byte[] CompressData(string inputXml)
+        public static byte[] CompressData(string inputXml, ILoggingService loggingService)
         {
             var bytes = Encoding.UTF8.GetBytes(inputXml);
 
@@ -36,10 +37,12 @@ namespace CharitiesOnline.Helpers
                 compressedBytes = compressedStream.ToArray();
             }
 
+            loggingService.LogInfo(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Compressed string input.");
+
             return compressedBytes;
         }
 
-        public static byte[] CompressData(System.Xml.XmlElement inputXml)
+        public static byte[] CompressData(System.Xml.XmlElement inputXml, ILoggingService loggingService)
         {
             var bytes = Encoding.UTF8.GetBytes(inputXml.OuterXml);
 
@@ -53,6 +56,8 @@ namespace CharitiesOnline.Helpers
 
                 compressedBytes = compressedStream.ToArray();
             }
+
+            loggingService.LogInfo(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Compressed string input.");
 
             return compressedBytes;
         }

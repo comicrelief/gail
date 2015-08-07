@@ -57,6 +57,7 @@
     <Compile Include="Builders\GovTalkMessageBuilderBase.cs" />
     <Compile Include="Builders\UnknownMessageBuilderBase.cs" />
     <Compile Include="DAL\DataTableRepaymentPopulater.cs" />
+    <Compile Include="DAL\IGiftAidRepaymentRepository.cs" />
     <Compile Include="Factories\GovTalkMessageBuilderFactory.cs" />
     <Compile Include="Builders\HeaderBuilder.cs" />
     <Compile Include="Factories\IGovTalkMessageBuilderFactory.cs" />
@@ -95,6 +96,7 @@
     <None Include="log4net.config.xsd">
       <SubType>Designer</SubType>
     </None>
+    <Compile Include="Models\GiftAidRepayment.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -107,9 +109,7 @@
       <Name>HMRCServiceClasses</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
