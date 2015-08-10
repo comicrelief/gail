@@ -195,11 +195,14 @@ namespace CharitiesOnline
 
         public static void TestReadMessage()
         {
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
             // vep200pc
             // XDocument xd = XDocument.Load(@"C:\Temp\Compressed Data Samples\GAValidSample_GZIP.xml");
             XDocument xd = XDocument.Load(@"C:\Temp\GAValidSample_GZIP.xml");
 
-            ReadSubmitRequestStrategy read = new ReadSubmitRequestStrategy();
+            ReadSubmitRequestStrategy read = new ReadSubmitRequestStrategy(loggingService);
             read.IsMatch(xd);
 
             DataTable dt = read.ReadMessage<DataTable>(xd);
@@ -243,9 +246,7 @@ namespace CharitiesOnline
         }
 
         public static void TestGovTalkMessageCreation()
-        {
-            
-
+        {           
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
@@ -266,7 +267,7 @@ namespace CharitiesOnline
 
             byte[] xmlDocumentSize = finalXd.XmlToBytes();
 
-            Console.WriteLine("The document is {0}bytes big", xmlDocumentSize.Length);
+            Console.WriteLine("The document is {0} bytes big.", xmlDocumentSize.Length);
 
             XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
 
