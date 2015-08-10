@@ -6,6 +6,7 @@ using System.Linq;
 
 using hmrcclasses;
 using CharitiesOnline.Helpers;
+using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Strategies
 {
@@ -15,6 +16,12 @@ namespace CharitiesOnline.Strategies
 
         private GovTalkMessage _message;
         private IRenvelope _body;
+        private ILoggingService _loggingService;
+
+        public ReadSubmitRequestStrategy(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
 
         public bool IsMatch(XDocument inMessage)
         {
@@ -34,6 +41,8 @@ namespace CharitiesOnline.Strategies
                 
                 _body = XmlSerializationHelpers.DeserializeIRenvelope(bodyDoc);
 
+                _loggingService.LogInfo(this, "Message read. Message is SubmitRequest.");
+
                 return true;
             }
                                        
@@ -47,90 +56,43 @@ namespace CharitiesOnline.Strategies
 
         public T ReadMessage<T>(XDocument inXD)
         {
+            // If DataSet return ds with GA repayments & if otherinc plus other inc
+            // If Datatable return dt with GA repayments
+            // What about 
+
+            R68Claim r68claim = GetClaim(_body.R68.Items);
+
             if (typeof(T) == typeof(DataTable))
             {
-                DataTable dt = DataHelpers.MakeRepaymentTable();                              
+                DataTable dt = GetDataTableGiftAidDonations(r68claim.Repayment.GAD);                           
 
-                // deal with compression first then load uncompressed repayment & otherinc 
+                // deal with compression first then load uncompressed repayment & otherinc                                 
 
-                R68Claim r68claim;
+                #region OtherInc
+                
 
-                if(_body.R68.Items[0] is R68CompressedPart)
-                {
-                    R68CompressedPart compressedPart = (R68CompressedPart)_body.R68.Items[0];
-
-                    string decompressedData = CommonUtilityHelpers.DecompressData(compressedPart.Value);
-                    XmlDocument decompressedXml = new XmlDocument();              
-                    decompressedXml.LoadXml(decompressedData);
-
-                    // decompressedXml.DocumentElement.SetAttribute("xmlns", "http://www.govtalk.gov.uk/taxation/charities/r68/2");
-
-                    XmlDocument r68ClaimXmlDoc = new XmlDocument();
-                    XmlElement r68root = r68ClaimXmlDoc.CreateElement("R68Claim");
-                    r68root.SetAttribute("xmlns", "http://www.govtalk.gov.uk/taxation/charities/r68/2");
-                    r68ClaimXmlDoc.AppendChild(r68root);
-                    r68root.InnerXml = decompressedXml.DocumentElement.InnerXml;
-                    
-                    r68claim = XmlSerializationHelpers.Deserialize <R68Claim> (r68ClaimXmlDoc.OuterXml, "R68Claim");                                                  
-                }
-                else
-                {
-                    r68claim = (R68Claim)_body.R68.Items[0];
-                }
-
-                #region GiftAidDonors
-
-                foreach (var gad in r68claim.Repayment.GAD)
-                {
-                    // @TODO: Sponsorship indicator
-
-                    DataRow dr;
-                    dr = dt.NewRow();
-
-                    if (gad.Item is hmrcclasses.R68ClaimRepaymentGADDonor)
-                    {
-                        hmrcclasses.R68ClaimRepaymentGADDonor donor = (hmrcclasses.R68ClaimRepaymentGADDonor)gad.Item;
-
-                        dr["Fore"] = donor.Fore;
-                        dr["Sur"] = donor.Sur;
-                        dr["House"] = donor.House;
-                        if (donor.Item is string)
-                        {
-                            dr["Postcode"] = donor.Item;
-                        }
-                        if (donor.Item is hmrcclasses.r68_YesType)
-                        {
-                            dr["Overseas"] = "yes";
-                        }
-                        dr["Type"] = "GAD";
-                    }
-                    else if (gad.Item is string)
-                    {
-                        // agg donation
-                        dr["Type"] = "AGG";
-                        dr["Description"] = gad.Item;
-                    }
-
-                    dr["Total"] = gad.Total;
-                    dr["Date"] = gad.Date;
-
-                    dt.Rows.Add(dr);
-                }
-                #endregion GiftAidDonors
-
-                foreach(var otherInc in r68claim.Repayment.OtherInc)
-                {
-
-                }
+                #endregion OtherInc
 
                 return (T)Convert.ChangeType(dt, typeof(T));
             }
-            else
-            {
-                // log this
+            if(typeof(T) == typeof(DataSet))
+            {                
+                // Get GiftAidDonations
+                DataTable dataTableGiftAidDonations = GetDataTableGiftAidDonations(r68claim.Repayment.GAD);
 
-                return default(T);
-            }                            
+                // Get OtherIncome
+                DataTable dataTableOtherIncome = GetDataTableOtherInc(r68claim.Repayment.OtherInc);
+
+                DataSet ds = new DataSet();
+                ds.Tables.Add(dataTableGiftAidDonations);
+                ds.Tables.Add(dataTableOtherIncome);
+
+                return (T)Convert.ChangeType(ds, typeof(T));
+            }
+
+            _loggingService.LogWarning(this, "No valid type specified for ReadSubmitRequest. Returning default (probably null).");
+
+            return default(T);            
         }
 
         public GovTalkMessage Message()
@@ -151,5 +113,92 @@ namespace CharitiesOnline.Strategies
             return _body.GetType().ToString();
         }
 
+        private R68Claim GetClaim(object[] R68Items)
+        {
+            if(R68Items[0] is R68CompressedPart)
+            {
+                R68CompressedPart compressedPart = (R68CompressedPart)_body.R68.Items[0];
+
+                string decompressedData = CommonUtilityHelpers.DecompressData(compressedPart.Value);
+                XmlDocument decompressedXml = new XmlDocument();
+                decompressedXml.LoadXml(decompressedData);
+
+                // decompressedXml.DocumentElement.SetAttribute("xmlns", "http://www.govtalk.gov.uk/taxation/charities/r68/2");
+
+                XmlDocument r68ClaimXmlDoc = new XmlDocument();
+                XmlElement r68root = r68ClaimXmlDoc.CreateElement("R68Claim");
+                r68root.SetAttribute("xmlns", "http://www.govtalk.gov.uk/taxation/charities/r68/2");
+                r68ClaimXmlDoc.AppendChild(r68root);
+                r68root.InnerXml = decompressedXml.DocumentElement.InnerXml;
+
+                return XmlSerializationHelpers.Deserialize<R68Claim>(r68ClaimXmlDoc.OuterXml, "R68Claim"); 
+            }
+            else
+            {
+                return (R68Claim)R68Items[0];
+            }
+        }
+
+        private DataTable GetDataTableGiftAidDonations(R68ClaimRepaymentGAD[] giftAidDonations)
+        {
+            DataTable dt = DataHelpers.MakeRepaymentTable();     
+
+            foreach (var gad in giftAidDonations)  //r68claim.Repayment.GAD
+            {
+                DataRow dr;
+                dr = dt.NewRow();
+
+                if (gad.Item is R68ClaimRepaymentGADDonor)
+                {
+                    R68ClaimRepaymentGADDonor donor = (R68ClaimRepaymentGADDonor)gad.Item;
+
+                    dr["Fore"] = donor.Fore;
+                    dr["Sur"] = donor.Sur;
+                    dr["House"] = donor.House;
+                    if (donor.Item is string)
+                    {
+                        dr["Postcode"] = donor.Item;
+                    }
+                    if (donor.Item is hmrcclasses.r68_YesType)
+                    {
+                        dr["Overseas"] = "yes";
+                    }
+                    dr["Type"] = "GAD";
+                }
+                else if (gad.Item is string)
+                {
+                    // agg donation
+                    dr["Type"] = "AGG";
+                    dr["Description"] = gad.Item;
+                }
+
+                dr["Total"] = gad.Total;
+                dr["Date"] = gad.Date;
+
+                //sponsorship flag // @TODO: TEST Sponsorship indicator
+                if (gad.SponsoredSpecified)
+                    dr["Sponsored"] = gad.Sponsored == r68_YesType.yes ? "Y" : "N";
+
+                dt.Rows.Add(dr);
+            }
+
+            return dt;
+        }
+
+        private DataTable GetDataTableOtherInc(R68ClaimRepaymentOtherInc[] otherInc)
+        {
+            DataTable dt = DataHelpers.MakeOtherIncomeTable();
+            
+            foreach (var otherincome in otherInc)
+            {
+                DataRow dr = dt.NewRow();
+                dr["Payer"] = otherincome.Payer;
+                dr["OIDate"] = otherincome.OIDate;
+                dr["Gross"] = otherincome.Gross;
+                dr["Tax"] = otherincome.Tax;
+            }
+
+            return dt;
+        }
     }
 }
