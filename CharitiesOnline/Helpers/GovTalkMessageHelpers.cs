@@ -5,6 +5,8 @@ using System.Linq;
 using System.Xml;
 using System.IO;
 
+using hmrcclasses;
+
 namespace CharitiesOnline.Helpers
 {
     public class GovTalkMessageHelpers
@@ -102,6 +104,11 @@ namespace CharitiesOnline.Helpers
             claim.LoadXml(claimNode.OuterXml);
 
             return claim;
+        }
+
+        public static string MessageQualifier(GovTalkMessageHeaderMessageDetailsQualifier qualifier)
+        {
+            return qualifier.ToString();
         }
     }
 }

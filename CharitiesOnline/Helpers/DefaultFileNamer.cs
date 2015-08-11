@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CharitiesOnline.Helpers
 {
-
+    // Sorry, ran out of time to work out how to make this an interface implementation
 
     public class DefaultFileNamer
     {
@@ -16,6 +16,7 @@ namespace CharitiesOnline.Helpers
         public string MessageQualifier { get; private set; }
         public string CorrelationId { get; private set; }
         public string CustomNamePart { get; private set; }
+        public string FilePath { get; private set; }
 
         private const string FILE_EXT = ".xml";
         private const string SEPARATOR = "_";
@@ -27,7 +28,8 @@ namespace CharitiesOnline.Helpers
             private string _messageIntention;
             private string _messageQualifier;
             private string _correlationId;
-            private string _customNamePart;            
+            private string _customNamePart;
+            private string _filePath;
             
             public FileNameBuilder AddTimestamp(string value)
             {
@@ -65,9 +67,16 @@ namespace CharitiesOnline.Helpers
                 return this;
             }
 
+            public FileNameBuilder AddFilePath(string value)
+            {
+                _filePath = value;
+                return this;
+            }
+
             public DefaultFileNamer BuildFileName()
             {
                 return new DefaultFileNamer { 
+                    FilePath = _filePath,
                     CorrelationId = _correlationId,
                     Environment = _environment,
                     Timestamp = _timestamp,
@@ -80,7 +89,7 @@ namespace CharitiesOnline.Helpers
 
         public override string ToString()
         {
-            string filename = string.Concat(Environment, MessageIntention,Timestamp, MessageQualifier, CorrelationId, CustomNamePart, FILE_EXT);
+            string filename = string.Concat(FilePath, Environment, MessageIntention,Timestamp, MessageQualifier, CorrelationId, CustomNamePart, FILE_EXT);
 
             // if there are any SEPARATOR chars, remove the last one
             if(filename.Contains(SEPARATOR))
@@ -89,6 +98,8 @@ namespace CharitiesOnline.Helpers
                 filename = CommonUtilityHelpers.ReplaceFirst(filename, SEPARATOR, String.Empty);
                 filename = CommonUtilityHelpers.ReverseString(filename);
             }
+
+            // @TODO: Test if this is a valid filename? 
 
             return filename;
             //return base.ToString();

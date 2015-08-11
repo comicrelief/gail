@@ -43,7 +43,13 @@ namespace CharitiesOnline
 
                 LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");
 
-                TestFileNaming();
+                IMessageReader reader = new DefaultMessageReader(loggingService);
+
+                TestReadMessages(reader);
+
+                // TestFileNaming();
+
+                // TestDeserializeSuccessResponse();
 
                 // TestSerialize();
                 // TestLocalProcess();
@@ -70,6 +76,7 @@ namespace CharitiesOnline
         {
 
             DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            .AddFilePath(@"")
             .AddEnvironment("Test")
             .AddMessageIntention("RequestMessage")
             .AddTimestamp(DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture))
@@ -82,63 +89,103 @@ namespace CharitiesOnline
 
         public static void TestLocalProcess()
         {
-            // Create a file
-            // Send to the LTS
-            // Read response
+            // Create a file of donations records
             DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
+
+            // Set up app.config as a source for the reference data
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
+            // Set up the logging
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
+            // Build a GovTalkMessage
             GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService),loggingService);
             submitMessageCreator.CreateGovTalkMessage();
             
-            
-            hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
+            // Get the GovTalkMessage that has been built
+            GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
+            // Serialize the GovTalkMessage to an XmlDocument
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
 
+            // Set the IRmark for the GovTalkMessage XmlDocument
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
+            // Set the URI to send the file to
             string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
 
+            // Create a client to send the file to the target gateway
             CharitiesOnline.MessageService.Client client = new MessageService.Client(loggingService);
 
-            XmlDocument reply = client.SendRequest(xd, uri);
+            // Create an XmlDocument of the reply from the endpoint
+            XmlDocument reply = client.SendRequest(xd, uri);           
 
-            // @TODO Need a method in the reader for generating a good filepath for messages
-            reply.Save(@"C:\Temp\localreply.xml");
-
+            // Set up a message reading strategy
             IMessageReader _messageReader = new DefaultMessageReader(loggingService);
 
-            string bodytype = _messageReader.GetBodyType(reply.ToXDocument());
-            
-            // This bit, bunch of if-thens, should be covered by the reader strategy ...
 
-            if(bodytype == null)
-            {
-                //acknowledgment
-                Console.WriteLine("CorrelationId is {0}",_messageReader.ReadMessage<string>(reply.ToXDocument()));
-            }
-            else if(bodytype == "hmrcclasses.SuccessResponse")
-            {
-                //success
-                string[] success = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
-                Console.WriteLine(string.Join("\n", success));
-            }
-            else if(bodytype == "hmrcclasses.ErrorResponse")
-            {
-                //error
-                string[] error = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
-                Console.WriteLine(string.Join("\n", error));
-            }                   
+            string[] results = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+
+            Console.WriteLine(string.Join("\n", results));
+
+            #region old
+            // This bit, bunch of if-thens, should be covered by the reader strategy ...
+            //string bodytype = _messageReader.GetBodyType(reply.ToXDocument());                        
+
+            //if(bodytype == null)
+            //{
+            //    //acknowledgment
+            //    Console.WriteLine("CorrelationId is {0}",_messageReader.ReadMessage<string>(reply.ToXDocument()));
+            //}
+            //else if(bodytype == "hmrcclasses.SuccessResponse")
+            //{
+            //    //success
+            //    string[] success = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+            //    Console.WriteLine(string.Join("\n", success));
+            //}
+            //else if(bodytype == "hmrcclasses.ErrorResponse")
+            //{
+            //    //error
+            //    string[] error = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+            //    Console.WriteLine(string.Join("\n", error));
+            //}
+
+            #endregion old
+
+            // @TODO Need a method in the reader for generating a good filepath for messages
+            // Made a utility to do it
+            // Need to get correlationId
+
+            DefaultFileNamer fileNamer = new DefaultFileNamer.FileNameBuilder()
+            .AddFilePath(configurationRepository.GetConfigurationValue<string>("TempFolder"))
+            .AddEnvironment("local")
+            .AddMessageIntention("reply")
+            .AddCorrelationId(results[0])
+            .AddMessageQualifier(results[1])
+            .BuildFileName();
+
+            // reply.Save(@"C:\Temp\localreply.xml");
+
+            reply.Save(fileNamer.ToString());
         }
 
         public static void TestDeserializeSuccessResponse()
         {
+            DefaultFileNamer FileNamer = new DefaultFileNamer.FileNameBuilder()
+            .AddFilePath(@"C:\Temp\")
+            .AddEnvironment("live")
+            .AddMessageIntention("PollMessage")
+            .AddTimestamp("2015_02_02_12_41")
+            .AddCorrelationId("1853DE80F71CEF4C07B57CD5BDA969D577")
+            .AddMessageQualifier("response")
+            .AddCustomNamePart("20150202124118")
+            .BuildFileName();
+
+            string filename = FileNamer.ToString();
+
             XmlDocument successMessage = new XmlDocument();
-            successMessage.Load(@"C:\Temp\livePollMessage2015_02_02_12_41_1853DE80F71CEF4C07B57CD5BDA969D577_response_20150202124118_.xml");
+            successMessage.Load(filename);           
 
             GovTalkMessage success = XmlSerializationHelpers.DeserializeMessage(successMessage);
 
@@ -171,7 +218,7 @@ namespace CharitiesOnline
             IMessageReader _messageReader = messageReader;
 
             XmlDocument messageXML = new XmlDocument();
-            messageXML.Load(@"C:\Temp\livePollMessage2015_02_02_12_41_1853DE80F71CEF4C07B57CD5BDA969D577_response_20150202124118_.xml");
+            messageXML.Load(@"C:\Temp\RequestMessage_1423572802_File187E1E8A7F16147A6B87962E07933B406_acknowledgement_20150210125836_.xml");
 
             string[] results = _messageReader.ReadMessage<string[]>(messageXML.ToXDocument());
 
@@ -327,7 +374,15 @@ namespace CharitiesOnline
 
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
-            finalXd.Save(@"C:\Temp\TestGovTalkMsgWithOtherIncome" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+            DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            .AddFilePath(@"C:\Temp\")
+            .AddEnvironment("Test")
+            .AddMessageIntention("GovTalkMsgWithOtherIncome")
+            .AddTimestamp(DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture))
+            .BuildFileName()
+            );
+
+            finalXd.Save(filename.ToString());
 
         }
 
@@ -350,7 +405,16 @@ namespace CharitiesOnline
 
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
-            finalXd.Save(@"C:\Temp\TestCompressedGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+            DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            .AddFilePath(@"C:\Temp\")
+            .AddEnvironment("Test")
+            .AddMessageIntention("CompressedGovTalkMessage")
+            .AddTimestamp(DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture))
+            .AddCustomNamePart("File" + 1)
+            .BuildFileName()
+            );
+
+            finalXd.Save(filename.ToString());
 
         }
 

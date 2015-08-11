@@ -42,7 +42,7 @@ namespace CharitiesOnline.Strategies
         public T ReadMessage<T>(XDocument inMessage)
         {
             string correlationId = "";
-            string[] acknowledgmentResults = new string[4];
+            string[] acknowledgmentResults = new string[5];
 
             if(typeof(T) == typeof(string))
             {
@@ -56,9 +56,10 @@ namespace CharitiesOnline.Strategies
             if(typeof(T) == typeof(string[]))
             {
                 acknowledgmentResults[0] = _message.Header.MessageDetails.CorrelationID;
-                acknowledgmentResults[1] = _message.Header.MessageDetails.ResponseEndPoint.Value;
-                acknowledgmentResults[2] = _message.Header.MessageDetails.ResponseEndPoint.PollInterval;
-                acknowledgmentResults[3] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
+                acknowledgmentResults[1] = _message.Header.MessageDetails.Qualifier.ToString();
+                acknowledgmentResults[2] = _message.Header.MessageDetails.ResponseEndPoint.Value;
+                acknowledgmentResults[3] = _message.Header.MessageDetails.ResponseEndPoint.PollInterval;
+                acknowledgmentResults[4] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
 
                 _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ", acknowledgmentResults[0]));
 
