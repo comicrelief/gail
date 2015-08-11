@@ -77,6 +77,27 @@ namespace CharitiesOnline.Helpers
                 return Encoding.UTF8.GetString(mso.ToArray());
             }
         }
+
+        public static string ReverseString(string s)
+        {
+            // credit: http://www.dotnetperls.com/reverse-string
+
+            char[] arr = s.ToCharArray();
+            Array.Reverse(arr);
+            return new string(arr);
+        }
+
+        public static string ReplaceFirst(string text, string search, string replace)
+        {
+            // credit: http://stackoverflow.com/questions/8809354/replace-first-occurrence-of-pattern-in-a-string
+
+            int pos = text.IndexOf(search);
+            if (pos < 0)
+            {
+                return text;
+            }
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+        }
     }
     
 

@@ -43,10 +43,11 @@ namespace CharitiesOnline
 
                 LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");
 
+                TestFileNaming();
+
                 // TestSerialize();
                 // TestLocalProcess();
-
-                TestGovTalkMessageCreation();
+                // TestGovTalkMessageCreation("");
                 // TestReadSuccessResponse();
                 // IMessageReader reader = new DefaultMessageReader();
                 // TestReadMessages(reader);
@@ -63,6 +64,20 @@ namespace CharitiesOnline
             }
 
             Console.ReadKey();                
+        }
+
+        public static void TestFileNaming()
+        {
+
+            DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            .AddEnvironment("Test")
+            .AddMessageIntention("RequestMessage")
+            .AddTimestamp(DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture))
+            .AddCustomNamePart("File" + 1)
+            .BuildFileName()
+            );
+
+            Console.WriteLine(filename.ToString());
         }
 
         public static void TestLocalProcess()
@@ -245,7 +260,7 @@ namespace CharitiesOnline
             // Console.ReadKey();
         }
 
-        public static void TestGovTalkMessageCreation()
+        public static void TestGovTalkMessageCreation(string SourceDataFileName)
         {           
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
@@ -253,7 +268,9 @@ namespace CharitiesOnline
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
             DataTableRepaymentPopulater.SetLogger(loggingService);
-            // DataTableRepaymentPopulater.GiftAidDonations = Helpers.GetDataTableFromCsv(@"C:\Temp\Donations-Wrong.csv", true);
+            
+            if(!string.IsNullOrEmpty(SourceDataFileName))
+                DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(@SourceDataFileName, true);
 
             GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService), loggingService);
             
@@ -262,18 +279,24 @@ namespace CharitiesOnline
             hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();         
-
-            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
-
-            byte[] xmlDocumentSize = finalXd.XmlToBytes();
+            
+            byte[] xmlDocumentSize = xd.XmlToBytes();
 
             Console.WriteLine("The document is {0} bytes big.", xmlDocumentSize.Length);
 
-            XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
+            XmlDocument outputXmlDocument;
 
-            finalXd = GovTalkMessageHelpers.SetIRmark(compressedVersion);
+            if(xmlDocumentSize.Length > 1000000)
+            {
+                XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
+                outputXmlDocument = GovTalkMessageHelpers.SetIRmark(compressedVersion);
+            }
+            else
+            {
+                outputXmlDocument = GovTalkMessageHelpers.SetIRmark(xd);
+            }                                  
 
-            finalXd.Save(@"C:\Temp\testGovTalkMsgCompressedWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+            outputXmlDocument.Save(@"C:\Temp\testGovTalkMsgCompressedWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
             #region old
             //BodyCreator bodyCreator = new BodyCreator(new SubmitRequestBodyBuilder());

@@ -20,7 +20,7 @@ namespace CharitiesOnline.Strategies
         {
             _loggingService = loggingService;
             _readers = new List<IMessageReadStrategy>();
-            _readers.Add(new ReadSubmitRequestStrategy());
+            _readers.Add(new ReadSubmitRequestStrategy(_loggingService));
             _readers.Add(new ReadAcknowledgementStrategy(_loggingService));
             _readers.Add(new ReadResponseStrategy(_loggingService));
             _readers.Add(new ReadErrorStrategy(_loggingService));

@@ -56,22 +56,11 @@ namespace CharitiesOnline.Strategies
 
         public T ReadMessage<T>(XDocument inXD)
         {
-            // If DataSet return ds with GA repayments & if otherinc plus other inc
-            // If Datatable return dt with GA repayments
-            // What about 
-
             R68Claim r68claim = GetClaim(_body.R68.Items);
 
             if (typeof(T) == typeof(DataTable))
             {
                 DataTable dt = GetDataTableGiftAidDonations(r68claim.Repayment.GAD);                           
-
-                // deal with compression first then load uncompressed repayment & otherinc                                 
-
-                #region OtherInc
-                
-
-                #endregion OtherInc
 
                 return (T)Convert.ChangeType(dt, typeof(T));
             }

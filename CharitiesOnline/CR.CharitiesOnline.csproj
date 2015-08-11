@@ -63,7 +63,9 @@
     <Compile Include="Factories\IGovTalkMessageBuilderFactory.cs" />
     <Compile Include="Helpers\CommonUtilityHelpers.cs" />
     <Compile Include="Helpers\DataHelpers.cs" />
+    <Compile Include="Helpers\DefaultFileNamer.cs" />
     <Compile Include="Helpers\GovTalkMessageHelpers.cs" />
+    <Compile Include="Helpers\IFileNamer.cs" />
     <Compile Include="Helpers\XmlSerializationHelpers.cs" />
     <Compile Include="Builders\IRenvelopeBuilder.cs" />
     <Compile Include="Builders\IRheaderBuilder.cs" />
