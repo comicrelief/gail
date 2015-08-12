@@ -55,11 +55,11 @@ namespace CharitiesOnline.Strategies
 
             if(typeof(T) == typeof(string[]))
             {
-                acknowledgmentResults[0] = _message.Header.MessageDetails.CorrelationID;
-                acknowledgmentResults[1] = _message.Header.MessageDetails.Qualifier.ToString();
-                acknowledgmentResults[2] = _message.Header.MessageDetails.ResponseEndPoint.Value;
-                acknowledgmentResults[3] = _message.Header.MessageDetails.ResponseEndPoint.PollInterval;
-                acknowledgmentResults[4] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
+                acknowledgmentResults[0] = string.Concat("CorrelationID::",_message.Header.MessageDetails.CorrelationID);
+                acknowledgmentResults[1] = string.Concat("Qualifier::",_message.Header.MessageDetails.Qualifier.ToString());
+                acknowledgmentResults[2] = string.Concat("ResponseEndPoint::",_message.Header.MessageDetails.ResponseEndPoint.Value);
+                acknowledgmentResults[3] = string.Concat("PollInterval::", _message.Header.MessageDetails.ResponseEndPoint.PollInterval);
+                acknowledgmentResults[4] = string.Concat("GatewayTimestamp::",_message.Header.MessageDetails.GatewayTimestamp.ToString());
 
                 _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ", acknowledgmentResults[0]));
 

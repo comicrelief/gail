@@ -78,6 +78,12 @@ namespace CharitiesOnline.Strategies
 
                 return (T)Convert.ChangeType(ds, typeof(T));
             }
+            if(typeof(T) == typeof(string))
+            {
+                string messageForUser = "This is a Submit Request Message.";
+
+                return (T)Convert.ChangeType(messageForUser, typeof(T));
+            }
 
             _loggingService.LogWarning(this, "No valid type specified for ReadSubmitRequest. Returning default (probably null).");
 

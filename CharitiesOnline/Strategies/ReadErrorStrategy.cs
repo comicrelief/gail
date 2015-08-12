@@ -68,10 +68,11 @@ namespace CharitiesOnline.Strategies
             {
                 //correlationId, responseEndPoint, gatewayTimestamp, IRmarkReceipt.Message, AcceptedTime
                 string[] response = new string[5];
-                response[0] = _message.Header.MessageDetails.CorrelationID;
-                response[1] = _message.Header.MessageDetails.ResponseEndPoint.Value;
-                response[2] = _message.Header.MessageDetails.GatewayTimestamp.ToString();
-                response[3] = _body.Application.Any[0].Name + ":" + _body.Application.Any[0].InnerText;
+                response[0] = string.Concat("CorrelationId::",_message.Header.MessageDetails.CorrelationID);
+                response[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier);
+                response[2] = string.Concat("ResponseEndPoint::",_message.Header.MessageDetails.ResponseEndPoint.Value);
+                response[3] = string.Concat("GatewayTimestamp::",_message.Header.MessageDetails.GatewayTimestamp.ToString());
+                response[4] = string.Concat("Error::",_body.Application.Any[0].Name + ":" + _body.Application.Any[0].InnerText);
 
                 _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", response[0]));
 
