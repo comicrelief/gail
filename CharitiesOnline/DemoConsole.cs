@@ -23,16 +23,15 @@ namespace CharitiesOnline
 {
     class DemoConsole
     {
+        private static ILoggingService loggingService;
         static void Main(string[] args)
         {
-
-
             try
             {
                 Console.WriteLine("Started");
 
                 IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
-                ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+                loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
                 LogProviderContext.Current = loggingService;
 
@@ -45,14 +44,14 @@ namespace CharitiesOnline
 
                 IMessageReader reader = new DefaultMessageReader(loggingService);
 
-                TestReadMessages(reader);
+                // TestReadMessages(reader);
 
                 // TestFileNaming();
 
-                // TestDeserializeSuccessResponse();
+                TestDeserializeSuccessResponse(loggingService);
 
                 // TestSerialize();
-                // TestLocalProcess();
+                TestLocalProcess();
                 // TestGovTalkMessageCreation("");
                 // TestReadSuccessResponse();
                 // IMessageReader reader = new DefaultMessageReader();
@@ -60,22 +59,25 @@ namespace CharitiesOnline
             }
             catch (System.Net.WebException wex)
             {
-                Console.WriteLine("Exception occured in connecting to remote machine");
-                Console.WriteLine(wex.InnerException.Message);
-                Console.WriteLine(wex.Message);
+                loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Exception occured in connecting to remote machine", wex);
+                
+                //Console.WriteLine("Exception occured in connecting to remote machine");
+                //Console.WriteLine(wex.InnerException.Message);
+                //Console.WriteLine(wex.Message);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Something went wrong", ex);
+                //Console.WriteLine(ex);
             }
 
             Console.ReadKey();                
         }
-
+         
         public static void TestFileNaming()
         {
 
-            DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"")
             .AddEnvironment("Test")
             .AddMessageIntention("RequestMessage")
@@ -89,15 +91,17 @@ namespace CharitiesOnline
 
         public static void TestLocalProcess()
         {
+            // Set up the logging
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            DataTableRepaymentPopulater.SetLogger(loggingService);
+
             // Create a file of donations records
             DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(@"C:\Temp\Donations.csv", true);
 
             // Set up app.config as a source for the reference data
-            ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
-
-            // Set up the logging
-            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
-            ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+            ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);            
 
             // Build a GovTalkMessage
             GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService),loggingService);
@@ -126,6 +130,16 @@ namespace CharitiesOnline
 
 
             string[] results = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+
+            //int correlationIdIndex = Array.IndexOf(results, "CorrelationId");
+            int correlationIdPosition = Array.FindIndex(results, element => element.StartsWith("CorrelationId"));
+            if (correlationIdPosition < 0)
+                throw new ArgumentNullException("CorrelationId");
+
+            int qualifierPosition = Array.FindIndex(results, element => element.StartsWith("Qualifier"));
+            
+            if (qualifierPosition < 0)
+                throw new ArgumentNullException("Qualifier");
 
             Console.WriteLine(string.Join("\n", results));
 
@@ -157,31 +171,36 @@ namespace CharitiesOnline
             // Made a utility to do it
             // Need to get correlationId
 
-            DefaultFileNamer fileNamer = new DefaultFileNamer.FileNameBuilder()
+            GovTalkMessageFileName fileNamer = new GovTalkMessageFileName.FileNameBuilder()
+            .AddLogger(loggingService)
             .AddFilePath(configurationRepository.GetConfigurationValue<string>("TempFolder"))
             .AddEnvironment("local")
             .AddMessageIntention("reply")
-            .AddCorrelationId(results[0])
-            .AddMessageQualifier(results[1])
+            .AddCorrelationId(results[correlationIdPosition].Substring(results[correlationIdPosition].IndexOf("::")+2))
+            .AddMessageQualifier(results[qualifierPosition].Substring(results[qualifierPosition].IndexOf("::")+2)) //could check for < 0 here and pass empty string
             .BuildFileName();
 
-            // reply.Save(@"C:\Temp\localreply.xml");
+            string filename = fileNamer.ToString();
 
-            reply.Save(fileNamer.ToString());
+            reply.Save(filename);
+            
+            // reply.Save(@"C:\Temp\localreply.xml");
+            
         }
 
-        public static void TestDeserializeSuccessResponse()
+        public static void TestDeserializeSuccessResponse(ILoggingService loggingService)
         {
-            DefaultFileNamer FileNamer = new DefaultFileNamer.FileNameBuilder()
-            .AddFilePath(@"C:\Temp\")
-            .AddEnvironment("live")
-            .AddMessageIntention("PollMessage")
-            .AddTimestamp("2015_02_02_12_41")
-            .AddCorrelationId("1853DE80F71CEF4C07B57CD5BDA969D577")
-            .AddMessageQualifier("response")
-            .AddCustomNamePart("20150202124118")
-            .BuildFileName();
-
+            GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+                .AddLogger(loggingService)
+                .AddFilePath(@"C:\Temp\")
+                .AddEnvironment("live")
+                .AddMessageIntention("PollMessage")
+                .AddTimestamp("2015_02_02_12_41")
+                .AddCorrelationId("1853DE80F71CEF4C07B57CD5BDA969D577")
+                .AddMessageQualifier("response")
+                .AddCustomNamePart("20150202124118")
+                .BuildFileName();
+            
             string filename = FileNamer.ToString();
 
             XmlDocument successMessage = new XmlDocument();
@@ -195,7 +214,7 @@ namespace CharitiesOnline
 
             SuccessResponse successResp = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
 
-            Console.WriteLine(successResp.Message[0].Value);
+            loggingService.LogInfo(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, successResp.Message[0].Value);
         }
 
         public static void TestReadSuccessResponse()
@@ -374,7 +393,7 @@ namespace CharitiesOnline
 
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
-            DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"C:\Temp\")
             .AddEnvironment("Test")
             .AddMessageIntention("GovTalkMsgWithOtherIncome")
@@ -405,7 +424,7 @@ namespace CharitiesOnline
 
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
-            DefaultFileNamer filename = (new DefaultFileNamer.FileNameBuilder()
+            GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"C:\Temp\")
             .AddEnvironment("Test")
             .AddMessageIntention("CompressedGovTalkMessage")
