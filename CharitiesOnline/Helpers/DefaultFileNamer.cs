@@ -4,12 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using CR.Infrastructure.Logging;
+
 namespace CharitiesOnline.Helpers
 {
     // Sorry, ran out of time to work out how to make this an interface implementation
 
-    public class DefaultFileNamer
+    public class GovTalkMessageFileName
     {
+        // public ILoggingService _loggingService { get; private set;}
+        private ILoggingService _loggingService;
+
+        public GovTalkMessageFileName(ILoggingService loggingService)
+        {
+            _loggingService = loggingService;
+        }
+
+        public ILoggingService LoggingService
+        {
+            private get
+            {
+                return _loggingService;
+            }
+            set
+            {
+                _loggingService = value;
+            }
+        }
+
         public string Timestamp { get; private set; }
         public string Environment { get; private set; }
         public string MessageIntention { get; private set; }
@@ -21,6 +43,9 @@ namespace CharitiesOnline.Helpers
         private const string FILE_EXT = ".xml";
         private const string SEPARATOR = "_";
         
+        
+
+
         public class FileNameBuilder
         {
             private string _timestamp;
@@ -30,7 +55,14 @@ namespace CharitiesOnline.Helpers
             private string _correlationId;
             private string _customNamePart;
             private string _filePath;
-            
+            private ILoggingService _loggingService;
+
+            public FileNameBuilder AddLogger(ILoggingService loggingService)
+            {
+                _loggingService = loggingService;
+                return this;
+                
+            }
             public FileNameBuilder AddTimestamp(string value)
             {
                 _timestamp = string.Concat(value,SEPARATOR);
@@ -73,9 +105,9 @@ namespace CharitiesOnline.Helpers
                 return this;
             }
 
-            public DefaultFileNamer BuildFileName()
+            public GovTalkMessageFileName BuildFileName()
             {
-                return new DefaultFileNamer { 
+                return new GovTalkMessageFileName(_loggingService) { 
                     FilePath = _filePath,
                     CorrelationId = _correlationId,
                     Environment = _environment,
@@ -89,7 +121,7 @@ namespace CharitiesOnline.Helpers
 
         public override string ToString()
         {
-            string filename = string.Concat(FilePath, Environment, MessageIntention,Timestamp, MessageQualifier, CorrelationId, CustomNamePart, FILE_EXT);
+            string filename = string.Concat(FilePath, Environment, MessageIntention, Timestamp, CorrelationId, MessageQualifier, CustomNamePart, FILE_EXT);
 
             // if there are any SEPARATOR chars, remove the last one
             if(filename.Contains(SEPARATOR))
@@ -99,10 +131,35 @@ namespace CharitiesOnline.Helpers
                 filename = CommonUtilityHelpers.ReverseString(filename);
             }
 
-            // @TODO: Test if this is a valid filename? 
-
-            return filename;
+            return validateFileName(filename);
             //return base.ToString();
+        }
+
+        private string validateFileName(string filename)
+        {
+            if (!isValidFilename(filename))
+                return string.Concat(@"C:\Temp\localreply", DateTime.Now.ToString("yyyymmddhhmiss"),".xml");
+            else
+                return filename;
+        }
+
+        private bool isValidFilename(string filename)
+        {
+            System.IO.FileInfo fileinfo = null;
+            try
+            {
+                fileinfo = new System.IO.FileInfo(filename);
+            }
+            catch (ArgumentException argEx) { _loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "FileName exception", argEx); }
+            catch (System.IO.PathTooLongException pathTooLongEx) { _loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "FileName exception", pathTooLongEx); }
+            catch (NotSupportedException unsupportedEx) { _loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "FileName exception", unsupportedEx); }
+
+            if(ReferenceEquals(fileinfo,null))
+            {
+                return false;
+            }
+
+            return true;
         }
 
     }
