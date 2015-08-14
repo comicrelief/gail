@@ -1,4 +1,4 @@
 # gail
 Gift Aid Interface Link (GAIL)
 
-This branch is for the work-in-progress on version 2
+This is the new Master branch of the GAIL library.
