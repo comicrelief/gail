@@ -59,12 +59,13 @@ namespace CharitiesOnline.Strategies
             if(typeof(T) == typeof(string[]))
             {
                 //correlationId, responseEndPoint, gatewayTimestamp, IRmarkReceipt.Message, AcceptedTime
-                string[] response = new string[5];
+                string[] response = new string[6];
                 response[0] = string.Concat("CorrelationId::",_message.Header.MessageDetails.CorrelationID);
-                response[1] = string.Concat("ResponseEndPoint::",_message.Header.MessageDetails.ResponseEndPoint.Value);
-                response[2] = string.Concat("GatewayTimestamp::",_message.Header.MessageDetails.GatewayTimestamp.ToString());
-                response[3] = string.Concat("IRmarkReceipt::",_body.IRmarkReceipt.Message.Value);
-                response[4] = string.Concat("AcceptedTime::",_body.AcceptedTime.ToString());
+                response[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier);
+                response[2] = string.Concat("ResponseEndPoint::",_message.Header.MessageDetails.ResponseEndPoint.Value);
+                response[3] = string.Concat("GatewayTimestamp::",_message.Header.MessageDetails.GatewayTimestamp.ToString());
+                response[4] = string.Concat("IRmarkReceipt::",_body.IRmarkReceipt.Message.Value);
+                response[5] = string.Concat("AcceptedTime::",_body.AcceptedTime.ToString());
 
                 _loggingService.LogInfo(this, string.Concat("Response CorrelationId is ", response[0]));
 
