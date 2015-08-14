@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.CharitiesOnline", "Chari
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D5554A60-F9F7-4934-A5D4-B5B89D57996C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.HMRCServiceClasses", "HMRCServiceClasses\CR.HMRCServiceClasses.csproj", "{A80CDEA5-22D9-48B6-853C-5D9FDB9C7D8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.HMRCServiceClasses", "CR.HMRCServiceClasses\CR.HMRCServiceClasses.csproj", "{A80CDEA5-22D9-48B6-853C-5D9FDB9C7D8A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.Infrastructure", "CR.Infrastructure\CR.Infrastructure.csproj", "{A64217D1-B0A1-4002-A85C-B8E1B2185E08}"
 EndProject
