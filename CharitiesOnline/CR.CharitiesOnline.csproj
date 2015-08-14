@@ -106,7 +106,7 @@
       <Project>{a64217d1-b0a1-4002-a85c-b8e1b2185e08}</Project>
       <Name>CR.Infrastructure</Name>
     </ProjectReference>
-    <ProjectReference Include="..\HMRCServiceClasses\CR.HMRCServiceClasses.csproj">
+    <ProjectReference Include="..\CR.HMRCServiceClasses\CR.HMRCServiceClasses.csproj">
       <Project>{a80cdea5-22d9-48b6-853c-5d9fdb9c7d8a}</Project>
       <Name>CR.HMRCServiceClasses</Name>
     </ProjectReference>
