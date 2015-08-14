@@ -4,9 +4,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Data;
-
-using System.Configuration;
-
 using System.Xml;
 using System.Xml.Linq;
 
@@ -117,7 +114,7 @@ namespace CharitiesOnline
             XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
 
             // Set the URI to send the file to
-            string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
+            string uri = configurationRepository.GetConfigurationValue<string>("SendURILocal");                                
 
             // Create a client to send the file to the target gateway
             CharitiesOnline.MessageService.Client client = new MessageService.Client(loggingService);
@@ -261,7 +258,7 @@ namespace CharitiesOnline
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-            string uri = ConfigurationManager.AppSettings.Get("SendURILocal");
+            string uri = configurationRepository.GetConfigurationValue<string>("SendURILocal");
 
             XmlDocument xd = new XmlDocument();
             xd.PreserveWhitespace = true;
