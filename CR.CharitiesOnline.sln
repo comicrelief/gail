@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.HMRCServiceClasses", "CR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.Infrastructure", "CR.Infrastructure\CR.Infrastructure.csproj", "{A64217D1-B0A1-4002-A85C-B8E1B2185E08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.CO.Demo", "CR.CO.Demo\CR.CO.Demo.csproj", "{31359A04-B829-4321-B2EB-901316E6DAB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{A64217D1-B0A1-4002-A85C-B8E1B2185E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A64217D1-B0A1-4002-A85C-B8E1B2185E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A64217D1-B0A1-4002-A85C-B8E1B2185E08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31359A04-B829-4321-B2EB-901316E6DAB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31359A04-B829-4321-B2EB-901316E6DAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31359A04-B829-4321-B2EB-901316E6DAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31359A04-B829-4321-B2EB-901316E6DAB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
