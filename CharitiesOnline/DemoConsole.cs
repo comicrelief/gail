@@ -39,8 +39,6 @@ namespace CharitiesOnline
 
                 LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");
 
-                IMessageReader reader = new DefaultMessageReader(loggingService);
-
                 // TestReadMessages(reader);
 
                 // TestFileNaming();
@@ -123,10 +121,9 @@ namespace CharitiesOnline
             XmlDocument reply = client.SendRequest(xd, uri);           
 
             // Set up a message reading strategy
-            IMessageReader _messageReader = new DefaultMessageReader(loggingService);
+            IMessageReader _messageReader = new DefaultMessageReader(loggingService, configurationRepository, reply.ToXDocument());
 
-
-            string[] results = _messageReader.ReadMessage<string[]>(reply.ToXDocument());
+            string[] results = _messageReader.ReadMessage<string[]>();
 
             //int correlationIdIndex = Array.IndexOf(results, "CorrelationId");
             int correlationIdPosition = Array.FindIndex(results, element => element.StartsWith("CorrelationId"));
@@ -236,7 +233,7 @@ namespace CharitiesOnline
             XmlDocument messageXML = new XmlDocument();
             messageXML.Load(@"C:\Temp\RequestMessage_1423572802_File187E1E8A7F16147A6B87962E07933B406_acknowledgement_20150210125836_.xml");
 
-            string[] results = _messageReader.ReadMessage<string[]>(messageXML.ToXDocument());
+            string[] results = _messageReader.ReadMessage<string[]>();
 
             foreach(var s in results)
             {
@@ -245,11 +242,11 @@ namespace CharitiesOnline
 
             // GovTalkMessage message = _messageReader.Message(messageXML.ToXDocument());
 
-            string bodytype = _messageReader.GetBodyType(messageXML.ToXDocument());
+            string bodytype = _messageReader.GetBodyType();
 
             Console.WriteLine(bodytype);
 
-            ErrorResponse err = _messageReader.GetBody<ErrorResponse>(messageXML.ToXDocument());
+            ErrorResponse err = _messageReader.GetBody<ErrorResponse>();
 
         }
 
@@ -283,7 +280,7 @@ namespace CharitiesOnline
             ReadSubmitRequestStrategy read = new ReadSubmitRequestStrategy(loggingService);
             read.IsMatch(xd);
 
-            DataTable dt = read.ReadMessage<DataTable>(xd);
+            DataTable dt = read.GetMessageResults<DataTable>();
             
         }
 

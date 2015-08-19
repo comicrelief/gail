@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CR.Infrastructure.Logging;
+using CR.Infrastructure.Configuration;
 
 namespace CharitiesOnline.Helpers
 {
@@ -14,10 +15,12 @@ namespace CharitiesOnline.Helpers
     {
         // public ILoggingService _loggingService { get; private set;}
         private ILoggingService _loggingService;
+        private IConfigurationRepository _configurationRepository;
 
-        public GovTalkMessageFileName(ILoggingService loggingService)
+        public GovTalkMessageFileName(ILoggingService loggingService, IConfigurationRepository configurationRepository)
         {
             _loggingService = loggingService;
+            _configurationRepository = configurationRepository;
         }
 
         public ILoggingService LoggingService
@@ -41,10 +44,7 @@ namespace CharitiesOnline.Helpers
         public string FilePath { get; private set; }
 
         private const string FILE_EXT = ".xml";
-        private const string SEPARATOR = "_";
-        
-        
-
+        private const string SEPARATOR = "_";                
 
         public class FileNameBuilder
         {
@@ -56,12 +56,19 @@ namespace CharitiesOnline.Helpers
             private string _customNamePart;
             private string _filePath;
             private ILoggingService _loggingService;
+            private IConfigurationRepository _configurationRepository;
 
             public FileNameBuilder AddLogger(ILoggingService loggingService)
             {
                 _loggingService = loggingService;
                 return this;
                 
+            }
+
+            public FileNameBuilder AddConfigurationRepository(IConfigurationRepository configurationRepository)
+            {
+                _configurationRepository = configurationRepository;
+                return this;
             }
             public FileNameBuilder AddTimestamp(string value)
             {
@@ -107,7 +114,7 @@ namespace CharitiesOnline.Helpers
 
             public GovTalkMessageFileName BuildFileName()
             {
-                return new GovTalkMessageFileName(_loggingService) { 
+                return new GovTalkMessageFileName(_loggingService,_configurationRepository) { 
                     FilePath = _filePath,
                     CorrelationId = _correlationId,
                     Environment = _environment,
@@ -160,6 +167,28 @@ namespace CharitiesOnline.Helpers
             }
 
             return true;
+        }
+
+        public string DefaultFileName()
+        {
+            // @TODO: TEST THIS
+
+            string defaultFileName = "";
+            try
+            {
+                string tempfilepath = _configurationRepository.GetConfigurationValue<string>("TempFolder");
+
+                defaultFileName = string.Concat(tempfilepath, DateTime.Now.ToString("yyyyMMddHHmmss"), ".xml");
+            }
+            catch(Exception ex)
+            {
+                _loggingService.LogError(this, "Something went wrong getting the TempFolder location from configuration or the current timestamp", ex);
+
+                defaultFileName = String.Concat(System.Environment.ExpandEnvironmentVariables("%userprofile%"), @"\", DateTime.Now.ToString("yyyyMMddHHmmss"), ".xml");
+            }
+
+            return defaultFileName;           
+            
         }
 
     }

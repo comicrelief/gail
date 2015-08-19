@@ -98,6 +98,11 @@ namespace CharitiesOnline.Helpers
             }
             return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
         }
+        public static long DateTimeToUnixTimestamp(DateTime inputDate)
+        {
+            return (long)(inputDate - new DateTime(1970, 1, 1).ToLocalTime()).TotalSeconds;
+        }
+
     }
     
 
