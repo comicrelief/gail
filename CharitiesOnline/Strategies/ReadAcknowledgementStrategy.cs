@@ -14,6 +14,7 @@ namespace CharitiesOnline.Strategies
     {
         private GovTalkMessage _message;
         private ILoggingService _loggingService;
+        private string _correlationId;
 
         public ReadAcknowledgementStrategy(ILoggingService loggingService)
         {
@@ -29,37 +30,39 @@ namespace CharitiesOnline.Strategies
 
             if (qualifier == "acknowledgement" && function == "submit")
             {
-                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
-
-                _loggingService.LogInfo(this, "Message read. Response type is Acknowledgment.");
-
                 return true;
             }
 
             return false;
         }
 
-        public T ReadMessage<T>(XDocument inMessage)
+        public void ReadMessage(XDocument inMessage)
         {
-            string correlationId = "";
+            _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
+
+            _correlationId = _message.Header.MessageDetails.CorrelationID;
+
+            _loggingService.LogInfo(this, "Message read. Response type is Acknowledgment.");
+        }
+
+        public T GetMessageResults<T>()
+        {
             string[] acknowledgmentResults = new string[5];
 
-            if(typeof(T) == typeof(string))
+            if (typeof(T) == typeof(string))
             {
-                correlationId = _message.Header.MessageDetails.CorrelationID;
-                
-                _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ",correlationId));
+                _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ", _correlationId));
 
-                return (T)Convert.ChangeType(correlationId, typeof(T));
+                return (T)Convert.ChangeType(_correlationId, typeof(T));
             }
 
-            if(typeof(T) == typeof(string[]))
+            if (typeof(T) == typeof(string[]))
             {
-                acknowledgmentResults[0] = string.Concat("CorrelationID::",_message.Header.MessageDetails.CorrelationID);
-                acknowledgmentResults[1] = string.Concat("Qualifier::",_message.Header.MessageDetails.Qualifier.ToString());
-                acknowledgmentResults[2] = string.Concat("ResponseEndPoint::",_message.Header.MessageDetails.ResponseEndPoint.Value);
+                acknowledgmentResults[0] = string.Concat("CorrelationID::", _message.Header.MessageDetails.CorrelationID);
+                acknowledgmentResults[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier.ToString());
+                acknowledgmentResults[2] = string.Concat("ResponseEndPoint::", _message.Header.MessageDetails.ResponseEndPoint.Value);
                 acknowledgmentResults[3] = string.Concat("PollInterval::", _message.Header.MessageDetails.ResponseEndPoint.PollInterval);
-                acknowledgmentResults[4] = string.Concat("GatewayTimestamp::",_message.Header.MessageDetails.GatewayTimestamp.ToString());
+                acknowledgmentResults[4] = string.Concat("GatewayTimestamp::", _message.Header.MessageDetails.GatewayTimestamp.ToString());
 
                 _loggingService.LogInfo(this, string.Concat("Acknowledgment CorrelationId is ", acknowledgmentResults[0]));
 
@@ -83,6 +86,15 @@ namespace CharitiesOnline.Strategies
         {
             // return Type of _body
             return String.Empty;
+        }
+        public string GetCorrelationId()
+        {
+            return _correlationId;
+        }
+
+        public bool HasErrors()
+        {
+            return false;
         }
     }
 }

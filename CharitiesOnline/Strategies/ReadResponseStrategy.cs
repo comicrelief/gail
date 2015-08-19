@@ -17,6 +17,7 @@ namespace CharitiesOnline.Strategies
         private GovTalkMessage _message;
         private SuccessResponse _body;
         private ILoggingService _loggingService;
+        private string _correlationId;
 
         public ReadResponseStrategy(ILoggingService loggingService)
         {
@@ -31,24 +32,29 @@ namespace CharitiesOnline.Strategies
 
             if(qualifier == "response" && function == "submit")
             {
-                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
-
-                XmlDocument successXml = new XmlDocument();
-                successXml.LoadXml(_message.Body.Any[0].OuterXml);
-
-                _body = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
-
-                _loggingService.LogInfo(this, "Message read. Response type is Response.");
-
                 return true;
             }
 
             return false;
         }
 
-        public T ReadMessage<T>(XDocument inMessage)
-        {           
-            if(typeof(T) == typeof(string))
+        public void ReadMessage(XDocument inMessage)
+        {
+            _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
+            _correlationId = _message.Header.MessageDetails.CorrelationID;
+
+            XmlDocument successXml = new XmlDocument();
+            
+            successXml.LoadXml(_message.Body.Any[0].OuterXml);
+
+            _body = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
+
+            _loggingService.LogInfo(this, "Message read. Response type is Response.");
+        }
+
+        public T GetMessageResults<T>()
+        {
+            if (typeof(T) == typeof(string))
             {
                 string correlationId = _message.Header.MessageDetails.CorrelationID;
 
@@ -56,16 +62,16 @@ namespace CharitiesOnline.Strategies
 
                 return (T)Convert.ChangeType(correlationId, typeof(T));
             }
-            if(typeof(T) == typeof(string[]))
+            if (typeof(T) == typeof(string[]))
             {
                 //correlationId, responseEndPoint, gatewayTimestamp, IRmarkReceipt.Message, AcceptedTime
                 string[] response = new string[6];
-                response[0] = string.Concat("CorrelationId::",_message.Header.MessageDetails.CorrelationID);
+                response[0] = string.Concat("CorrelationId::", _message.Header.MessageDetails.CorrelationID);
                 response[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier);
-                response[2] = string.Concat("ResponseEndPoint::",_message.Header.MessageDetails.ResponseEndPoint.Value);
-                response[3] = string.Concat("GatewayTimestamp::",_message.Header.MessageDetails.GatewayTimestamp.ToString());
-                response[4] = string.Concat("IRmarkReceipt::",_body.IRmarkReceipt.Message.Value);
-                response[5] = string.Concat("AcceptedTime::",_body.AcceptedTime.ToString());
+                response[2] = string.Concat("ResponseEndPoint::", _message.Header.MessageDetails.ResponseEndPoint.Value);
+                response[3] = string.Concat("GatewayTimestamp::", _message.Header.MessageDetails.GatewayTimestamp.ToString());
+                response[4] = string.Concat("IRmarkReceipt::", _body.IRmarkReceipt.Message.Value);
+                response[5] = string.Concat("AcceptedTime::", _body.AcceptedTime.ToString());
 
                 _loggingService.LogInfo(this, string.Concat("Response CorrelationId is ", response[0]));
 
@@ -95,5 +101,16 @@ namespace CharitiesOnline.Strategies
             // return Type of _body
             return _body.GetType().ToString();
         }
+
+        public string GetCorrelationId()
+        {
+            return _correlationId;
+        }
+           
+        public bool HasErrors()
+        {
+            return false;
+        }
+        
     }
 }

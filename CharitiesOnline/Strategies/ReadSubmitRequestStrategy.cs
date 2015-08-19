@@ -32,17 +32,6 @@ namespace CharitiesOnline.Strategies
 
             if (qualifier == "request" && function == "submit")
             {
-                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
-                
-                XmlElement xmlElement = _message.Body.Any[0];
-                
-                XmlDocument bodyDoc = new XmlDocument();
-                bodyDoc.LoadXml(xmlElement.OuterXml);
-                
-                _body = XmlSerializationHelpers.DeserializeIRenvelope(bodyDoc);
-
-                _loggingService.LogInfo(this, "Message read. Message is SubmitRequest.");
-
                 return true;
             }
                                        
@@ -54,18 +43,32 @@ namespace CharitiesOnline.Strategies
         // what do we want to do when we read in a Submit Request - recreate the input datatables (donations & otherincome)
         // list of the reference values
 
-        public T ReadMessage<T>(XDocument inXD)
+        public void ReadMessage(XDocument inXD)
+        {
+            _message = XmlSerializationHelpers.DeserializeMessage(inXD.ToXmlDocument());
+
+            XmlElement xmlElement = _message.Body.Any[0];
+
+            XmlDocument bodyDoc = new XmlDocument();
+            bodyDoc.LoadXml(xmlElement.OuterXml);
+
+            _body = XmlSerializationHelpers.DeserializeIRenvelope(bodyDoc);
+
+            _loggingService.LogInfo(this, "Message read. Message is SubmitRequest.");        
+        }
+
+        public T GetMessageResults<T>()
         {
             R68Claim r68claim = GetClaim(_body.R68.Items);
 
             if (typeof(T) == typeof(DataTable))
             {
-                DataTable dt = GetDataTableGiftAidDonations(r68claim.Repayment.GAD);                           
+                DataTable dt = GetDataTableGiftAidDonations(r68claim.Repayment.GAD);
 
                 return (T)Convert.ChangeType(dt, typeof(T));
             }
-            if(typeof(T) == typeof(DataSet))
-            {                
+            if (typeof(T) == typeof(DataSet))
+            {
                 // Get GiftAidDonations
                 DataTable dataTableGiftAidDonations = GetDataTableGiftAidDonations(r68claim.Repayment.GAD);
 
@@ -78,7 +81,7 @@ namespace CharitiesOnline.Strategies
 
                 return (T)Convert.ChangeType(ds, typeof(T));
             }
-            if(typeof(T) == typeof(string))
+            if (typeof(T) == typeof(string))
             {
                 string messageForUser = "This is a Submit Request Message.";
 
@@ -87,9 +90,8 @@ namespace CharitiesOnline.Strategies
 
             _loggingService.LogWarning(this, "No valid type specified for ReadSubmitRequest. Returning default (probably null).");
 
-            return default(T);            
+            return default(T); 
         }
-
         public GovTalkMessage Message()
         {
             return _message;
@@ -194,6 +196,16 @@ namespace CharitiesOnline.Strategies
             }
 
             return dt;
+        }
+
+        public string GetCorrelationId()
+        {
+            return String.Empty;
+        }
+
+        public bool HasErrors()
+        {
+            return false;
         }
     }
 }

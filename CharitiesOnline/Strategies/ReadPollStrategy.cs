@@ -13,6 +13,7 @@ namespace CharitiesOnline.Strategies
     {
         private GovTalkMessage _message;
         private ILoggingService _loggingService;
+        private string _correlationId;
 
         public ReadPollStrategy(ILoggingService loggingService)
         {
@@ -27,8 +28,6 @@ namespace CharitiesOnline.Strategies
 
             if(qualifier == "poll" && function == "submit")
             {
-                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
-
                 _loggingService.LogInfo(this, "Message read. Response type is Poll.");
 
                 return true;
@@ -47,17 +46,24 @@ namespace CharitiesOnline.Strategies
             return default(T);
         }
 
-        public T ReadMessage<T>(XDocument inMessage)
+        public void ReadMessage(XDocument inMessage)
         {
-            if(typeof(T) == typeof(string))
-            {
-                string correlationId = _message.Header.MessageDetails.CorrelationID;
-
-                _loggingService.LogInfo(this, string.Concat("Poll CorrelationId is ", correlationId));
-
-                return (T)Convert.ChangeType(correlationId, typeof(T));
-            }
+            _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
             
+            _correlationId = _message.Header.MessageDetails.CorrelationID;
+
+            
+        }
+
+        public T GetMessageResults<T>()
+        {
+            if (typeof(T) == typeof(string))
+            {               
+                _loggingService.LogInfo(this, string.Concat("Poll CorrelationId is ", _correlationId));
+
+                return (T)Convert.ChangeType(_correlationId, typeof(T));
+            }
+
             return default(T);
         }
 
@@ -66,6 +72,17 @@ namespace CharitiesOnline.Strategies
             // return Type of _body
             return String.Empty;
         }
+
+        public string GetCorrelationId()
+        {
+            return _correlationId;
+        }
+
+        public bool HasErrors()
+        {
+            return false;
+        }
+
 
     }
 }

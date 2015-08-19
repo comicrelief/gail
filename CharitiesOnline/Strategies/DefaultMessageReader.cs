@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using hmrcclasses;
 using CharitiesOnline.Helpers;
 using CR.Infrastructure.Logging;
+using CR.Infrastructure.Configuration;
 
 namespace CharitiesOnline.Strategies
 {
@@ -15,36 +16,52 @@ namespace CharitiesOnline.Strategies
     {
         private readonly List<IMessageReadStrategy> _readers;
         private ILoggingService _loggingService;
+        private IConfigurationRepository _configurationRepository;
+        
+        private XDocument _inMessage;
 
-        public DefaultMessageReader(ILoggingService loggingService)
+        public DefaultMessageReader(ILoggingService loggingService, IConfigurationRepository configurationRepository, XDocument inMessage)
         {
             _loggingService = loggingService;
+            _configurationRepository = configurationRepository;
+            _inMessage = inMessage;
+
             _readers = new List<IMessageReadStrategy>();
             _readers.Add(new ReadSubmitRequestStrategy(_loggingService));
             _readers.Add(new ReadAcknowledgementStrategy(_loggingService));
             _readers.Add(new ReadResponseStrategy(_loggingService));
-            _readers.Add(new ReadErrorStrategy(_loggingService));
+            _readers.Add(new ReadErrorStrategy(_loggingService, _configurationRepository));
             _readers.Add(new ReadPollStrategy(_loggingService));
         }
 
-        public T ReadMessage<T>(XDocument inMessage)
+        public T ReadMessage<T>()
         {
-            return _readers.First(r => r.IsMatch(inMessage)).ReadMessage<T>(inMessage);
+            var message = _readers.First(r => r.IsMatch(_inMessage));
+
+            message.ReadMessage(_inMessage);                
+
+            return message.GetMessageResults<T>();                              
+
         }
 
-        public GovTalkMessage Message(XDocument inMessage)
+        public GovTalkMessage Message()
         {
-            return _readers.First(r => r.IsMatch(inMessage)).Message();
+            return _readers.First(r => r.IsMatch(_inMessage)).Message();
         }
 
-        public T GetBody<T>(XDocument inMessage)
+        public T GetBody<T>()
         {
-            return _readers.First(r => r.IsMatch(inMessage)).GetBody<T>();
+            return _readers.First(r => r.IsMatch(_inMessage)).GetBody<T>();
         }
 
-        public string GetBodyType(XDocument inMessage)
+        public string GetBodyType()
         {
-            return _readers.First(r => r.IsMatch(inMessage)).GetBodyType();
+            return _readers.First(r => r.IsMatch(_inMessage)).GetBodyType();
+        }
+
+        public string GetCorrelationId()
+        {
+            return _readers.First(r => r.IsMatch(_inMessage)).GetCorrelationId();
         }
     }
 }
