@@ -10,7 +10,9 @@ using System.Xml.Linq;
 using hmrcclasses;
 using CharitiesOnline.Helpers;
 using CharitiesOnline.Builders;
+using CharitiesOnline.Models;
 using CharitiesOnline.Strategies;
+using CharitiesOnline.Strategies.ErrorReader;
 
 using CR.Infrastructure.Configuration;
 using CR.Infrastructure.Logging;
@@ -44,32 +46,36 @@ namespace CharitiesOnline
                 string fileCreationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
 
                 GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
-                .AddLogger(loggingService)
-                .AddMessageIntention("GatewaySubmission")
-                .AddFilePath(@"C:\Temp\")
-                .AddTimestamp(fileCreationDateTime)
-                .AddEnvironment("test")
-                .AddCustomNamePart("EmptyRepayment")
+                    .AddLogger(loggingService)
+                    .AddMessageIntention("GatewaySubmission")
+                    .AddFilePath(@"C:\Temp\")
+                    .AddTimestamp(fileCreationDateTime)
+                    .AddEnvironment("test")
+                    .AddCustomNamePart("EmptyRepayment")
                 .BuildFileName();
 
-                TestGovTalkMessageCreation("", FileNamer.ToString());
+                //TestGovTalkMessageCreation("", FileNamer.ToString());
+                //XmlDocument reply = TestSend(FileNamer.ToString());
 
-                XmlDocument reply = TestSend(FileNamer.ToString());
+                XmlDocument testreply = new XmlDocument();
+                testreply.PreserveWhitespace = true;
+                testreply.Load(@"C:\Temp\SampleGovTalkErrorsFile.xml");
 
-                IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository,reply.ToXDocument());
+                IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository,testreply.ToXDocument());
 
                 // @TODO: If this throws an exception, still need to save reply
                 string[] results = reader.ReadMessage<string[]>();
 
                 string correlationId = reader.GetCorrelationId();
 
-                var varreesults = reader.ReadMessage<object>(); // WHAT HAPPENS?
-
-                if(varreesults is string[])
+                if(reader.HasErrors())
                 {
+                    IErrorReturnCalculator errorCalculator = new DefaultErrorReturnCalculator();
+                    GatewayError error = reader.ReadMessage<GatewayError>();
+                    Console.WriteLine(errorCalculator.CalculateErrorReturn(error));
+                }              
 
-                }
-
+                #region SaveReplyToDisk
                 // @TODO: If this throws an exception still need to save reply
                 // int correlationIdPosition = Array.FindIndex(results, element => element.StartsWith("CorrelationId"));
                 
@@ -95,9 +101,11 @@ namespace CharitiesOnline
 
                 string replyFilename = FileNamer.ToString();
 
-                reply.Save(replyFilename);
+                testreply.Save(replyFilename);
 
+                #endregion SaveReplyToDisk
 
+                #region old
                 // TestDeserializeSuccessResponse(loggingService);
 
                 // TestSerialize();
@@ -106,6 +114,7 @@ namespace CharitiesOnline
                 // TestReadSuccessResponse();
                 // IMessageReader reader = new DefaultMessageReader();
                 // TestReadMessages(reader);
+                #endregion old
             }
             catch (System.Net.WebException wex)
             {
