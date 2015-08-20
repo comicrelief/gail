@@ -76,7 +76,6 @@
     <Compile Include="MessageSending Service\Client.cs" />
     <Compile Include="MessageSending Service\Request.cs" />
     <Compile Include="MessageSending Service\Response.cs" />
-    <Compile Include="DemoConsole.cs" />
     <Compile Include="Models\GatewayErrors\ErrorClasses.cs" />
     <Compile Include="Strategies\ErrorReader\DefaultErrorReturnCalculator.cs" />
     <Compile Include="Strategies\ErrorReader\IErrorReturnCalculator.cs" />
