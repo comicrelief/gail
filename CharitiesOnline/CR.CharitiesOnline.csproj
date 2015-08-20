@@ -77,6 +77,9 @@
     <Compile Include="MessageSending Service\Request.cs" />
     <Compile Include="MessageSending Service\Response.cs" />
     <Compile Include="DemoConsole.cs" />
+    <Compile Include="Models\GatewayErrors\ErrorClasses.cs" />
+    <Compile Include="Strategies\ErrorReader\DefaultErrorReturnCalculator.cs" />
+    <Compile Include="Strategies\ErrorReader\IErrorReturnCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Builders\R68Builder.cs" />
     <Compile Include="Builders\R68ClaimBuilder.cs" />
@@ -84,6 +87,9 @@
     <Compile Include="Builders\R68ClaimRepaymentOtherIncBuilder.cs" />
     <Compile Include="DAL\ReferenceDataManager.cs" />
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
+    <Compile Include="Models\GatewayErrors\IGatewayError.cs" />
+    <Compile Include="Strategies\ErrorReader\ErrorReturnStrategies.cs" />
+    <Compile Include="Strategies\ErrorReader\IErrorReturnStrategy.cs" />
     <Compile Include="Strategies\IMessageReader.cs" />
     <Compile Include="Strategies\IMessageReadStrategy.cs" />
     <Compile Include="Strategies\DefaultMessageReader.cs" />

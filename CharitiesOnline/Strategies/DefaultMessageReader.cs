@@ -63,5 +63,10 @@ namespace CharitiesOnline.Strategies
         {
             return _readers.First(r => r.IsMatch(_inMessage)).GetCorrelationId();
         }
+
+        public bool HasErrors()
+        {
+            return _readers.First(r => r.IsMatch(_inMessage)).HasErrors();
+        }
     }
 }

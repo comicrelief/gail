@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 using hmrcclasses;
 using CharitiesOnline.Helpers;
+using CharitiesOnline.Models;
+
 using CR.Infrastructure.Logging;
 using CR.Infrastructure.Configuration;
 
@@ -60,7 +62,7 @@ namespace CharitiesOnline.Strategies
 
                 _correlationId = _message.Header.MessageDetails.CorrelationID;
 
-                if (_message.Body != null)
+                if (_message.Body.Any != null)
                 {
                     XmlDocument errorXml = new XmlDocument();
                     errorXml.LoadXml(_message.Body.Any[0].OuterXml);
@@ -85,9 +87,9 @@ namespace CharitiesOnline.Strategies
 
                 _loggingService.LogInfo(this, string.Concat("Message read. Response type is Error."));
             }
-            catch(System.Xml.XmlException xmlException)
+            catch(Exception ex)
             {
-                _loggingService.LogError(this, "XmlException", xmlException);
+                _loggingService.LogError(this, "Message Reading Exception", ex);
 
                 GovTalkMessageFileName FileNamer = new GovTalkMessageFileName(_loggingService,_configurationRepository);
                 string filename = FileNamer.DefaultFileName();
@@ -120,6 +122,24 @@ namespace CharitiesOnline.Strategies
                 _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", response[0]));
 
                 return (T)Convert.ChangeType(response, typeof(T));
+            }
+            if(typeof(T) == typeof(GatewayError))
+            {
+                foreach(var govTalkError in _message.GovTalkDetails.GovTalkErrors)
+                {
+                    GatewayError error = new GatewayError
+                    {
+                        ErrorCode = Convert.ToInt32(govTalkError.Number),
+                        ErrorDescription = govTalkError.Text[0]
+                    };
+
+                    // @TODO: What if there are more than one? The schema allows this, 
+                    // If the user has asked for a single GatewayError object, how to cope?
+                    // Make GatewayError object a class that holds a list of errors ( i.e. it's GovTalkErrors not GovTalkDetailsGovTalkError)
+                    // or, return first error if a single object is T, multiple errors if T is a collection?
+
+                    return (T)Convert.ChangeType(error, typeof(T));
+                }
             }
 
             return default(T);

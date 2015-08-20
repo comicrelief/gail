@@ -14,5 +14,6 @@ namespace CharitiesOnline.Strategies
         T GetBody<T>();
         string GetBodyType();
         string GetCorrelationId();
+        bool HasErrors();
     }
 }
