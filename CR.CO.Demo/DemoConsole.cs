@@ -54,26 +54,27 @@ namespace CharitiesOnline
                     .AddCustomNamePart("EmptyRepayment")
                 .BuildFileName();
 
-                //TestGovTalkMessageCreation("", FileNamer.ToString());
+                TestGovTalkMessageCreation("", FileNamer.ToString());
+
                 //XmlDocument reply = TestSend(FileNamer.ToString());
 
-                XmlDocument testreply = new XmlDocument();
-                testreply.PreserveWhitespace = true;
-                testreply.Load(@"C:\Temp\SampleGovTalkErrorsFile.xml");
+                //XmlDocument testreply = new XmlDocument();
+                //testreply.PreserveWhitespace = true;
+                //testreply.Load(@"C:\Temp\SampleGovTalkErrorsFile.xml");
 
-                IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository,testreply.ToXDocument());
+                // IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository,reply.ToXDocument());
 
                 // @TODO: If this throws an exception, still need to save reply
-                string[] results = reader.ReadMessage<string[]>();
+                // string[] results = reader.ReadMessage<string[]>();
 
-                string correlationId = reader.GetCorrelationId();
+                // string correlationId = reader.GetCorrelationId();
 
-                if(reader.HasErrors())
-                {
-                    IErrorReturnCalculator errorCalculator = new DefaultErrorReturnCalculator();
-                    GatewayError error = reader.ReadMessage<GatewayError>();
-                    Console.WriteLine(errorCalculator.CalculateErrorReturn(error));
-                }              
+                //if(reader.HasErrors())
+                //{
+                //    IErrorReturnCalculator errorCalculator = new DefaultErrorReturnCalculator();
+                //    GatewayError error = reader.ReadMessage<GatewayError>();
+                //    Console.WriteLine(errorCalculator.CalculateErrorReturn(error));
+                //}              
 
                 #region SaveReplyToDisk
                 // @TODO: If this throws an exception still need to save reply
@@ -82,26 +83,26 @@ namespace CharitiesOnline
                 // if (correlationIdPosition < 0)
                 //    throw new ArgumentNullException("CorrelationId");
 
-                int qualifierPosition = Array.FindIndex(results, element => element.StartsWith("Qualifier"));
+                // int qualifierPosition = Array.FindIndex(results, element => element.StartsWith("Qualifier"));
 
-                if (qualifierPosition < 0)
-                    throw new ArgumentNullException("Qualifier");
+                //if (qualifierPosition < 0)
+                //    throw new ArgumentNullException("Qualifier");
 
-                // string correlationId = results[correlationIdPosition].Substring(results[correlationIdPosition].IndexOf("::") + 2);
+                //// string correlationId = results[correlationIdPosition].Substring(results[correlationIdPosition].IndexOf("::") + 2);
 
-                FileNamer = new GovTalkMessageFileName.FileNameBuilder()
-                    .AddLogger(loggingService)
-                    .AddFilePath(configurationRepository.GetConfigurationValue<string>("TempFolder"))
-                    .AddEnvironment("test")
-                    .AddMessageIntention("reply")
-                    .AddCorrelationId(correlationId)
-                    .AddMessageQualifier(results[qualifierPosition].Substring(results[qualifierPosition].IndexOf("::") + 2)) //could check for < 0 here and pass empty string
-                    .AddCustomNamePart(fileCreationDateTime)
-                    .BuildFileName();
+                //FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+                //    .AddLogger(loggingService)
+                //    .AddFilePath(configurationRepository.GetConfigurationValue<string>("TempFolder"))
+                //    .AddEnvironment("test")
+                //    .AddMessageIntention("reply")
+                //    .AddCorrelationId(correlationId)
+                //    .AddMessageQualifier(results[qualifierPosition].Substring(results[qualifierPosition].IndexOf("::") + 2)) //could check for < 0 here and pass empty string
+                //    .AddCustomNamePart(fileCreationDateTime)
+                //    .BuildFileName();
 
-                string replyFilename = FileNamer.ToString();
+                //string replyFilename = FileNamer.ToString();
 
-                testreply.Save(replyFilename);
+                //reply.Save(replyFilename);
 
                 #endregion SaveReplyToDisk
 
@@ -173,7 +174,7 @@ namespace CharitiesOnline
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
 
             // Set the IRmark for the GovTalkMessage XmlDocument
-            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
 
             // Set the URI to send the file to
             string uri = configurationRepository.GetConfigurationValue<string>("SendURILocal");
@@ -410,9 +411,14 @@ namespace CharitiesOnline
 
             submitMessageCreator.CreateGovTalkMessage();
 
-            hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
+            GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
+
+            GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            helper.SetPassword(submitMessage, "weirdpassword");
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
+
+            XDocument passwordProtectedXDocument = helper.AddPassword(xd.ToXDocument(),"xdocpassword","clear");
 
             byte[] xmlDocumentSize = xd.XmlToBytes();
 
@@ -420,15 +426,15 @@ namespace CharitiesOnline
 
             XmlDocument outputXmlDocument;
 
-            if (xmlDocumentSize.Length > 1000000)
-            {
-                XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
-                outputXmlDocument = GovTalkMessageHelpers.SetIRmark(compressedVersion);
-            }
-            else
-            {
-                outputXmlDocument = GovTalkMessageHelpers.SetIRmark(xd);
-            }
+            //if (xmlDocumentSize.Length > 1000000)
+            //{
+            //    XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
+            //    outputXmlDocument = GovTalkMessageHelper.SetIRmark(compressedVersion);
+            //}
+            //else
+            //{
+                outputXmlDocument = GovTalkMessageHelper.SetIRmark(passwordProtectedXDocument.ToXmlDocument());
+            //}
 
             string filename;
 
@@ -479,7 +485,7 @@ namespace CharitiesOnline
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
 
-            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
 
             GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"C:\Temp\")
@@ -510,7 +516,7 @@ namespace CharitiesOnline
 
             XmlDocument xd = compressedSubmissionCreator.SerializeGovTalkMessage();
 
-            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
 
             GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"C:\Temp\")
@@ -595,7 +601,7 @@ namespace CharitiesOnline
             xd.PreserveWhitespace = true;
             xd.Load(@"C:\Temp\TestGovTalkMsgWithOtherIncome_2015_06_30_11_32_29.xml");
 
-            XmlDocument finalXd = GovTalkMessageHelpers.SetIRmark(xd);
+            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
 
             finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
         }
@@ -617,7 +623,7 @@ namespace CharitiesOnline
 
             R68CompressedPart compressedPart = (R68CompressedPart)ire.R68.Items[0];
 
-            string decompressed = CommonUtilityHelpers.DecompressData(compressedPart.Value);
+            string decompressed = CommonUtilityHelper.DecompressData(compressedPart.Value);
         }
 
         public static void TestSerialize()
