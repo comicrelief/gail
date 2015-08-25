@@ -20,7 +20,7 @@ namespace CharitiesOnline
         public static void SetLogger(ILoggingService loggingService)
         {
             _loggingService = loggingService;
-        }
+        }       
 
         public static DataTable GiftAidDonations
         {
