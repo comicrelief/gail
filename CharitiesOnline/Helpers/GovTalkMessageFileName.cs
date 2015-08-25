@@ -133,9 +133,9 @@ namespace CharitiesOnline.Helpers
             // if there are any SEPARATOR chars, remove the last one
             if(filename.Contains(SEPARATOR))
             {
-                filename = CommonUtilityHelpers.ReverseString(filename);
-                filename = CommonUtilityHelpers.ReplaceFirst(filename, SEPARATOR, String.Empty);
-                filename = CommonUtilityHelpers.ReverseString(filename);
+                filename = CommonUtilityHelper.ReverseString(filename);
+                filename = CommonUtilityHelper.ReplaceFirst(filename, SEPARATOR, String.Empty);
+                filename = CommonUtilityHelper.ReverseString(filename);
             }
 
             return validateFileName(filename);

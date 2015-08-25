@@ -3,14 +3,26 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using System.IO;
 
+using CR.Infrastructure.Configuration;
+using CR.Infrastructure.Logging;
 using hmrcclasses;
 
 namespace CharitiesOnline.Helpers
 {
-    public class GovTalkMessageHelpers
+    public class GovTalkMessageHelper
     {
+        private IConfigurationRepository _configurationRepository;
+        private ILoggingService _loggingService;
+
+        public GovTalkMessageHelper(IConfigurationRepository configurationRepository, ILoggingService loggingService)
+        {
+            _configurationRepository = configurationRepository;
+            _loggingService = loggingService;
+        }
+
         public static XmlDocument SetIRmark(XmlDocument XmlFile)
         {
             // Loads XML document into byte array           
@@ -104,6 +116,83 @@ namespace CharitiesOnline.Helpers
             claim.LoadXml(claimNode.OuterXml);
 
             return claim;
+        }
+
+        public XDocument AddPassword( XDocument inputXDocument, string userPassword, string passwordMethod = "")
+        {
+            _loggingService.LogInfo(this, "Adding input password via Xml.Linq");
+
+            bool MD5Password = false;
+
+            if ((passwordMethod == "MD5" || _configurationRepository.GetConfigurationValue<string>("SenderAuthenticationMethod") == "MD5") && passwordMethod.ToLower() != "clear")
+            {
+                MD5Password = true;
+            }
+            else
+            {
+                MD5Password = false;
+            }
+
+            if(MD5Password)
+            {
+                CommonUtilityHelper helper = new CommonUtilityHelper(_configurationRepository, _loggingService);
+                userPassword = helper.MD5Hash(userPassword);
+            }
+
+            XElement root = XElement.Parse(inputXDocument.ToString());
+            XNamespace GovTalk = "http://www.govtalk.gov.uk/CM/envelope";
+
+            //The name of the password element is 'value'. 
+            // The full path is /GovTalkMessage/Header/SenderDetails/IDAuthentication/Authentication/Value .
+
+            IEnumerable<XElement> PasswordTree =
+                    (from el in root.Descendants(GovTalk + "Value")
+                     select el);
+            if (PasswordTree.Count() == 0 || PasswordTree.ElementAt(0).Name.LocalName != "Value")
+            {
+                _loggingService.LogWarning(this, "Password element not found.");
+                return inputXDocument;
+            }
+
+            XElement Password = PasswordTree.ElementAt(0);
+            XElement NewPassword = new XElement(GovTalk + "Value", userPassword);
+            Password.ReplaceWith(NewPassword);
+
+            IEnumerable<XElement> MethodTree =
+                    (from el in root.Descendants(GovTalk + "Method")
+                     select el);
+            XElement PassMethod = MethodTree.ElementAt(0);
+            XElement NewMethod = MD5Password ? new XElement(GovTalk + "Method", "MD5") : new XElement(GovTalk + "Method", "clear");
+            PassMethod.ReplaceWith(NewMethod);
+
+            XDocument outputXDocument = new XDocument(root);
+            _loggingService.LogInfo(this, "Password added to XDocument.");
+
+            return outputXDocument;
+        }
+
+        public void SetPassword(GovTalkMessage govTalkMessage, string userPassword, string passwordMethod = "")
+        {
+            _loggingService.LogInfo(this, "Setting password.");
+
+            if((passwordMethod == "MD5" || _configurationRepository.GetConfigurationValue<string>("SenderAuthenticationMethod") == "MD5") && passwordMethod.ToLower() != "clear")
+            {
+                CommonUtilityHelper helper = new CommonUtilityHelper(_configurationRepository,_loggingService);
+
+                govTalkMessage.Header.SenderDetails.IDAuthentication.Authentication[0].Method = GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthenticationMethod.MD5;
+
+                userPassword = helper.MD5Hash(userPassword);
+
+                _loggingService.LogDebug(this, "MD5 Hashed password.");
+            }
+            if(passwordMethod.ToLower() == "clear")
+            {
+                govTalkMessage.Header.SenderDetails.IDAuthentication.Authentication[0].Method = GovTalkMessageHeaderSenderDetailsIDAuthenticationAuthenticationMethod.clear;
+            }
+
+            govTalkMessage.Header.SenderDetails.IDAuthentication.Authentication[0].Item = userPassword;
+
+            _loggingService.LogInfo(this, "Password set.");
         }
 
         public static string MessageQualifier(GovTalkMessageHeaderMessageDetailsQualifier qualifier)

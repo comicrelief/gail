@@ -4,12 +4,23 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.IO.Compression;
+
+using CR.Infrastructure.Configuration;
 using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline.Helpers
 {
-    public class CommonUtilityHelpers
+    public class CommonUtilityHelper
     {
+        private IConfigurationRepository _configurationRepository;
+        private ILoggingService _loggingService;
+
+        public CommonUtilityHelper(IConfigurationRepository configurationRepository, ILoggingService loggingService)
+        {
+            _configurationRepository = configurationRepository;
+            _loggingService = loggingService;
+        }
+
         public static void CopyTo(Stream src, Stream dest)
         {
             byte[] bytes = new byte[4096];
@@ -71,7 +82,7 @@ namespace CharitiesOnline.Helpers
             {
                 using (var gs = new GZipStream(msi, CompressionMode.Decompress))
                 {
-                    CommonUtilityHelpers.CopyTo(gs, mso);
+                    CommonUtilityHelper.CopyTo(gs, mso);
                 }
 
                 return Encoding.UTF8.GetString(mso.ToArray());
@@ -101,6 +112,23 @@ namespace CharitiesOnline.Helpers
         public static long DateTimeToUnixTimestamp(DateTime inputDate)
         {
             return (long)(inputDate - new DateTime(1970, 1, 1).ToLocalTime()).TotalSeconds;
+        }
+
+        public string MD5Hash(string input)
+        {
+            input = input.ToLower();
+            byte[] byteInput = Encoding.UTF8.GetBytes(input);
+
+            byte[] byteHashedInput;
+
+            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+            {
+                byteHashedInput = md5.ComputeHash(byteInput);
+            }
+
+            string Output = Convert.ToBase64String(byteHashedInput);
+
+            return Output;
         }
 
     }
