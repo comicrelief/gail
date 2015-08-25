@@ -128,13 +128,13 @@ namespace CharitiesOnline.Builders
             R68 uncompressedR68 = irEnvelope.R68;
             XmlDocument r68xmlDoc = XmlSerializationHelpers.SerializeItem(uncompressedR68);
 
-            System.Xml.XmlDocument claimXmlDoc = GovTalkMessageHelpers.GetClaim(r68xmlDoc);
+            System.Xml.XmlDocument claimXmlDoc = GovTalkMessageHelper.GetClaim(r68xmlDoc);
 
             irEnvelope.R68.Items = null;
 
             R68CompressedPart compressedPart = new R68CompressedPart();
             compressedPart.Type = R68CompressedPartType.gzip;
-            compressedPart.Value = CommonUtilityHelpers.CompressData(claimXmlDoc.OuterXml, _loggingService);
+            compressedPart.Value = CommonUtilityHelper.CompressData(claimXmlDoc.OuterXml, _loggingService);
 
             R68CompressedPart[] compressedParts = new R68CompressedPart[1];
             compressedParts[0] = compressedPart;

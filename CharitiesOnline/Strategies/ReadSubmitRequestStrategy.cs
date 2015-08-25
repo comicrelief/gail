@@ -116,7 +116,7 @@ namespace CharitiesOnline.Strategies
             {
                 R68CompressedPart compressedPart = (R68CompressedPart)_body.R68.Items[0];
 
-                string decompressedData = CommonUtilityHelpers.DecompressData(compressedPart.Value);
+                string decompressedData = CommonUtilityHelper.DecompressData(compressedPart.Value);
                 XmlDocument decompressedXml = new XmlDocument();
                 decompressedXml.LoadXml(decompressedData);
 

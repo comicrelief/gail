@@ -66,8 +66,8 @@
     <Compile Include="Factories\IGovTalkMessageBuilderFactory.cs" />
     <Compile Include="Helpers\CommonUtilityHelpers.cs" />
     <Compile Include="Helpers\DataHelpers.cs" />
-    <Compile Include="Helpers\DefaultFileNamer.cs" />
-    <Compile Include="Helpers\GovTalkMessageHelpers.cs" />
+    <Compile Include="Helpers\GovTalkMessageFileName.cs" />
+    <Compile Include="Helpers\GovTalkMessageHelper.cs" />
     <Compile Include="Helpers\IFileNamer.cs" />
     <Compile Include="Helpers\XmlSerializationHelpers.cs" />
     <Compile Include="Builders\IRenvelopeBuilder.cs" />
@@ -76,7 +76,7 @@
     <Compile Include="MessageSending Service\Client.cs" />
     <Compile Include="MessageSending Service\Request.cs" />
     <Compile Include="MessageSending Service\Response.cs" />
-    <Compile Include="Models\GatewayErrors\ErrorClasses.cs" />
+    <Compile Include="Models\GatewayErrors\GatewayError.cs" />
     <Compile Include="Strategies\ErrorReader\DefaultErrorReturnCalculator.cs" />
     <Compile Include="Strategies\ErrorReader\IErrorReturnCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -170,7 +170,7 @@ namespace CharitiesOnline.Builders
 
             // Then extract Claim itself
 
-            System.Xml.XmlDocument claimXmlDoc = GovTalkMessageHelpers.GetClaim(r68xmlDoc);
+            System.Xml.XmlDocument claimXmlDoc = GovTalkMessageHelper.GetClaim(r68xmlDoc);
             
             // Reset R68 Items
 
@@ -180,7 +180,7 @@ namespace CharitiesOnline.Builders
 
             R68CompressedPart compressedPart = new R68CompressedPart();
             compressedPart.Type = R68CompressedPartType.gzip;          
-            compressedPart.Value = CommonUtilityHelpers.CompressData(claimXmlDoc.OuterXml, _loggingService);
+            compressedPart.Value = CommonUtilityHelper.CompressData(claimXmlDoc.OuterXml, _loggingService);
 
             R68CompressedPart[] compressedParts = new R68CompressedPart[1];
             compressedParts[0] = compressedPart;
