@@ -31,30 +31,32 @@ namespace CharitiesOnline
 
                 Console.WriteLine(DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-                IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
-                loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+                TestReadListResponse();
 
-                LogProviderContext.Current = loggingService;
+                //IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+                //loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                Type type = typeof(DemoConsole);
-                //System.Reflection.MethodBase.GetCurrentMethod().DeclaringType;
+                //LogProviderContext.Current = loggingService;
 
-                loggingService.LogInfo(type, "Logging!");
+                //Type type = typeof(DemoConsole);
+                ////System.Reflection.MethodBase.GetCurrentMethod().DeclaringType;
 
-                LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");               
+                //loggingService.LogInfo(type, "Logging!");
 
-                string fileCreationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                //LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");               
 
-                GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
-                    .AddLogger(loggingService)
-                    .AddMessageIntention("GatewaySubmission")
-                    .AddFilePath(@"C:\Temp\")
-                    .AddTimestamp(fileCreationDateTime)
-                    .AddEnvironment("test")
-                    .AddCustomNamePart("EmptyRepayment")
-                .BuildFileName();
+                //string fileCreationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
 
-                TestGovTalkMessageCreation("", FileNamer.ToString());
+                //GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+                //    .AddLogger(loggingService)
+                //    .AddMessageIntention("GatewaySubmission")
+                //    .AddFilePath(@"C:\Temp\")
+                //    .AddTimestamp(fileCreationDateTime)
+                //    .AddEnvironment("test")
+                //    .AddCustomNamePart("EmptyRepayment")
+                //.BuildFileName();
+
+                //TestGovTalkMessageCreation("", FileNamer.ToString());
 
                 //XmlDocument reply = TestSend(FileNamer.ToString());
 
@@ -132,6 +134,27 @@ namespace CharitiesOnline
             }
 
             Console.ReadKey();
+        }
+
+        static void TestReadListResponse()
+        {
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            LogProviderContext.Current = loggingService;
+
+            string filename = @"C:\Temp\LocalDataRequestMessage_2014_10_16_10_33_50.xml";
+
+            XmlDocument listResponse = new XmlDocument();
+            listResponse.Load(filename);
+
+            IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository, listResponse.ToXDocument());
+
+            DataTable listResults = reader.ReadMessage<DataTable>();
+
+            GovTalkMessage message = reader.Message();
+
+            Console.WriteLine("Message from ", message.Header.MessageDetails.ResponseEndPoint.Value.ToString());
         }
 
         public static void TestFileNaming()
