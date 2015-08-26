@@ -89,6 +89,7 @@
     <Compile Include="Models\GatewayErrors\IGatewayError.cs" />
     <Compile Include="Strategies\ErrorReader\ErrorReturnStrategies.cs" />
     <Compile Include="Strategies\ErrorReader\IErrorReturnStrategy.cs" />
+    <Compile Include="Strategies\ReadListResponseStrategy.cs" />
     <Compile Include="Strategies\IMessageReader.cs" />
     <Compile Include="Strategies\IMessageReadStrategy.cs" />
     <Compile Include="Strategies\DefaultMessageReader.cs" />
