@@ -17,6 +17,9 @@ namespace CharitiesOnline.Strategies
         private GovTalkMessage _message;
         private GovTalkMessageBodyStatusReport _statusReport;
         private ILoggingService _loggingService;
+        private string _qualifier;
+        private string _function;
+        private bool _messageRead;
 
         public ReadListResponseStrategy(ILoggingService loggingService)
         {
@@ -42,6 +45,11 @@ namespace CharitiesOnline.Strategies
         {
             _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
 
+            _messageRead = true;
+
+            _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
+            _function = _message.Header.MessageDetails.Function.ToString();
+
             XmlDocument listXml = new XmlDocument();
 
             listXml.LoadXml(_message.Body.Any[0].OuterXml);
@@ -54,6 +62,22 @@ namespace CharitiesOnline.Strategies
 
         public T GetMessageResults<T>()
         {
+            if (!_messageRead)
+                throw new Exception("Message not read. Call ReadMessage first.");
+
+            if(typeof(T) == typeof(string[]))
+            {
+                string[] listResults = new string[5];
+
+                listResults[0] = string.Concat("CorrelationID::", _message.Header.MessageDetails.CorrelationID);
+                listResults[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier.ToString());
+                listResults[2] = string.Concat("ResponseEndPoint::", _message.Header.MessageDetails.ResponseEndPoint.Value);
+                listResults[3] = string.Concat("PollInterval::", _message.Header.MessageDetails.ResponseEndPoint.PollInterval);
+                listResults[4] = string.Concat("GatewayTimestamp::", _message.Header.MessageDetails.GatewayTimestamp.ToString());
+
+                return (T)Convert.ChangeType(listResults, typeof(T));
+            }
+
             if(typeof(T) == typeof(DataTable))
             {
                 return (T)Convert.ChangeType(
@@ -87,6 +111,16 @@ namespace CharitiesOnline.Strategies
         public string GetCorrelationId()
         {
             return string.Empty;
+        }
+
+        public string GetQualifier()
+        {
+            return _qualifier;
+        }
+
+        public string GetFunction()
+        {
+            return _function;
         }
 
         public bool HasErrors()

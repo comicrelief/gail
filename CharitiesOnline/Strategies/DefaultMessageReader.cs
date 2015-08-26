@@ -35,14 +35,17 @@ namespace CharitiesOnline.Strategies
             _readers.Add(new ReadListResponseStrategy(_loggingService));
         }
 
-        public T ReadMessage<T>()
+        public void ReadMessage()
         {
             var message = _readers.First(r => r.IsMatch(_inMessage));
+            message.ReadMessage(_inMessage);                                                         
 
-            message.ReadMessage(_inMessage);                
+        }
 
-            return message.GetMessageResults<T>();                              
-
+        public T GetMessageResults<T>()
+        {
+            var message = _readers.First(r => r.IsMatch(_inMessage));
+            return message.GetMessageResults<T>(); 
         }
 
         public GovTalkMessage Message()
@@ -63,6 +66,16 @@ namespace CharitiesOnline.Strategies
         public string GetCorrelationId()
         {
             return _readers.First(r => r.IsMatch(_inMessage)).GetCorrelationId();
+        }
+
+        public string GetQualifier()
+        {
+            return _readers.First(r => r.IsMatch(_inMessage)).GetQualifier();
+        }
+
+        public string GetFunction()
+        {
+            return _readers.First(r => r.IsMatch(_inMessage)).GetFunction();
         }
 
         public bool HasErrors()

@@ -11,9 +11,9 @@ namespace CharitiesOnline.Strategies
     {
         bool IsMatch(XDocument inMessage);
 
-        // Need to constrain T ...
         void ReadMessage(XDocument xd);
 
+        // Need to constrain T ...
         T GetMessageResults<T>();
 
         GovTalkMessage Message();
@@ -23,6 +23,9 @@ namespace CharitiesOnline.Strategies
         string GetBodyType();
 
         string GetCorrelationId();
+
+        string GetQualifier();
+        string GetFunction();
 
         bool HasErrors();
 

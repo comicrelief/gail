@@ -22,6 +22,9 @@ namespace CharitiesOnline.Strategies
         private IConfigurationRepository _configurationRepository;
         private string _errorText;
         private string _correlationId = "";
+        private string _qualifier;
+        private string _function;
+        private bool _messageRead;
 
         public ReadErrorStrategy(ILoggingService loggingService, IConfigurationRepository configurationRepository)
         {
@@ -60,7 +63,11 @@ namespace CharitiesOnline.Strategies
             {
                 _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
 
+                _messageRead = true;
+
                 _correlationId = _message.Header.MessageDetails.CorrelationID;
+                _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
+                _function = _message.Header.MessageDetails.Function.ToString();
 
                 if (_message.Body.Any != null)
                 {
@@ -102,6 +109,9 @@ namespace CharitiesOnline.Strategies
 
         public T GetMessageResults<T>()
         {
+            if (!_messageRead)
+                throw new Exception("Message not read. Call ReadMessage first.");
+
             if (typeof(T) == typeof(string))
             {
                 string correlationId = _message.Header.MessageDetails.CorrelationID;
@@ -155,7 +165,15 @@ namespace CharitiesOnline.Strategies
         {
             return _correlationId;
         }
+        public string GetQualifier()
+        {
+            return _qualifier;
+        }
 
+        public string GetFunction()
+        {
+            return _function;
+        }
         public bool HasErrors()
         {
             return true;

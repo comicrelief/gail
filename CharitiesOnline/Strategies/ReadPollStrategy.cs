@@ -14,6 +14,9 @@ namespace CharitiesOnline.Strategies
         private GovTalkMessage _message;
         private ILoggingService _loggingService;
         private string _correlationId;
+        private string _qualifier;
+        private string _function;
+        private bool _messageRead;
 
         public ReadPollStrategy(ILoggingService loggingService)
         {
@@ -49,14 +52,19 @@ namespace CharitiesOnline.Strategies
         public void ReadMessage(XDocument inMessage)
         {
             _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
+
+            _messageRead = true;
             
             _correlationId = _message.Header.MessageDetails.CorrelationID;
-
-            
+            _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
+            _function = _message.Header.MessageDetails.Function.ToString();            
         }
 
         public T GetMessageResults<T>()
         {
+            if (!_messageRead)
+                throw new Exception("Message not read. Call ReadMessage first.");
+
             if (typeof(T) == typeof(string))
             {               
                 _loggingService.LogInfo(this, string.Concat("Poll CorrelationId is ", _correlationId));
@@ -77,7 +85,15 @@ namespace CharitiesOnline.Strategies
         {
             return _correlationId;
         }
+        public string GetQualifier()
+        {
+            return _qualifier;
+        }
 
+        public string GetFunction()
+        {
+            return _function;
+        }
         public bool HasErrors()
         {
             return false;

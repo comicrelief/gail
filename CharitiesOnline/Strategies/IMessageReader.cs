@@ -9,11 +9,14 @@ namespace CharitiesOnline.Strategies
 {
     public interface IMessageReader
     {
-        T ReadMessage<T>();
+        void ReadMessage();
+        T GetMessageResults<T>();
         GovTalkMessage Message();
         T GetBody<T>();
         string GetBodyType();
         string GetCorrelationId();
+        string GetQualifier();
+        string GetFunction();
         bool HasErrors();
     }
 }

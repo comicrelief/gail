@@ -17,6 +17,9 @@ namespace CharitiesOnline.Strategies
         private GovTalkMessage _message;
         private IRenvelope _body;
         private ILoggingService _loggingService;
+        private string _qualifier;
+        private string _function;
+        private bool _messageRead;
 
         public ReadSubmitRequestStrategy(ILoggingService loggingService)
         {
@@ -47,6 +50,11 @@ namespace CharitiesOnline.Strategies
         {
             _message = XmlSerializationHelpers.DeserializeMessage(inXD.ToXmlDocument());
 
+            _messageRead = true;
+
+            _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
+            _function = _message.Header.MessageDetails.Function.ToString();
+
             XmlElement xmlElement = _message.Body.Any[0];
 
             XmlDocument bodyDoc = new XmlDocument();
@@ -59,6 +67,9 @@ namespace CharitiesOnline.Strategies
 
         public T GetMessageResults<T>()
         {
+            if (!_messageRead)
+                throw new Exception("Message not read. Call ReadMessage first.");
+
             R68Claim r68claim = GetClaim(_body.R68.Items);
 
             if (typeof(T) == typeof(DataTable))
@@ -201,6 +212,15 @@ namespace CharitiesOnline.Strategies
         public string GetCorrelationId()
         {
             return String.Empty;
+        }
+        public string GetQualifier()
+        {
+            return _qualifier;
+        }
+
+        public string GetFunction()
+        {
+            return _function;
         }
 
         public bool HasErrors()
