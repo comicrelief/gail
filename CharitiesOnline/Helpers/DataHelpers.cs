@@ -122,5 +122,54 @@ namespace CharitiesOnline.Helpers
 
             return dt;
         }
+
+        public static DataTable MakeStatusReportTable(hmrcclasses.GovTalkMessageBodyStatusReport statusReport)
+        {
+            DataTable statusReportTable = new DataTable("StatusReport");
+            AddStatusReportColumns(statusReportTable);
+            InsertStatusReportRows(statusReportTable, statusReport);
+
+            return statusReportTable;            
+        }
+
+        private static void AddGatewayColumns(DataTable inputTable)
+        {
+            inputTable.Columns.Add("EnvelopeVersion");
+            inputTable.Columns.Add("Class");
+            inputTable.Columns.Add("Qualifier");
+            inputTable.Columns.Add("TransactionID");
+            inputTable.Columns.Add("PollInterval");
+            inputTable.Columns.Add("ResponseEndPoint");
+            inputTable.Columns.Add("GatewayTimeStamp");
+            inputTable.Columns.Add("Keys");
+        }
+
+        private static void AddStatusReportColumns(DataTable inputTable)
+        {
+            inputTable.Columns.Add("StatusReportSenderID");
+            inputTable.Columns.Add("StatusReportStartTimestamp");
+            inputTable.Columns.Add("StatusReportEndTimestamp");
+            inputTable.Columns.Add("StatusRecordTimestamp");
+            inputTable.Columns.Add("StatusRecordCorrelationID");
+            inputTable.Columns.Add("StatusRecordTransactionID");
+            inputTable.Columns.Add("StatusRecordStatus");
+        }
+
+        private static void InsertStatusReportRows(DataTable statusReportTable, hmrcclasses.GovTalkMessageBodyStatusReport statusReport)
+        {
+            for (int i = 0; i <statusReport.StatusRecord.Length; i++)
+            {
+                statusReportTable.Rows.Add(new Object[]
+                            {                                                                   
+                                statusReport.SenderID,
+                                statusReport.StartTimeStamp,
+                                statusReport.EndTimeStamp,
+                                statusReport.StatusRecord[i].TimeStamp,
+                                statusReport.StatusRecord[i].CorrelationID,
+                                statusReport.StatusRecord[i].TransactionID,
+                                statusReport.StatusRecord[i].Status});
+            }
+
+        }
     }
 }
