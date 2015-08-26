@@ -74,6 +74,19 @@ namespace CharitiesOnline.Helpers
             return success;
         }
 
+        public static GovTalkMessageBodyStatusReport DeserializeStatusReport(XmlDocument xmlElement)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(GovTalkMessageBodyStatusReport));
+            MemoryStream xmlStream = new MemoryStream();
+            xmlElement.Save(xmlStream);
+            xmlStream.Seek(0, SeekOrigin.Begin);
+
+            var LocalStatusReport = serializer.Deserialize(xmlStream);
+            GovTalkMessageBodyStatusReport statusReport = (GovTalkMessageBodyStatusReport)LocalStatusReport;
+
+            return statusReport;
+        }
+
         public static ErrorResponse DeserializeErrorResponse(XmlDocument xmlElement)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(ErrorResponse));
