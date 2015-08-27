@@ -227,4 +227,47 @@ namespace hmrcclasses
             }
         }
     }
+
+
+    public partial class Application
+    {
+        private ErrorResponseErrorApplicationMessages messagesField;
+
+        /// <remarks/>
+        public ErrorResponseErrorApplicationMessages Messages
+        {
+            get
+            {
+                return this.messagesField;
+            }
+            set
+            {
+                this.messagesField = value;
+            }
+        }
+    }
+
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "2.0.50727.3038")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.govtalk.gov.uk/CM/errorresponse")]
+    public partial class ErrorResponseErrorApplicationMessages
+    {
+
+        private string developerMessageField;
+
+        /// <remarks/>
+        public string DeveloperMessage
+        {
+            get
+            {
+                return this.developerMessageField;
+            }
+            set
+            {
+                this.developerMessageField = value;
+            }
+        }
+    }
 }
