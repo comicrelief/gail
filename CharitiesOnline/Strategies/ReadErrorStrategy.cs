@@ -109,48 +109,111 @@ namespace CharitiesOnline.Strategies
 
         public T GetMessageResults<T>()
         {
-            if (!_messageRead)
-                throw new Exception("Message not read. Call ReadMessage first.");
-
-            if (typeof(T) == typeof(string))
+            try
             {
-                string correlationId = _message.Header.MessageDetails.CorrelationID;
+                if (!_messageRead)
+                    throw new Exception("Message not read. Call ReadMessage first.");
 
-                _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", correlationId));
-
-                return (T)Convert.ChangeType(correlationId, typeof(T));
-            }
-            if (typeof(T) == typeof(string[]))
-            {
-                string[] response = new string[5];
-                response[0] = string.Concat("CorrelationId::", _message.Header.MessageDetails.CorrelationID);
-                response[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier);
-                response[2] = string.Concat("ResponseEndPoint::", _message.Header.MessageDetails.ResponseEndPoint.Value);
-                response[3] = string.Concat("GatewayTimestamp::", _message.Header.MessageDetails.GatewayTimestamp.ToString());
-                response[4] = string.Concat("Error::", _errorText);
-
-                _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", response[0]));
-
-                return (T)Convert.ChangeType(response, typeof(T));
-            }
-            if(typeof(T) == typeof(GatewayError))
-            {
-                foreach(var govTalkError in _message.GovTalkDetails.GovTalkErrors)
+                if (typeof(T) == typeof(string))
                 {
-                    GatewayError error = new GatewayError
+                    string correlationId = _message.Header.MessageDetails.CorrelationID;
+
+                    _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", correlationId));
+
+                    return (T)Convert.ChangeType(correlationId, typeof(T));
+                }
+                if (typeof(T) == typeof(string[]))
+                {
+                    string[] response = new string[5];
+                    response[0] = string.Concat("CorrelationId::", _message.Header.MessageDetails.CorrelationID);
+                    response[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier);
+                    response[2] = string.Concat("ResponseEndPoint::", _message.Header.MessageDetails.ResponseEndPoint.Value);
+                    response[3] = string.Concat("GatewayTimestamp::", _message.Header.MessageDetails.GatewayTimestamp.ToString());
+                    response[4] = string.Concat("Error::", _errorText);
+
+                    _loggingService.LogInfo(this, string.Concat("Error CorrelationId is ", response[0]));
+
+                    return (T)Convert.ChangeType(response, typeof(T));
+                }
+                if (typeof(T) == typeof(GatewayError))
+                {
+                    foreach (var govTalkError in _message.GovTalkDetails.GovTalkErrors)
                     {
-                        ErrorCode = Convert.ToInt32(govTalkError.Number),
-                        ErrorDescription = govTalkError.Text[0]
-                    };
+                        GatewayError error = new GatewayError
+                        {
+                            ErrorNumber = Convert.ToInt32(govTalkError.Number),
+                            ErrorText = govTalkError.Text[0]
+                        };
 
-                    // @TODO: What if there are more than one? The schema allows this, 
-                    // If the user has asked for a single GatewayError object, how to cope?
-                    // Make GatewayError object a class that holds a list of errors ( i.e. it's GovTalkErrors not GovTalkDetailsGovTalkError)
-                    // or, return first error if a single object is T, multiple errors if T is a collection?
+                        // @TODO: What if there are more than one? The schema allows this, 
+                        // If the user has asked for a single GatewayError object, how to cope?
+                        // Make GatewayError object a class that holds a list of errors ( i.e. it's GovTalkErrors not GovTalkDetailsGovTalkError)
+                        // or, return first error if a single object is T, multiple errors if T is a collection?
 
-                    return (T)Convert.ChangeType(error, typeof(T));
+                        return (T)Convert.ChangeType(error, typeof(T));
+                    }
+                }
+
+                if (typeof(T) == typeof(System.Data.DataTable))
+                {
+                    System.Data.DataTable errorTable = new System.Data.DataTable("Errors");
+
+                    if (_body != null)
+                    {
+                        GatewayError[] errors = new GatewayError[_body.Error.Count()];
+
+                        for (int i = 0; i < _body.Error.Count(); i++)
+                        {
+                            errors[i] = new GatewayError
+                            {
+                                CorrelationId = _correlationId,
+                                ErrorRaisedBy = _body.Error[i].RaisedBy,
+                                ErrorNumber = Convert.ToInt32(_body.Error[i].Number),
+                                ErrorType = _body.Error[i].Type,
+                                ErrorText = _body.Error[i].Text[0],
+                                ErrorLocation = _body.Error[i].Location,
+                                // ErrrorApplicationMessage = _body.Error[i].Application.Messages.DeveloperMessage,
+                                ErrrorApplicationMessage = object.ReferenceEquals(null, _body.Error[i].Application) ? "" : _body.Error[i].Application.Messages.DeveloperMessage
+                            };
+                        }
+
+                        errorTable = DataHelpers.MakeErrorTable(errors);
+                    }
+                    else if (_govTalkDetailsErrors != null)
+                    {
+                        GatewayError[] errors = new GatewayError[_govTalkDetailsErrors.Count];
+                        for (int i = 0; i < _govTalkDetailsErrors.Count; i++)
+                        {
+                            errors[i] = new GatewayError
+                            {
+                                CorrelationId = _correlationId,
+                                ErrorRaisedBy = _govTalkDetailsErrors[i].RaisedBy,
+                                ErrorNumber = Convert.ToInt32(_govTalkDetailsErrors[i].Number),
+                                ErrorType = _govTalkDetailsErrors[i].Type.ToString(),
+                                ErrorText = _govTalkDetailsErrors[i].Text[0]
+                            };
+                        }
+
+                        errorTable = DataHelpers.MakeErrorTable(errors);
+                    }
+
+                    return (T)Convert.ChangeType(errorTable, typeof(T));
                 }
             }
+            catch(Exception ex)
+            {
+                _loggingService.LogError(this, "Message Reading Exception", ex);
+
+                GovTalkMessageFileName FileNamer = new GovTalkMessageFileName(_loggingService, _configurationRepository);
+                string filename = FileNamer.DefaultFileName();
+
+                _loggingService.LogInfo(this, String.Concat("Attempting to save reply document to ", filename, "."));
+
+                XmlSerializationHelpers.SerializeToFile(_message, filename );                
+
+
+            }
+            
 
             return default(T);
         }
