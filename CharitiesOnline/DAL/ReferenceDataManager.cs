@@ -9,9 +9,13 @@ using CR.Infrastructure.Configuration;
 
 namespace CharitiesOnline
 {
+    /// <summary>
+    /// Reference values for GovTalkMessages are constants that need to be assigned to the properties of the GovTalkMessage objects.
+    /// The ReferenceDataManager is a static class to allow these values to be used by the message builders.
+    /// </summary>
     public static class ReferenceDataManager
     {
-        // a class that wraps access to either a config file or a database as a source of
+        // A class that wraps access to either a config file or a database as a source of
         // data for reference values
 
         private static IConfigurationRepository _configurationRepository = new ConfigFileConfigurationRepository();
@@ -23,12 +27,20 @@ namespace CharitiesOnline
         private static DatabaseType _databaseType;
         private static SourceTypes _sourceType;
 
+        /// <summary>
+        /// If a datatable is used for reference values, set it here
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="dbType"></param>
         public static void SetDataTable(DataTable dt, DatabaseType dbType)
         {
             _databaseType = dbType;
             _databaseSettings = dt;
         }
 
+        /// <summary>
+        /// Get the Settings
+        /// </summary>
         public static NameValueCollection Settings
         {
             get
@@ -50,16 +62,20 @@ namespace CharitiesOnline
             }
             private set
             {
-                // only this class should be able to set this value
+                // Only this class should be able to set this value.
                 _sourceIsSet = value;
             }
         }
 
+        /// <summary>
+        ///  Set a config file or a database table as the source of reference data.
+        /// </summary>
+        /// <param name="sourceType"></param>
         public static void SetSource(SourceTypes sourceType)
         {
             _sourceType = sourceType;
 
-            // Determine whether the Config file is used or the Database connection
+            // Determine whether the Config file is used or the Database connection.
 
             _settings = new NameValueCollection();
 
@@ -93,10 +109,12 @@ namespace CharitiesOnline
         {
             _settings = null;
         }
-
-        // The Database types are Key-Value and DefaultHeader
-        // Key-Value means there are two columns in the database table, named Key and Value. Each row contains a Key and a Value
-        // DefaultHeader is a single row where the column names correspond to the keys and the row entries contains the values
+        
+        /// <summary>
+        /// The Database types are Key-Value and DefaultHeader
+        //  Key-Value means there are two columns in the database table, named Key and Value. Each row contains a Key and a Value
+        //  DefaultHeader is a single row where the column names correspond to the keys and the row entries contains the values
+        /// </summary>
         public enum SourceTypes
         {
             ConfigFile, DatabaseKeyValue, TextFile, DatabaseDefaultHeader
