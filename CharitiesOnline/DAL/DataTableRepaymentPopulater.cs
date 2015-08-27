@@ -10,6 +10,11 @@ using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline
 {
+    /// <summary>
+    /// A mechanism to get donations data in to a submission message. Static so that it can be called
+    /// from within the message builder classes without being injected through constructors. To use, first initialise a logger via
+    /// SetLogger then assign a datatable via the static setter.
+    /// </summary>
     public static class DataTableRepaymentPopulater
     {
         private static DataTable _giftAidDonations;
