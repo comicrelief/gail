@@ -12,6 +12,9 @@ using CR.Infrastructure.Configuration;
 namespace CharitiesOnline.Strategies
 {
 
+    /// <summary>
+    /// Reads messages that are passed into the constructor as XDocuments
+    /// </summary>
     public class DefaultMessageReader : IMessageReader
     {
         private readonly List<IMessageReadStrategy> _readers;
@@ -35,6 +38,9 @@ namespace CharitiesOnline.Strategies
             _readers.Add(new ReadListResponseStrategy(_loggingService));
         }
 
+        /// <summary>
+        /// Reads the message based on the IsMatch method of each strategy
+        /// </summary>
         public void ReadMessage()
         {
             var message = _readers.First(r => r.IsMatch(_inMessage));
@@ -42,17 +48,26 @@ namespace CharitiesOnline.Strategies
 
         }
 
+        /// <summary>
+        /// Get results, acceptable types usually include string, string[], datatable
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T GetMessageResults<T>()
         {
             var message = _readers.First(r => r.IsMatch(_inMessage));
             return message.GetMessageResults<T>(); 
         }
 
+        /// <summary>
+        /// Return the underlying GovTalkMessage
+        /// </summary>
+        /// <returns></returns>
         public GovTalkMessage Message()
         {
             return _readers.First(r => r.IsMatch(_inMessage)).Message();
         }
-
+        
         public T GetBody<T>()
         {
             return _readers.First(r => r.IsMatch(_inMessage)).GetBody<T>();
