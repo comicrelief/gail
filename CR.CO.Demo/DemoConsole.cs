@@ -20,104 +20,40 @@ using CR.Infrastructure.ContextProvider;
 
 namespace CharitiesOnline
 {
+    /// <summary>
+    /// The DemoConsole is a demonstration console application showing examples of how to use the types and methods provided in the
+    /// Comic Relief Charities Online library. It is not intended for production use, it is merely there for instruction, demonstration
+    /// and user-testing purposes
+    /// </summary>
     class DemoConsole
     {
         private static ILoggingService loggingService;
+        private static IConfigurationRepository configurationRepository;
         static void Main(string[] args)
         {
             try
             {
-                Console.WriteLine("Started");
+                // The configurationRepository is intended to abstract the configurationManager type and allow
+                // for different configuration options to be applied. For example, a DatabaseConfigurationRepository could be provided
+                // if the requirement is to take reference values from a database.
+                configurationRepository = new ConfigFileConfigurationRepository();
+                loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                Console.WriteLine(DateTime.Now.ToString("yyyyMMddHHmmss"));
+                // Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
+                string csvFile = String.Empty;
 
-                TestReadListResponse();
+                // Create a GovTalkMessage and save the Xml to disk
+                string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);
+                                 
+                XmlDocument submitMessageXml = new XmlDocument();
+                submitMessageXml.Load(submitMessageFilename);
 
-                //IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
-                //loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+                XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
 
-                //LogProviderContext.Current = loggingService;
+                DemonstrateReadMessage(loggingService, submitMessageReply);
 
-                //Type type = typeof(DemoConsole);
-                ////System.Reflection.MethodBase.GetCurrentMethod().DeclaringType;
+                Console.ReadKey();
 
-                //loggingService.LogInfo(type, "Logging!");
-
-                //LogProviderContext.Current.LogInfo(type, "Logging from contextual log provider");               
-
-                //string fileCreationDateTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-
-                //GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
-                //    .AddLogger(loggingService)
-                //    .AddMessageIntention("GatewaySubmission")
-                //    .AddFilePath(@"C:\Temp\")
-                //    .AddTimestamp(fileCreationDateTime)
-                //    .AddEnvironment("test")
-                //    .AddCustomNamePart("EmptyRepayment")
-                //.BuildFileName();
-
-                //TestGovTalkMessageCreation("", FileNamer.ToString());
-
-                //XmlDocument reply = TestSend(FileNamer.ToString());
-
-                //XmlDocument testreply = new XmlDocument();
-                //testreply.PreserveWhitespace = true;
-                //testreply.Load(@"C:\Temp\SampleGovTalkErrorsFile.xml");
-
-                // IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository,reply.ToXDocument());
-
-                // @TODO: If this throws an exception, still need to save reply
-                // string[] results = reader.ReadMessage<string[]>();
-
-                // string correlationId = reader.GetCorrelationId();
-
-                //if(reader.HasErrors())
-                //{
-                //    IErrorReturnCalculator errorCalculator = new DefaultErrorReturnCalculator();
-                //    GatewayError error = reader.ReadMessage<GatewayError>();
-                //    Console.WriteLine(errorCalculator.CalculateErrorReturn(error));
-                //}              
-
-                #region SaveReplyToDisk
-                // @TODO: If this throws an exception still need to save reply
-                // int correlationIdPosition = Array.FindIndex(results, element => element.StartsWith("CorrelationId"));
-                
-                // if (correlationIdPosition < 0)
-                //    throw new ArgumentNullException("CorrelationId");
-
-                // int qualifierPosition = Array.FindIndex(results, element => element.StartsWith("Qualifier"));
-
-                //if (qualifierPosition < 0)
-                //    throw new ArgumentNullException("Qualifier");
-
-                //// string correlationId = results[correlationIdPosition].Substring(results[correlationIdPosition].IndexOf("::") + 2);
-
-                //FileNamer = new GovTalkMessageFileName.FileNameBuilder()
-                //    .AddLogger(loggingService)
-                //    .AddFilePath(configurationRepository.GetConfigurationValue<string>("TempFolder"))
-                //    .AddEnvironment("test")
-                //    .AddMessageIntention("reply")
-                //    .AddCorrelationId(correlationId)
-                //    .AddMessageQualifier(results[qualifierPosition].Substring(results[qualifierPosition].IndexOf("::") + 2)) //could check for < 0 here and pass empty string
-                //    .AddCustomNamePart(fileCreationDateTime)
-                //    .BuildFileName();
-
-                //string replyFilename = FileNamer.ToString();
-
-                //reply.Save(replyFilename);
-
-                #endregion SaveReplyToDisk
-
-                #region old
-                // TestDeserializeSuccessResponse(loggingService);
-
-                // TestSerialize();
-                // TestLocalProcess();
-                // TestGovTalkMessageCreation("");
-                // TestReadSuccessResponse();
-                // IMessageReader reader = new DefaultMessageReader();
-                // TestReadMessages(reader);
-                #endregion old
             }
             catch (System.Net.WebException wex)
             {
@@ -135,44 +71,128 @@ namespace CharitiesOnline
 
             Console.ReadKey();
         }
-
-        static void TestReadListResponse()
+        
+        /// <summary>
+        /// Shows how to create a Submit Request GovTalkMessage, the basic type for submitting a GiftAid claim.
+        /// If the message is very large it can be compressed, or compression can be chosen at the start of the process.
+        /// Password and IRmark are added after the message is created.
+        /// </summary>
+        /// <param name="loggingService"></param>
+        static string DemonstrateCreateSubmitRequest(ILoggingService loggingService, IConfigurationRepository configurationRepository, string giftAidDataSourceCsvFile)
         {
-            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
-            loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+            // Assign a reference data source
+            ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
-            LogProviderContext.Current = loggingService;
+            // Set logger for the repaymentPopulater
+            DataTableRepaymentPopulater.SetLogger(loggingService);
+            
+            // Assign a source for the GiftAid repayments data
+            // If a filepath has been passed in, the DataHelpers method will make a datatable from a CSV source 
+            // with a valid set of columns. Otherwise, grab a datatable from a database or some other source
+            // If the repaymentpopulater is not given a datatable, the submission message will have no repayments in it
+            if (!string.IsNullOrEmpty(giftAidDataSourceCsvFile))
+                DataTableRepaymentPopulater.GiftAidDonations = DataHelpers.GetDataTableFromCsv(giftAidDataSourceCsvFile, true);            
+            
+            GovTalkMessageCreator submitMessageCreator = new GovTalkMessageCreator(new SubmitRequestMessageBuilder(loggingService), loggingService);
 
-            string filename = @"C:\Temp\LocalDataRequestMessage_2014_10_16_10_33_50.xml";
+            submitMessageCreator.CreateGovTalkMessage();
 
-            XmlDocument listResponse = new XmlDocument();
-            listResponse.Load(filename);
+            GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
-            IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository, listResponse.ToXDocument());
+            // Set a password if not using the password hard-coded in the configuration source
+            GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            helper.SetPassword(submitMessage, "weirdpassword");
 
-            DataTable listResults = reader.ReadMessage<DataTable>();
+            XmlDocument submitMessageXml = submitMessageCreator.SerializeGovTalkMessage();
+            
+            XmlDocument irMarkedMessageXml = GovTalkMessageHelper.SetIRmark(submitMessageXml);
 
-            GovTalkMessage message = reader.Message();
+            // If the message is too big, compress it
+            
+            // byte[] xmlDocumentSize = xd.XmlToBytes();
 
-            Console.WriteLine("Message from ", message.Header.MessageDetails.ResponseEndPoint.Value.ToString());
+            // if (xmlDocumentSize.Length > 1000000)
+            // {
+            //    XmlDocument compressedVersion = submitMessageCreator.CompressClaim();
+            //    outputXmlDocument = GovTalkMessageHelper.SetIRmark(compressedVersion);
+            // }
+
+            // Optionally, create a filename using this helper class
+
+            string outputFilename;
+            string tempDirectory = configurationRepository.GetConfigurationValue<string>("TempFolder");
+
+            GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+                .AddLogger(loggingService)
+                .AddMessageIntention("GatewaySubmission")
+                .AddFilePath(tempDirectory)
+                .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
+                .AddEnvironment("local")
+                .AddCustomNamePart("EmptyRepayment")
+                .BuildFileName();
+            
+            outputFilename = FileNamer.ToString();
+
+            irMarkedMessageXml.Save(outputFilename);
+
+            return outputFilename;
         }
 
-        public static void TestFileNaming()
+        
+        /// <summary>
+        /// Demonstrate using the MessageSendingService to send a GovTalkMessage to the Government Gateway and receive a reply.
+        /// </summary>
+        /// <param name="loggingService"></param>
+        /// <param name="sendMessage"></param>
+        static XmlDocument DemonstrateSendMessage(ILoggingService loggingService, XmlDocument sendMessage)
         {
+            string uri = configurationRepository.GetConfigurationValue<string>("SendURILocal");
 
-            GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
-            .AddFilePath(@"")
-            .AddEnvironment("Test")
-            .AddMessageIntention("RequestMessage")
-            .AddTimestamp(DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture))
-            .AddCustomNamePart("File" + 1)
-            .BuildFileName()
-            );
+            // Create a client to send the file to the target gateway
+            CharitiesOnline.MessageService.Client client = new MessageService.Client(loggingService);
 
-            Console.WriteLine(filename.ToString());
+            // Create an XmlDocument of the reply from the endpoint
+            XmlDocument reply = client.SendRequest(sendMessage, uri);
+
+            return reply;        
         }
 
-        public static void TestLocalProcess()
+        /// <summary>
+        /// Demonstrate using the message reader strategies to get results from a message reply
+        /// </summary>
+        /// <param name="loggingService"></param>
+        /// <param name="messageToRead"></param>
+        static void DemonstrateReadMessage(ILoggingService loggingService, XmlDocument messageToRead)
+        {
+            // Set up a message reading strategy
+            IMessageReader messageReader = new DefaultMessageReader(loggingService, configurationRepository, messageToRead.ToXDocument());
+            messageReader.ReadMessage();
+
+            // We don't know what we've got back from the Gateway, but all replies are GovTalkMessages
+            if(messageReader.HasErrors())
+            {
+                //There are errors in the results file so we can deal with them
+
+                // Get a DataTable of the results and have a look at that
+                DataTable errorTable = messageReader.GetMessageResults<DataTable>();
+                // Or set up an error return strategy and do something with that
+                IErrorReturnCalculator errorCalculator = new DefaultErrorReturnCalculator();
+                GatewayError error = messageReader.GetMessageResults<GatewayError>();
+                Console.WriteLine(errorCalculator.CalculateErrorReturn(error));
+            }
+            else
+            {
+                // It's either an acknowledgement so we need to get the poll interval and URL, or a response.
+                string[] results = messageReader.GetMessageResults<string[]>();
+
+                foreach(var result in results)
+                {
+                    Console.WriteLine(result);
+                }
+            }     
+        }
+
+        public static void DemonstrateLocalProcess()
         {
             // Set up the logging
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
@@ -210,9 +230,9 @@ namespace CharitiesOnline
 
             // Set up a message reading strategy
             IMessageReader _messageReader = new DefaultMessageReader(loggingService,configurationRepository,reply.ToXDocument());
+            _messageReader.ReadMessage();
 
-
-            string[] results = _messageReader.ReadMessage<string[]>();
+            string[] results = _messageReader.GetMessageResults<string[]>();
 
             //int correlationIdIndex = Array.IndexOf(results, "CorrelationId");
             int correlationIdPosition = Array.FindIndex(results, element => element.StartsWith("CorrelationId"));
@@ -271,6 +291,93 @@ namespace CharitiesOnline
 
         }
 
+        #region TestingAndDevelopment
+
+        static void TestReadErrors(IConfigurationRepository configurationRepository, ILoggingService loggingService)
+        {
+
+            XDocument errorDoc = XDocument.Load(@"C:\Temp\test_reply__error_20150825151729.xml");
+
+            IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository, errorDoc);
+
+            reader.ReadMessage();
+
+            DataTable errorTable = reader.GetMessageResults<DataTable>();
+
+            foreach (DataColumn column in errorTable.Columns)
+                Console.Write("\t{0}", column.ColumnName);
+
+            Console.WriteLine("");
+            foreach (DataRow row in errorTable.Rows)
+            {
+
+                foreach (DataColumn column in errorTable.Columns)
+                    Console.Write("\t{0}", row[column]);
+                Console.WriteLine("");
+            }
+
+            errorTable.Clear();
+
+            errorDoc = XDocument.Load(@"C:\Temp\RequestMessage_1422880486_File14393268203594585061_error_20150202123518_.xml");
+            reader = new DefaultMessageReader(loggingService, configurationRepository, errorDoc);
+            reader.ReadMessage();
+
+            errorTable = reader.GetMessageResults<DataTable>();
+
+            Console.WriteLine("");
+            foreach (DataRow row in errorTable.Rows)
+            {
+
+                foreach (DataColumn column in errorTable.Columns)
+                    Console.Write("\t{0}", row[column]);
+                Console.WriteLine("");
+            }
+
+            Console.ReadKey();
+        }
+
+        static void TestReadListResponse()
+        {
+            IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
+            loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            LogProviderContext.Current = loggingService;
+
+            string filename = @"C:\Temp\LocalDataRequestMessage_2014_10_16_10_33_50.xml";
+
+            XmlDocument listResponse = new XmlDocument();
+            listResponse.Load(filename);
+
+            IMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository, listResponse.ToXDocument());
+            reader.ReadMessage();
+
+            string[] results = reader.GetMessageResults<string[]>();
+
+            string qualifier = reader.GetQualifier();
+            string function = reader.GetFunction();
+
+            DataTable listResults = reader.GetMessageResults<DataTable>();
+
+            GovTalkMessage message = reader.Message();
+
+            Console.WriteLine("Message from {0}", message.Header.MessageDetails.ResponseEndPoint.Value.ToString());
+        }
+
+        public static void TestFileNaming()
+        {
+
+            GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
+            .AddFilePath(@"")
+            .AddEnvironment("Test")
+            .AddMessageIntention("RequestMessage")
+            .AddTimestamp(DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture))
+            .AddCustomNamePart("File" + 1)
+            .BuildFileName()
+            );
+
+            Console.WriteLine(filename.ToString());
+        }
+
         public static void TestDeserializeSuccessResponse(ILoggingService loggingService)
         {
             GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
@@ -318,11 +425,12 @@ namespace CharitiesOnline
         public static void TestReadMessages(IMessageReader messageReader)
         {
             IMessageReader _messageReader = messageReader;
+            _messageReader.ReadMessage();
 
             XmlDocument messageXML = new XmlDocument();
             messageXML.Load(@"C:\Temp\RequestMessage_1423572802_File187E1E8A7F16147A6B87962E07933B406_acknowledgement_20150210125836_.xml");
 
-            string[] results = _messageReader.ReadMessage<string[]>();
+            string[] results = _messageReader.GetMessageResults<string[]>();
 
             foreach (var s in results)
             {
@@ -722,5 +830,7 @@ namespace CharitiesOnline
             //Helpers.Deserialize<R68Claim>(claimXml.OuterXml, "R68Claim");
 
         }
+
+        #endregion TestingAndDevelopment
     }
 }
