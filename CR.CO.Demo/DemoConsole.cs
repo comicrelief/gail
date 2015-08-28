@@ -46,6 +46,9 @@ namespace CharitiesOnline
                 string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);
                                  
                 XmlDocument submitMessageXml = new XmlDocument();
+
+                // It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
+                submitMessageXml.PreserveWhitespace = true;
                 submitMessageXml.Load(submitMessageFilename);
 
                 XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
