@@ -107,8 +107,10 @@ namespace CharitiesOnline
             helper.SetPassword(submitMessage, "weirdpassword");
 
             XmlDocument submitMessageXml = submitMessageCreator.SerializeGovTalkMessage();
-            
-            XmlDocument irMarkedMessageXml = GovTalkMessageHelper.SetIRmark(submitMessageXml);
+
+            GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
+
+            XmlDocument irMarkedMessageXml = gtmHelper.SetIRmark(submitMessageXml);
 
             // If the message is too big, compress it
             
@@ -220,7 +222,8 @@ namespace CharitiesOnline
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
 
             // Set the IRmark for the GovTalkMessage XmlDocument
-            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
+            GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            XmlDocument finalXd = gtmHelper.SetIRmark(xd);
 
             // Set the URI to send the file to
             string uri = configurationRepository.GetConfigurationValue<string>("SendURILocal");
@@ -567,7 +570,9 @@ namespace CharitiesOnline
             //}
             //else
             //{
-                outputXmlDocument = GovTalkMessageHelper.SetIRmark(passwordProtectedXDocument.ToXmlDocument());
+
+            GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            outputXmlDocument = gtmHelper.SetIRmark(passwordProtectedXDocument.ToXmlDocument());
             //}
 
             string filename;
@@ -618,8 +623,9 @@ namespace CharitiesOnline
             hmrcclasses.GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
-
-            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
+            
+            GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            XmlDocument finalXd = gtmHelper.SetIRmark(xd);
 
             GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"C:\Temp\")
@@ -650,7 +656,8 @@ namespace CharitiesOnline
 
             XmlDocument xd = compressedSubmissionCreator.SerializeGovTalkMessage();
 
-            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
+            GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            XmlDocument finalXd = gtmHelper.SetIRmark(xd);
 
             GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
             .AddFilePath(@"C:\Temp\")
@@ -735,7 +742,8 @@ namespace CharitiesOnline
             xd.PreserveWhitespace = true;
             xd.Load(@"C:\Temp\TestGovTalkMsgWithOtherIncome_2015_06_30_11_32_29.xml");
 
-            XmlDocument finalXd = GovTalkMessageHelper.SetIRmark(xd);
+            GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            XmlDocument finalXd = gtmHelper.SetIRmark(xd);
 
             finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
         }
