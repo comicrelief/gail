@@ -31,7 +31,7 @@ namespace CharitiesOnline.Helpers
         /// </summary>
         /// <param name="XmlFile"></param>
         /// <returns></returns>
-        public static XmlDocument SetIRmark(XmlDocument XmlFile)
+        public XmlDocument SetIRmark(XmlDocument XmlFile)
         {
             // Loads XML document into byte array           
             byte[] bytes = Encoding.UTF8.GetBytes(XmlFile.OuterXml);
@@ -88,6 +88,7 @@ namespace CharitiesOnline.Helpers
                 byte[] hash = sha.ComputeHash(textBytes);
 
                 result = Convert.ToBase64String(hash);
+                _loggingService.LogInfo(typeof(GovTalkMessageHelper), string.Format("IRmark created: {0}",result));
             }
 
             // attempt to re-insert the IRmark
@@ -106,9 +107,12 @@ namespace CharitiesOnline.Helpers
                 }
                 else
                 {
-                    Console.WriteLine("No IRmark");
+                    _loggingService.LogWarning(typeof(GovTalkMessageHelper), "No IRmark");
                 }
             }
+
+            _loggingService.LogInfo(typeof(GovTalkMessageHelper), string.Format("IRmark inserted into XML Document."));
+
             return XmlFile;
         }
 
