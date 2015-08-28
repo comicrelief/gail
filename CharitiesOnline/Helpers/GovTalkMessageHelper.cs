@@ -12,6 +12,9 @@ using hmrcclasses;
 
 namespace CharitiesOnline.Helpers
 {
+    /// <summary>
+    /// Useful methods for working with GovTalkMessage objects and serialized representations.
+    /// </summary>
     public class GovTalkMessageHelper
     {
         private IConfigurationRepository _configurationRepository;
@@ -23,6 +26,11 @@ namespace CharitiesOnline.Helpers
             _loggingService = loggingService;
         }
 
+        /// <summary>
+        /// Set the IRmark for a 
+        /// </summary>
+        /// <param name="XmlFile"></param>
+        /// <returns></returns>
         public static XmlDocument SetIRmark(XmlDocument XmlFile)
         {
             // Loads XML document into byte array           
@@ -118,6 +126,13 @@ namespace CharitiesOnline.Helpers
             return claim;
         }
 
+        /// <summary>
+        /// Add a password to a serialized GovTalkMessage
+        /// </summary>
+        /// <param name="inputXDocument"></param>
+        /// <param name="userPassword"></param>
+        /// <param name="passwordMethod"></param>
+        /// <returns></returns>
         public XDocument AddPassword( XDocument inputXDocument, string userPassword, string passwordMethod = "")
         {
             _loggingService.LogInfo(this, "Adding input password via Xml.Linq");
@@ -171,6 +186,12 @@ namespace CharitiesOnline.Helpers
             return outputXDocument;
         }
 
+        /// <summary>
+        /// Set a password within a GovTalkMessage object
+        /// </summary>
+        /// <param name="govTalkMessage"></param>
+        /// <param name="userPassword"></param>
+        /// <param name="passwordMethod"></param>
         public void SetPassword(GovTalkMessage govTalkMessage, string userPassword, string passwordMethod = "")
         {
             _loggingService.LogInfo(this, "Setting password.");

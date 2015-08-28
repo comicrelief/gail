@@ -27,6 +27,11 @@ namespace CharitiesOnline
             }
         }
 
+        /// <summary>
+        /// Helper to get the size of an XmlDocument by getting its bytes
+        /// </summary>
+        /// <param name="inputDocument"></param>
+        /// <returns></returns>
         public static byte[] XmlToBytes(this XmlDocument inputDocument)
         {
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(inputDocument.InnerXml);

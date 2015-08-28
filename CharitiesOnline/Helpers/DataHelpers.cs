@@ -8,8 +8,17 @@ using LumenWorks.Framework.IO.Csv;
 
 namespace CharitiesOnline.Helpers
 {
+    /// <summary>
+    /// A helper class that provides methods for creating datatables and inserting data into them
+    /// </summary>
     public class DataHelpers
     {
+        /// <summary>
+        /// Given a filepath and a header flag will create a datatable from a CSV file
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="isFirstRowHeader"></param>
+        /// <returns></returns>
         public static DataTable GetDataTableFromCsv(string path, bool isFirstRowHeader)
         {
             //Uses CsvReader from http://www.codeproject.com/Articles/9258/A-Fast-CSV-Reader
@@ -170,6 +179,45 @@ namespace CharitiesOnline.Helpers
                                 statusReport.StatusRecord[i].Status});
             }
 
+        }
+
+        public static DataTable MakeErrorTable(CharitiesOnline.Models.GatewayError[] errors)
+        {
+            DataTable errorTable = new DataTable("Errors");
+            AddErrorResponseColumns(errorTable);
+            InsertErrorResponseRows(errorTable, errors);
+
+            return errorTable;
+
+        }
+
+        private static void AddErrorResponseColumns(DataTable inputTable)
+        {
+            inputTable.Columns.Add("CorrelationId");
+            inputTable.Columns.Add("RaisedBy");
+            inputTable.Columns.Add("Number");
+            inputTable.Columns.Add("Type");
+            inputTable.Columns.Add("Text");
+            inputTable.Columns.Add("Location");
+            inputTable.Columns.Add("Warnings"); //where from?
+            inputTable.Columns.Add("Message");
+        }
+
+        private static void InsertErrorResponseRows(DataTable errorsTable, CharitiesOnline.Models.GatewayError[] errors)
+        {
+            for (int i = 0; i < errors.Length; i++)
+            {
+                DataRow errorRow = errorsTable.NewRow();
+                errorRow["CorrelationId"] = errors[i].CorrelationId;
+                errorRow["RaisedBy"] = errors[i].ErrorRaisedBy;
+                errorRow["Number"] = errors[i].ErrorNumber;
+                errorRow["Type"] = errors[i].ErrorType;
+                errorRow["Text"] = errors[i].ErrorText;
+                errorRow["Location"] = errors[i].ErrorLocation;
+                errorRow["Message"] = errors[i].ErrrorApplicationMessage;
+
+                errorsTable.Rows.Add(errorRow);
+            }
         }
     }
 }
