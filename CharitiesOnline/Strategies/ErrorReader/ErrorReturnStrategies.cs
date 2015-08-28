@@ -13,15 +13,18 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public string ErrorResponse(GatewayError error)
         {
-            return error.ErrorDescription;
+            return error.ErrorText;
         }
     }
 
-    public class AuthenticationUserErrorStrategy : GatewayErrors, IErrorReturnStrategy
+    public class AuthenticationUserError : GatewayErrors, IErrorReturnStrategy
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1046);
+            if (error.ErrorNumber.Equals(1046))
+                return true;
+            else
+                return false;
         }
 
     }
@@ -30,7 +33,9 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1000);
+            if (error.ErrorNumber.Equals(1000))
+                return true;
+            else return false;
         }
     }
 
@@ -38,7 +43,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1001);
+            return error.ErrorNumber.Equals(1001) == true ? true : false;
         }
     }
 
@@ -46,7 +51,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1002);
+            return error.ErrorNumber.Equals(1002) == true? true: false;
         }
     }
 
@@ -54,7 +59,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1020);
+            return error.ErrorNumber.Equals(1020) == true? true: false;
         }
     }
 
@@ -62,7 +67,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1035);
+            return error.ErrorNumber.Equals(1035) == true? true: false;
         }
     }
 
@@ -70,7 +75,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1038);
+            return error.ErrorNumber.Equals(1038) == true? true: false;
         }
     }
 
@@ -78,7 +83,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1039);
+            return error.ErrorNumber.Equals(1039) == true? true: false;
         }
     }
 
@@ -86,7 +91,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1040);
+            return error.ErrorNumber.Equals(1040) == true? true : false;
         }
     }
 
@@ -94,7 +99,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(1042);
+            return error.ErrorNumber.Equals(1042) == true? true : false;
         }
     }
 
@@ -102,7 +107,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(2000);
+            return error.ErrorNumber.Equals(2000) == true? true: false;
         }
     }
 
@@ -110,7 +115,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(2001);
+            return error.ErrorNumber.Equals(2001) == true? true: false;
         }
     }
 
@@ -118,7 +123,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(2002);
+            return error.ErrorNumber.Equals(2002) == true? true: false;
         }
     }
 
@@ -126,7 +131,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(2005);
+            return error.ErrorNumber.Equals(2005) == true? true: false;
         }
     }
 
@@ -134,7 +139,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(3000);
+            return error.ErrorNumber.Equals(3000) == true? true: false;
         }
     }
 
@@ -142,7 +147,7 @@ namespace CharitiesOnline.Strategies.ErrorStrategies
     {
         public bool IsMatch(GatewayError error)
         {
-            return error.ErrorCode.Equals(3001);
+            return error.ErrorNumber.Equals(3001) == true? true: false;
         }
     }
 
