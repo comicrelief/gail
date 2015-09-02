@@ -86,6 +86,10 @@ namespace CharitiesOnline.Strategies
 
                 return (T)Convert.ChangeType(response, typeof(T));
             }
+            if(typeof(T) == typeof(DataTable))
+            {
+                return (T)Convert.ChangeType(GetDataTableResponse(), typeof(T));
+            }
 
             return default(T);
         }
@@ -104,13 +108,11 @@ namespace CharitiesOnline.Strategies
 
             return default(T);
         }
-
         public string GetBodyType()
         {
             // return Type of _body
             return _body.GetType().ToString();
         }
-
         public string GetCorrelationId()
         {
             return _correlationId;
@@ -119,7 +121,6 @@ namespace CharitiesOnline.Strategies
         {
             return _qualifier;
         }
-
         public string GetFunction()
         {
             return _function;
@@ -127,6 +128,13 @@ namespace CharitiesOnline.Strategies
         public bool HasErrors()
         {
             return false;
+        }
+
+        private DataTable GetDataTableResponse()
+        {
+            DataTable responseTable = DataHelpers.MakeResponseTable(_body, _correlationId);
+
+            return responseTable;            
         }
         
     }
