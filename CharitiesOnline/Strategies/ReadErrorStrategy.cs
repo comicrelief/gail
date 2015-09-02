@@ -135,69 +135,24 @@ namespace CharitiesOnline.Strategies
 
                     return (T)Convert.ChangeType(response, typeof(T));
                 }
-                if (typeof(T) == typeof(GatewayError))
+                if (typeof(T) == typeof(GovTalkMessageGovTalkDetailsError))
                 {
-                    foreach (var govTalkError in _message.GovTalkDetails.GovTalkErrors)
-                    {
-                        GatewayError error = new GatewayError
-                        {
-                            ErrorNumber = Convert.ToInt32(govTalkError.Number),
-                            ErrorText = govTalkError.Text[0]
-                        };
+                    return (T)Convert.ChangeType(GetGovTalkDetailsError(), typeof(T));
+                }
 
-                        // @TODO: What if there are more than one? The schema allows this, 
-                        // If the user has asked for a single GatewayError object, how to cope?
-                        // Make GatewayError object a class that holds a list of errors ( i.e. it's GovTalkErrors not GovTalkDetailsGovTalkError)
-                        // or, return first error if a single object is T, multiple errors if T is a collection?
-
-                        return (T)Convert.ChangeType(error, typeof(T));
-                    }
+                if (typeof(T) == typeof(GovTalkMessageGovTalkDetailsError[]))
+                {
+                    return (T)Convert.ChangeType(GetGovTalkDetailsErrors(), typeof(T));
                 }
 
                 if (typeof(T) == typeof(System.Data.DataTable))
                 {
-                    System.Data.DataTable errorTable = new System.Data.DataTable("Errors");
+                    return (T)Convert.ChangeType(GetErrorTable(), typeof(T));
+                }
 
-                    if (_body != null)
-                    {
-                        GatewayError[] errors = new GatewayError[_body.Error.Count()];
-
-                        for (int i = 0; i < _body.Error.Count(); i++)
-                        {
-                            errors[i] = new GatewayError
-                            {
-                                CorrelationId = _correlationId,
-                                ErrorRaisedBy = _body.Error[i].RaisedBy,
-                                ErrorNumber = Convert.ToInt32(_body.Error[i].Number),
-                                ErrorType = _body.Error[i].Type,
-                                ErrorText = _body.Error[i].Text[0],
-                                ErrorLocation = _body.Error[i].Location,
-                                // ErrrorApplicationMessage = _body.Error[i].Application.Messages.DeveloperMessage,
-                                ErrrorApplicationMessage = object.ReferenceEquals(null, _body.Error[i].Application) ? "" : _body.Error[i].Application.Messages.DeveloperMessage
-                            };
-                        }
-
-                        errorTable = DataHelpers.MakeErrorTable(errors);
-                    }
-                    else if (_govTalkDetailsErrors != null)
-                    {
-                        GatewayError[] errors = new GatewayError[_govTalkDetailsErrors.Count];
-                        for (int i = 0; i < _govTalkDetailsErrors.Count; i++)
-                        {
-                            errors[i] = new GatewayError
-                            {
-                                CorrelationId = _correlationId,
-                                ErrorRaisedBy = _govTalkDetailsErrors[i].RaisedBy,
-                                ErrorNumber = Convert.ToInt32(_govTalkDetailsErrors[i].Number),
-                                ErrorType = _govTalkDetailsErrors[i].Type.ToString(),
-                                ErrorText = _govTalkDetailsErrors[i].Text[0]
-                            };
-                        }
-
-                        errorTable = DataHelpers.MakeErrorTable(errors);
-                    }
-
-                    return (T)Convert.ChangeType(errorTable, typeof(T));
+                if(typeof(T) == typeof(ErrorResponse))
+                {
+                    return (T)Convert.ChangeType(GetErrorResponse(), typeof(T));
                 }
             }
             catch(Exception ex)
@@ -210,12 +165,72 @@ namespace CharitiesOnline.Strategies
                 _loggingService.LogInfo(this, String.Concat("Attempting to save reply document to ", filename, "."));
 
                 XmlSerializationHelpers.SerializeToFile(_message, filename );                
-
-
-            }
+            }           
             
-
             return default(T);
+        }
+
+        private System.Data.DataTable GetErrorTable()
+        {
+            System.Data.DataTable errorTable = new System.Data.DataTable("Errors");
+
+            if (_body != null)
+            {
+                GovTalkMessageError[] errors = new GovTalkMessageError[_body.Error.Count()];
+
+                for (int i = 0; i < _body.Error.Count(); i++)
+                {
+                    errors[i] = new GovTalkMessageError
+                    {
+                        CorrelationId = _correlationId,
+                        ErrorRaisedBy = _body.Error[i].RaisedBy,
+                        ErrorNumber = Convert.ToInt32(_body.Error[i].Number),
+                        ErrorType = _body.Error[i].Type,
+                        ErrorText = _body.Error[i].Text[0],
+                        ErrorLocation = _body.Error[i].Location,
+                        // ErrrorApplicationMessage = _body.Error[i].Application.Messages.DeveloperMessage,
+                        ErrrorApplicationMessage = object.ReferenceEquals(null, _body.Error[i].Application) ? "" : _body.Error[i].Application.Messages.DeveloperMessage
+                    };
+                }
+
+                errorTable = DataHelpers.MakeErrorTable(errors);
+            }
+            else if (_govTalkDetailsErrors != null)
+            {
+                GovTalkMessageError[] errors = new GovTalkMessageError[_govTalkDetailsErrors.Count];
+                for (int i = 0; i < _govTalkDetailsErrors.Count; i++)
+                {
+                    errors[i] = new GovTalkMessageError
+                    {
+                        CorrelationId = _correlationId,
+                        ErrorRaisedBy = _govTalkDetailsErrors[i].RaisedBy,
+                        ErrorNumber = Convert.ToInt32(_govTalkDetailsErrors[i].Number),
+                        ErrorType = _govTalkDetailsErrors[i].Type.ToString(),
+                        ErrorText = _govTalkDetailsErrors[i].Text[0]
+                    };
+                }
+
+                errorTable = DataHelpers.MakeErrorTable(errors);
+            }
+
+            return errorTable;
+        }
+
+        private GovTalkMessageGovTalkDetailsError GetGovTalkDetailsError()
+        {
+            if (_message.GovTalkDetails.GovTalkErrors.Length > 1)
+                throw new Exception("More than one GovTalkMessageGovTalkDetailErrors.");
+            return _message.GovTalkDetails.GovTalkErrors[0];
+        }
+
+        private GovTalkMessageGovTalkDetailsError[] GetGovTalkDetailsErrors()
+        {
+            return _message.GovTalkDetails.GovTalkErrors;
+        }
+
+        private ErrorResponse GetErrorResponse()
+        {
+            return _body;
         }
 
         public string GetBodyType()
