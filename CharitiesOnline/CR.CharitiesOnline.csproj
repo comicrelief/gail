@@ -76,7 +76,7 @@
     <Compile Include="MessageSending Service\Client.cs" />
     <Compile Include="MessageSending Service\Request.cs" />
     <Compile Include="MessageSending Service\Response.cs" />
-    <Compile Include="Models\GatewayErrors\GatewayError.cs" />
+    <Compile Include="Models\GatewayErrors\GovTalkMessageError.cs" />
     <Compile Include="Strategies\ErrorReader\DefaultErrorReturnCalculator.cs" />
     <Compile Include="Strategies\ErrorReader\IErrorReturnCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -86,7 +86,7 @@
     <Compile Include="Builders\R68ClaimRepaymentOtherIncBuilder.cs" />
     <Compile Include="DAL\ReferenceDataManager.cs" />
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
-    <Compile Include="Models\GatewayErrors\IGatewayError.cs" />
+    <Compile Include="Models\GatewayErrors\IGovTalkMessageError.cs" />
     <Compile Include="Strategies\ErrorReader\ErrorReturnStrategies.cs" />
     <Compile Include="Strategies\ErrorReader\IErrorReturnStrategy.cs" />
     <Compile Include="Strategies\ReadListResponseStrategy.cs" />

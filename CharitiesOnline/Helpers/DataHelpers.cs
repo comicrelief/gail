@@ -181,7 +181,7 @@ namespace CharitiesOnline.Helpers
 
         }
 
-        public static DataTable MakeErrorTable(CharitiesOnline.Models.GatewayError[] errors)
+        public static DataTable MakeErrorTable(CharitiesOnline.Models.GovTalkMessageError[] errors)
         {
             DataTable errorTable = new DataTable("Errors");
             AddErrorResponseColumns(errorTable);
@@ -203,7 +203,7 @@ namespace CharitiesOnline.Helpers
             inputTable.Columns.Add("Message");
         }
 
-        private static void InsertErrorResponseRows(DataTable errorsTable, CharitiesOnline.Models.GatewayError[] errors)
+        private static void InsertErrorResponseRows(DataTable errorsTable, CharitiesOnline.Models.GovTalkMessageError[] errors)
         {
             for (int i = 0; i < errors.Length; i++)
             {
