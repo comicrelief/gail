@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using CharitiesOnline.Models;
 using CharitiesOnline.Strategies.ErrorStrategies;
 
+using hmrcclasses;
+
 namespace CharitiesOnline.Strategies.ErrorReader
 {
     public class DefaultErrorReturnCalculator : IErrorReturnCalculator
@@ -35,11 +37,11 @@ namespace CharitiesOnline.Strategies.ErrorReader
             
         }
 
-        public string CalculateErrorReturn(GatewayError error)
+        public string CalculateErrorReturn(GovTalkMessageGovTalkDetailsError error)
         {
             return _errorRules.First(e => e.IsMatch(error)).ErrorResponse(error);
 
-            // @TODO: Handle situation where no rule is matched, or there is no errorresponse class
+            // @TODO: Handle situation where no rule is matched, or there is no errorResponse class
         }
     }
 }

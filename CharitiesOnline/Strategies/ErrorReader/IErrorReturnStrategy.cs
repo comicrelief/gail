@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CharitiesOnline.Models;
+using hmrcclasses;
 
 namespace CharitiesOnline.Strategies.ErrorReader
 {
     public interface IErrorReturnStrategy
     {
-        bool IsMatch(GatewayError error);
-        string ErrorResponse(GatewayError error);
+        bool IsMatch(GovTalkMessageGovTalkDetailsError error);
+        string ErrorResponse(GovTalkMessageGovTalkDetailsError error);
     }
 }
