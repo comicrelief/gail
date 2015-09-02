@@ -6,8 +6,5 @@ using System.Threading.Tasks;
 
 namespace CharitiesOnline.Models
 {
-    interface IGatewayError
-    {
-
-    }
+    interface IGatewayError { }
 }
