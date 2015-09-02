@@ -40,13 +40,26 @@ namespace CharitiesOnline.MessageService
             if(response.StatusCode == HttpStatusCode.OK)
             {
                 _loggingService.LogInfo(this, "Web response received.");
+
+                XmlDocument xmlReplyDoc = new XmlDocument();
+
                 using (Stream ResponseStream = response.GetResponseStream())
-                using (System.Xml.XmlTextReader xmlReader = new XmlTextReader(ResponseStream))
+                if(response.ContentType.Contains("xml"))
                 {
-                    XmlDocument xmlReplyDoc = new XmlDocument();
-                    xmlReplyDoc.Load(xmlReader);
+                    using (System.Xml.XmlTextReader xmlReader = new XmlTextReader(ResponseStream))
+                    {
+                        xmlReplyDoc.Load(xmlReader);
+                        return xmlReplyDoc;
+                    }  
+                }
+                else
+                {
+                    string webResponse = @"<?xml version=""1.0"" encoding=""utf-8""?>";
+                    webResponse += "<webResponse>" + ReadResponseStream(ResponseStream) + "</webResponse>";                    
+                    xmlReplyDoc.LoadXml(webResponse);
                     return xmlReplyDoc;
-                }            
+                }
+                                              
             }            
             else
             {
@@ -56,6 +69,31 @@ namespace CharitiesOnline.MessageService
                     response.StatusDescription));
             }
             
+        }
+
+        private string ReadResponseStream(Stream responseStream)
+        {
+            System.Text.Encoding encode = System.Text.Encoding.GetEncoding("utf-8");
+            StreamReader readStream = new StreamReader(responseStream, encode);
+
+            Char[] read = new Char[256];
+            int count = readStream.Read(read, 0, 256);
+
+            string webResponse = "";
+
+            webResponse = ("HTML ...\r\n");
+            while(count > 0)
+            {
+                String str = new String(read, 0, count);
+                webResponse += str;
+                count = readStream.Read(read, 0, 256);
+            }
+
+            webResponse += "";
+
+            readStream.Close();
+
+            return webResponse;
         }
     }
 }
