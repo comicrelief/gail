@@ -18,6 +18,8 @@ using CR.Infrastructure.Configuration;
 using CR.Infrastructure.Logging;
 using CR.Infrastructure.ContextProvider;
 
+using CR.CO.Demo;
+
 namespace CharitiesOnline
 {
     /// <summary>
@@ -43,7 +45,7 @@ namespace CharitiesOnline
                 string csvFile = @"C:\Temp\testdata.csv";
 
                 //// Create a GovTalkMessage and save the Xml to disk
-                string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);
+                string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                
                                  
                 XmlDocument submitMessageXml = new XmlDocument();
 
@@ -52,14 +54,13 @@ namespace CharitiesOnline
                 submitMessageXml.Load(submitMessageFilename);
 
                 XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
+                // XmlDocument submitMessageReply = new XmlDocument();
+                // submitMessageReply.Load(@"C:\Temp\local_SubmitRequest_20150902144633_195_2895335584791035911_response_20150902144738_.xml");
 
                 //XmlDocument submitMessageReply = new XmlDocument();
                 //submitMessageReply.Load(submitMessageReply);
 
                 DemonstrateReadMessage(loggingService, submitMessageReply);
-
-                Console.ReadKey();
-
             }
             catch (System.Net.WebException wex)
             {
@@ -74,8 +75,10 @@ namespace CharitiesOnline
                 loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Something went wrong", ex);
                 //Console.WriteLine(ex);
             }
-
-            Console.ReadKey();
+            finally
+            {
+                Console.ReadKey();
+            }
         }
         
         /// <summary>
@@ -191,9 +194,7 @@ namespace CharitiesOnline
 
                 if(error.Number == "3001")
                 {
-                    ErrorResponse errResponse = messageReader.GetMessageResults<ErrorResponse>();
-                    
-
+                    ErrorResponse errResponse = messageReader.GetMessageResults<ErrorResponse>();                    
                 }
             }
             else
@@ -204,6 +205,13 @@ namespace CharitiesOnline
                 foreach(var result in results)
                 {
                     Console.WriteLine(result);
+                }
+
+                if(messageReader.GetQualifier() == "response")
+                {
+                    DataTable responseTable = messageReader.GetMessageResults<DataTable>();
+
+                    LocalHelp.ConsolePrintDataTable(responseTable);
                 }
             }     
         }
@@ -327,7 +335,6 @@ namespace CharitiesOnline
             Console.WriteLine("");
             foreach (DataRow row in errorTable.Rows)
             {
-
                 foreach (DataColumn column in errorTable.Columns)
                     Console.Write("\t{0}", row[column]);
                 Console.WriteLine("");
