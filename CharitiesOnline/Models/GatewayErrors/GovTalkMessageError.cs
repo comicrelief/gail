@@ -2,7 +2,7 @@
 
 namespace CharitiesOnline.Models
 {
-    public class GatewayError : IGatewayError
+    public class GovTalkMessageError : IGovTalkMessageError
     {
         public string CorrelationId { get; set; }
         public int ErrorNumber { get; set; }

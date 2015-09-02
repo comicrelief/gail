@@ -1,4 +1,4 @@
 ﻿namespace CharitiesOnline.Models
 {
-    interface IGatewayError { }
+    interface IGovTalkMessageError { }
 }
