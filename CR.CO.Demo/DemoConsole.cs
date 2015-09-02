@@ -39,19 +39,22 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                // Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
-                string csvFile = String.Empty;
+                //// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
+                string csvFile = @"C:\Temp\testdata.csv";
 
-                // Create a GovTalkMessage and save the Xml to disk
+                //// Create a GovTalkMessage and save the Xml to disk
                 string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);
                                  
                 XmlDocument submitMessageXml = new XmlDocument();
 
-                // It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
+                //// It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
                 submitMessageXml.PreserveWhitespace = true;
                 submitMessageXml.Load(submitMessageFilename);
 
                 XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
+
+                //XmlDocument submitMessageReply = new XmlDocument();
+                //submitMessageReply.Load(submitMessageReply);
 
                 DemonstrateReadMessage(loggingService, submitMessageReply);
 
@@ -182,8 +185,16 @@ namespace CharitiesOnline
                 DataTable errorTable = messageReader.GetMessageResults<DataTable>();
                 // Or set up an error return strategy and do something with that
                 IErrorReturnCalculator errorCalculator = new DefaultErrorReturnCalculator();
-                GatewayError error = messageReader.GetMessageResults<GatewayError>();
+                GovTalkMessageGovTalkDetailsError error = messageReader.GetMessageResults<GovTalkMessageGovTalkDetailsError>();
+                
                 Console.WriteLine(errorCalculator.CalculateErrorReturn(error));
+
+                if(error.Number == "3001")
+                {
+                    ErrorResponse errResponse = messageReader.GetMessageResults<ErrorResponse>();
+                    
+
+                }
             }
             else
             {
