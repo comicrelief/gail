@@ -231,6 +231,7 @@ namespace CharitiesOnline.Helpers
 
         private static void AddResponseColumns(DataTable inputTable)
         {
+            inputTable.Columns.Add("CorrelationId");
             inputTable.Columns.Add("IRMarkReceiptMessage");
             inputTable.Columns.Add("MessageCode");
             inputTable.Columns.Add("Message");
