@@ -42,24 +42,12 @@ namespace CharitiesOnline.MessageService
                 _loggingService.LogInfo(this, "Web response received.");
 
                 XmlDocument xmlReplyDoc = new XmlDocument();
-
                 using (Stream ResponseStream = response.GetResponseStream())
-                if(response.ContentType.Contains("xml"))
-                {
                     using (System.Xml.XmlTextReader xmlReader = new XmlTextReader(ResponseStream))
                     {
                         xmlReplyDoc.Load(xmlReader);
                         return xmlReplyDoc;
                     }  
-                }
-                else
-                {
-                    string webResponse = @"<?xml version=""1.0"" encoding=""utf-8""?>";
-                    webResponse += "<webResponse>" + ReadResponseStream(ResponseStream) + "</webResponse>";                    
-                    xmlReplyDoc.LoadXml(webResponse);
-                    return xmlReplyDoc;
-                }
-                                              
             }            
             else
             {
