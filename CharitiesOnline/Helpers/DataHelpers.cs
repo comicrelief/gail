@@ -219,5 +219,34 @@ namespace CharitiesOnline.Helpers
                 errorsTable.Rows.Add(errorRow);
             }
         }
+
+        public static DataTable MakeResponseTable(hmrcclasses.SuccessResponse successResponse, string correlationId)
+        {
+            DataTable responseTable = new DataTable("Response");
+            AddResponseColumns(responseTable);
+            AddResponseRows(responseTable, successResponse, correlationId);
+
+            return responseTable;
+        }
+
+        private static void AddResponseColumns(DataTable inputTable)
+        {
+            inputTable.Columns.Add("IRMarkReceiptMessage");
+            inputTable.Columns.Add("MessageCode");
+            inputTable.Columns.Add("Message");
+            inputTable.Columns.Add("AcceptedTime");
+        }
+
+        private static void AddResponseRows(DataTable inputTable, hmrcclasses.SuccessResponse response, string correlationId)
+        {
+            inputTable.Rows.Add(new Object[]
+                {
+                    correlationId,
+                    response.IRmarkReceipt.Message.Value,
+                    response.Message[0].code,
+                    response.Message[0].Value,
+                    response.AcceptedTime
+                });            
+        }
     }
 }
