@@ -36,6 +36,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Configuration\ConfigFileConfigurationRepository.cs" />
     <Compile Include="Configuration\IConfigurationRepository.cs" />
+    <Compile Include="ContextProvider\HttpContextService.cs" />
     <Compile Include="Logging\ConsoleLoggingService.cs" />
     <Compile Include="Logging\ILoggingService.cs" />
     <Compile Include="Logging\Log4NetLoggingService.cs" />
