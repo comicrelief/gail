@@ -44,8 +44,7 @@ namespace CharitiesOnline.Strategies
         public void ReadMessage()
         {
             var message = _readers.First(r => r.IsMatch(_inMessage));
-            message.ReadMessage(_inMessage);                                                         
-
+            message.ReadMessage(_inMessage);                                                                  
         }
 
         /// <summary>

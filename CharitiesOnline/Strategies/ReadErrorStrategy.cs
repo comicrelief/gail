@@ -104,6 +104,8 @@ namespace CharitiesOnline.Strategies
                 _loggingService.LogInfo(this, String.Concat("Attempting to save reply document to ", filename, "."));
 
                 inMessage.Save(filename);
+
+                throw ex;
             }            
         }
 
