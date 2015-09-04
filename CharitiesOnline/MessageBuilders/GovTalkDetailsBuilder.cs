@@ -7,7 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 
-namespace CharitiesOnline.Builders
+namespace CharitiesOnline.MessageBuilders
 {
     public abstract class GovTalkDetailsBuilderBase
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Data;
 
 using hmrcclasses;
-using CharitiesOnline.Builders;
+using CharitiesOnline.MessageBuilders;
 using CR.Infrastructure.Logging;
 
 namespace CharitiesOnline

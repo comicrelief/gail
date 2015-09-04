@@ -9,7 +9,7 @@ using hmrcclasses;
 using CR.Infrastructure.Logging;
 using CharitiesOnline.Helpers;
 
-namespace CharitiesOnline.Builders
+namespace CharitiesOnline.MessageBuilders
 {
     public abstract class BodyBuilderBase
     {

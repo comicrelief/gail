@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using hmrcclasses;
 using CR.Infrastructure.Logging;
 
-namespace CharitiesOnline.Builders
+namespace CharitiesOnline.MessageBuilders
 {
     public abstract class IRheaderBuilderBase
     {

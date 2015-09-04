@@ -10,7 +10,7 @@ using System.IO;
 using hmrcclasses;
 using CR.Infrastructure.Logging;
 
-namespace CharitiesOnline.Builders
+namespace CharitiesOnline.MessageBuilders
 {
     public abstract class IRenvelopeBuilderBase
     {

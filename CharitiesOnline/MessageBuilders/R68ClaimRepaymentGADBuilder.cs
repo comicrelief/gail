@@ -9,7 +9,7 @@ using System.Data;
 using hmrcclasses;
 using CR.Infrastructure.Logging;
 
-namespace CharitiesOnline.Builders
+namespace CharitiesOnline.MessageBuilders
 {
     public abstract class R68ClaimRepaymentGADBuilderBase
     {
