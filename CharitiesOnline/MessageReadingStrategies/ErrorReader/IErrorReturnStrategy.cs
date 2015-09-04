@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using CharitiesOnline.Models;
 using hmrcclasses;
 
-namespace CharitiesOnline.Strategies.ErrorReader
+namespace CharitiesOnline.MessageReadingStrategies.ErrorReader
 {
     public interface IErrorReturnStrategy
     {

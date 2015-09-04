@@ -11,7 +11,7 @@ using CharitiesOnline.Models;
 using CR.Infrastructure.Logging;
 using CR.Infrastructure.Configuration;
 
-namespace CharitiesOnline.Strategies
+namespace CharitiesOnline.MessageReadingStrategies
 {
     public class ReadErrorStrategy : IMessageReadStrategy
     {

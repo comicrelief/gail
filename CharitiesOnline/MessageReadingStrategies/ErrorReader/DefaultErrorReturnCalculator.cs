@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CharitiesOnline.Models;
-using CharitiesOnline.Strategies.ErrorStrategies;
+using CharitiesOnline.MessageReadingStrategies.ErrorStrategies;
 
 using hmrcclasses;
 
-namespace CharitiesOnline.Strategies.ErrorReader
+namespace CharitiesOnline.MessageReadingStrategies.ErrorReader
 {
     public class DefaultErrorReturnCalculator : IErrorReturnCalculator
     {

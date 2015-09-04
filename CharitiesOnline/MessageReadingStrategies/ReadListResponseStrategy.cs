@@ -10,7 +10,7 @@ using hmrcclasses;
 using CharitiesOnline.Helpers;
 using CR.Infrastructure.Logging;
 
-namespace CharitiesOnline.Strategies
+namespace CharitiesOnline.MessageReadingStrategies
 {
     public class ReadListResponseStrategy : IMessageReadStrategy
     {

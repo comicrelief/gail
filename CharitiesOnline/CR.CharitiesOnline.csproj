@@ -77,8 +77,8 @@
     <Compile Include="MessageSending Service\Request.cs" />
     <Compile Include="MessageSending Service\Response.cs" />
     <Compile Include="Models\GatewayErrors\GovTalkMessageError.cs" />
-    <Compile Include="Strategies\ErrorReader\DefaultErrorReturnCalculator.cs" />
-    <Compile Include="Strategies\ErrorReader\IErrorReturnCalculator.cs" />
+    <Compile Include="MessageReadingStrategies\ErrorReader\DefaultErrorReturnCalculator.cs" />
+    <Compile Include="MessageReadingStrategies\ErrorReader\IErrorReturnCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageBuilders\R68Builder.cs" />
     <Compile Include="MessageBuilders\R68ClaimBuilder.cs" />
@@ -87,17 +87,17 @@
     <Compile Include="DAL\ReferenceDataManager.cs" />
     <Compile Include="Helpers\XmlWriterWrapper.cs" />
     <Compile Include="Models\GatewayErrors\IGovTalkMessageError.cs" />
-    <Compile Include="Strategies\ErrorReader\ErrorReturnStrategies.cs" />
-    <Compile Include="Strategies\ErrorReader\IErrorReturnStrategy.cs" />
-    <Compile Include="Strategies\ReadListResponseStrategy.cs" />
-    <Compile Include="Strategies\IMessageReader.cs" />
-    <Compile Include="Strategies\IMessageReadStrategy.cs" />
-    <Compile Include="Strategies\DefaultMessageReader.cs" />
-    <Compile Include="Strategies\ReadAcknowledgementStrategy.cs" />
-    <Compile Include="Strategies\ReadErrorStrategy.cs" />
-    <Compile Include="Strategies\ReadPollStrategy.cs" />
-    <Compile Include="Strategies\ReadResponseStrategy.cs" />
-    <Compile Include="Strategies\ReadSubmitRequestStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\ErrorReader\ErrorReturnStrategies.cs" />
+    <Compile Include="MessageReadingStrategies\ErrorReader\IErrorReturnStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\ReadListResponseStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\IMessageReader.cs" />
+    <Compile Include="MessageReadingStrategies\IMessageReadStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\DefaultMessageReader.cs" />
+    <Compile Include="MessageReadingStrategies\ReadAcknowledgementStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\ReadErrorStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\ReadPollStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\ReadResponseStrategy.cs" />
+    <Compile Include="MessageReadingStrategies\ReadSubmitRequestStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

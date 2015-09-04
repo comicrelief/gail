@@ -1,22 +1,33 @@
 ﻿using System;
-using System.Linq;
-using System.Xml;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 using hmrcclasses;
+using CharitiesOnline.Helpers;
 
-namespace CharitiesOnline.Strategies
+namespace CharitiesOnline.MessageReadingStrategies
 {
-    public interface IMessageReader
+    interface IMessageReadStrategy
     {
-        void ReadMessage();
+        bool IsMatch(XDocument inMessage);
+
+        void ReadMessage(XDocument xd);
+
+        // Need to constrain T ...
         T GetMessageResults<T>();
+
         GovTalkMessage Message();
+
         T GetBody<T>();
+
         string GetBodyType();
+
         string GetCorrelationId();
+
         string GetQualifier();
         string GetFunction();
+
         bool HasErrors();
+
     }
 }

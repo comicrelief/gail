@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CharitiesOnline.Models;
-using CharitiesOnline.Strategies.ErrorReader;
+using CharitiesOnline.MessageReadingStrategies.ErrorReader;
 using hmrcclasses;
 
-namespace CharitiesOnline.Strategies.ErrorStrategies
+namespace CharitiesOnline.MessageReadingStrategies.ErrorStrategies
 {
     public abstract class GatewayErrors
     {
