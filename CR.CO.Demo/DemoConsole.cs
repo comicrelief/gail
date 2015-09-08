@@ -9,10 +9,10 @@ using System.Xml.Linq;
 
 using hmrcclasses;
 using CharitiesOnline.Helpers;
-using CharitiesOnline.Builders;
+using CharitiesOnline.MessageBuilders;
 using CharitiesOnline.Models;
-using CharitiesOnline.Strategies;
-using CharitiesOnline.Strategies.ErrorReader;
+using CharitiesOnline.MessageReadingStrategies;
+using CharitiesOnline.MessageReadingStrategies.ErrorReader;
 
 using CR.Infrastructure.Configuration;
 using CR.Infrastructure.Logging;
@@ -41,21 +41,52 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                //// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
+                TestFileNaming(loggingService, configurationRepository);
+
+                return;
+
+                GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+                .AddLogger(loggingService)
+                .AddMessageIntention("GatewaySubmission")
+                .AddFilePath(@"C:\Temp\")
+                .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
+                .AddEnvironment("production")
+                .BuildFileName();
+
+                string outputFilename = FileNamer.ToString();
+
+                GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
+
+                ////// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
                 string csvFile = @"C:\Temp\testdata.csv";
 
+                TestGovTalkMessageCreation(csvFile, outputFilename);
+
+                XmlDocument LiveXml = new XmlDocument();
+                LiveXml.PreserveWhitespace = true;
+                LiveXml.Load(outputFilename);
+
+                
+
+                XmlDocument LocalTestXml = new XmlDocument();
+                LocalTestXml.PreserveWhitespace = true;
+                LocalTestXml = helper.UpdateMessageForLocalTest(LiveXml);
+                LocalTestXml.Save(@"C:\Temp\Localsend.xml");
+
                 //// Create a GovTalkMessage and save the Xml to disk
-                string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                
-                                 
-                XmlDocument submitMessageXml = new XmlDocument();
+                // string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                
+                //string submitMessageFilename = @"C:\Temp\test_SubmitRequest_20150904101453_200_.xml";
+                 
+                //XmlDocument submitMessageXml = new XmlDocument();
 
                 //// It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
-                submitMessageXml.PreserveWhitespace = true;
-                submitMessageXml.Load(submitMessageFilename);
+                //submitMessageXml.PreserveWhitespace = true;
+                //submitMessageXml.Load(outputFilename);
 
-                XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
-                // XmlDocument submitMessageReply = new XmlDocument();
-                // submitMessageReply.Load(@"C:\Temp\local_SubmitRequest_20150902144633_195_2895335584791035911_response_20150902144738_.xml");
+                XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, LocalTestXml);
+                submitMessageReply.Save(@"C:\Temp\reply.xml");
+                //XmlDocument submitMessageReply = new XmlDocument();
+                //submitMessageReply.Load(@"");
 
                 //XmlDocument submitMessageReply = new XmlDocument();
                 //submitMessageReply.Load(submitMessageReply);
@@ -63,7 +94,7 @@ namespace CharitiesOnline
                 DemonstrateReadMessage(loggingService, submitMessageReply);
             }
             catch (System.Net.WebException wex)
-            {
+            { 
                 loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Exception occured in connecting to remote machine", wex);
 
                 //Console.WriteLine("Exception occured in connecting to remote machine");
@@ -387,10 +418,11 @@ namespace CharitiesOnline
             Console.WriteLine("Message from {0}", message.Header.MessageDetails.ResponseEndPoint.Value.ToString());
         }
 
-        public static void TestFileNaming()
+        public static void TestFileNaming(ILoggingService loggingService, IConfigurationRepository configurationRepository)
         {
 
             GovTalkMessageFileName filename = (new GovTalkMessageFileName.FileNameBuilder()
+            .AddLogger(loggingService)
             .AddFilePath(@"")
             .AddEnvironment("Test")
             .AddMessageIntention("RequestMessage")
@@ -400,6 +432,30 @@ namespace CharitiesOnline
             );
 
             Console.WriteLine(filename.ToString());
+
+            Console.WriteLine(filename.Environment);
+
+            filename.Environment = "production_";
+
+            Console.WriteLine(filename.ToString());
+
+            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            int FileSequence = 0;
+
+            GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+               .AddConfigurationRepository(configurationRepository)
+               .AddLogger(loggingService)
+               .AddEnvironment("localtest")
+               .AddFilePath(@"C:\Temp\")
+               .AddMessageIntention("SubmitRequest")
+               .AddTimestamp(timestamp)
+               .AddCustomNamePart(String.Concat("152",(FileSequence > 0 ? "_" + FileSequence.ToString() : "")))
+            .BuildFileName();
+
+            Console.WriteLine(FileNamer.ToString());
+
+
+            Console.ReadKey();
         }
 
         public static void TestDeserializeSuccessResponse(ILoggingService loggingService)
@@ -552,10 +608,11 @@ namespace CharitiesOnline
 
         public static void TestGovTalkMessageCreation(string SourceDataFileName, string Filename = "")
         {
-            ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
-
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+            ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
+            ReferenceDataManager.governmentGatewayEnvironment = GovernmentGatewayEnvironment.productiongateway;
 
             DataTableRepaymentPopulater.SetLogger(loggingService);
 
@@ -569,17 +626,19 @@ namespace CharitiesOnline
             GovTalkMessage submitMessage = submitMessageCreator.GetGovTalkMessage();
 
             GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
-            helper.SetPassword(submitMessage, "weirdpassword");
+            helper.SetPassword(submitMessage, "testing1");
 
             XmlDocument xd = submitMessageCreator.SerializeGovTalkMessage();
+            xd.PreserveWhitespace = true;
 
-            XDocument passwordProtectedXDocument = helper.AddPassword(xd.ToXDocument(),"xdocpassword","clear");
+            xd = helper.AddPassword(xd.ToXDocument(), "xdocpassword", "clear").ToXmlDocument();          
 
             byte[] xmlDocumentSize = xd.XmlToBytes();
 
             Console.WriteLine("The document is {0} bytes big.", xmlDocumentSize.Length);
 
-            XmlDocument outputXmlDocument;
+            XmlDocument outputXmlDocument = new XmlDocument();
+            outputXmlDocument.PreserveWhitespace = true;
 
             //if (xmlDocumentSize.Length > 1000000)
             //{
@@ -590,7 +649,7 @@ namespace CharitiesOnline
             //{
 
             GovTalkMessageHelper gtmHelper = new GovTalkMessageHelper(configurationRepository, loggingService);
-            outputXmlDocument = gtmHelper.SetIRmark(passwordProtectedXDocument.ToXmlDocument());
+            outputXmlDocument = gtmHelper.SetIRmark(xd);
             //}
 
             string filename;
@@ -602,8 +661,7 @@ namespace CharitiesOnline
                 .AddMessageIntention("GatewaySubmission")
                 .AddFilePath(@"C:\Temp\")
                 .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
-                .AddEnvironment("test")
-                .AddCustomNamePart("EmptyRepayment")
+                .AddEnvironment(ReferenceDataManager.governmentGatewayEnvironment.ToString())
                 .BuildFileName();
 
                 filename = FileNamer.ToString();
