@@ -10,10 +10,12 @@ using CR.Infrastructure.Configuration;
 namespace CharitiesOnline.Helpers
 {
     // Sorry, ran out of time to work out how to make this an interface implementation
-
+    /// <summary>
+    /// This class is not really part of the Charities Online library. It is here because I find it useful to create filename strings this way, but there is
+    /// no necessary connection between it and the CO library.
+    /// </summary>
     public class GovTalkMessageFileName
     {
-        // public ILoggingService _loggingService { get; private set;}
         private ILoggingService _loggingService;
         private IConfigurationRepository _configurationRepository;
 
@@ -35,13 +37,13 @@ namespace CharitiesOnline.Helpers
             }
         }
 
-        public string Timestamp { get; private set; }
-        public string Environment { get; private set; }
-        public string MessageIntention { get; private set; }
-        public string MessageQualifier { get; private set; }
-        public string CorrelationId { get; private set; }
-        public string CustomNamePart { get; private set; }
-        public string FilePath { get; private set; }
+        public string Timestamp { get; set; }
+        public string Environment { get; set; }
+        public string MessageIntention { get; set; }
+        public string MessageQualifier { get; set; }
+        public string CorrelationId { get; set; }
+        public string CustomNamePart { get; set; }
+        public string FilePath { get; set; }
 
         private const string FILE_EXT = ".xml";
         private const string SEPARATOR = "_";                
@@ -61,8 +63,7 @@ namespace CharitiesOnline.Helpers
             public FileNameBuilder AddLogger(ILoggingService loggingService)
             {
                 _loggingService = loggingService;
-                return this;
-                
+                return this;                
             }
 
             public FileNameBuilder AddConfigurationRepository(IConfigurationRepository configurationRepository)
@@ -145,7 +146,7 @@ namespace CharitiesOnline.Helpers
         private string validateFileName(string filename)
         {
             if (!isValidFilename(filename))
-                return string.Concat(@"C:\Temp\localreply", DateTime.Now.ToString("yyyymmddhhmiss"),".xml");
+                return string.Concat(@"C:\Temp\message_", DateTime.Now.ToString("yyyymmddhhmiss"),".xml");
             else
                 return filename;
         }
