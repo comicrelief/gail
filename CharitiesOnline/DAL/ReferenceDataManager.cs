@@ -111,9 +111,9 @@ namespace CharitiesOnline
         }
         
         /// <summary>
-        /// The Database types are Key-Value and DefaultHeader
-        //  Key-Value means there are two columns in the database table, named Key and Value. Each row contains a Key and a Value
-        //  DefaultHeader is a single row where the column names correspond to the keys and the row entries contains the values
+        /// The Database types are Key-Value and DefaultHeader.
+        //  Key-Value means there are two columns in the database table, named Key and Value. Each row contains a Key and a Value.
+        //  DefaultHeader is a single row where the column names correspond to the keys and the row entries contains the values.
         /// </summary>
         public enum SourceTypes
         {
@@ -125,5 +125,9 @@ namespace CharitiesOnline
         {
             KeyValue, DefaultHeader
         }
+        /// <summary>
+        /// Set an enumeration value to indicate the Gateway environment the message is being created for.
+        /// </summary>
+        public static hmrcclasses.GovernmentGatewayEnvironment governmentGatewayEnvironment { get; set; }
     }
 }

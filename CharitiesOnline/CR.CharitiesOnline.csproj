@@ -56,8 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MessageBuilders\BodyBuilderBase.cs" />
+    <Compile Include="MessageBuilders\BodyCreator.cs" />
+    <Compile Include="MessageBuilders\EmptyBodyBuilder.cs" />
     <Compile Include="MessageBuilders\GovTalkDetailsBuilder.cs" />
     <Compile Include="MessageBuilders\GovTalkMessageBuilderBase.cs" />
+    <Compile Include="MessageBuilders\SubmitRequestBodyBuilder.cs" />
+    <Compile Include="MessageBuilders\SubmitRequestCompressedBodyBuilder.cs" />
     <Compile Include="MessageBuilders\UnknownMessageBuilderBase.cs" />
     <Compile Include="DAL\DataTableRepaymentPopulater.cs" />
     <Compile Include="DAL\IGiftAidRepaymentRepository.cs" />
