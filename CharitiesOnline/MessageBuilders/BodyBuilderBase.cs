@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 using hmrcclasses;
 using CR.Infrastructure.Logging;
@@ -33,12 +28,4 @@ namespace CharitiesOnline.MessageBuilders
         public abstract void BuildBody();
         public abstract void AddBodyElements();
     }
-
-    
-
-
-
-
-
-
 }
