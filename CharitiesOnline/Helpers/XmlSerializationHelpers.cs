@@ -21,6 +21,40 @@ namespace CharitiesOnline.Helpers
 {
     public static class XmlSerializationHelpers
     {      
+        public static XmlDocument SerializeGovTalkMessage(GovTalkMessage govTalkMessage)
+        {
+            // Use XmlWriter to make use of settings
+            // Load to XmlDoc for ease of use by client    
+
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "\t",
+                    Encoding = Encoding.UTF8
+                };
+
+                XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
+                ns.Add(string.Empty, "http://www.govtalk.gov.uk/CM/envelope");
+
+                XmlSerializer serializer = new XmlSerializer(typeof(GovTalkMessage));
+                serializer.Serialize(XmlWriter.Create(memStream, settings), govTalkMessage, ns);
+
+                memStream.Seek(0, SeekOrigin.Begin);          
+
+                XmlDocument doc = new XmlDocument();
+                doc.PreserveWhitespace = true;
+                doc.Load(memStream);
+
+                XmlDeclaration xmlDeclaration;
+                xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+
+                doc.ReplaceChild(xmlDeclaration, doc.FirstChild);
+
+                return doc;
+            }            
+        }
         public static XmlElement SerializeIREnvelope(IRenvelope ire)
         {
             using (MemoryStream memStream = new MemoryStream())
