@@ -11,6 +11,7 @@ namespace CharitiesOnline
         public static XmlDocument ToXmlDocument(this XDocument xd)
         {
             var xmlDocument = new XmlDocument();
+            xmlDocument.PreserveWhitespace = true;
             using(var xmlReader = xd.CreateReader())
             {
                 xmlDocument.Load(xmlReader);
@@ -20,10 +21,19 @@ namespace CharitiesOnline
 
         public static XDocument ToXDocument(this XmlDocument xmlDocument)
         {
-            using(var nodeReader = new XmlNodeReader(xmlDocument))
-            {
-                nodeReader.MoveToContent();
-                return XDocument.Load(nodeReader);
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.IgnoreWhitespace = false;
+
+            XmlNodeReader nodeReader = new XmlNodeReader(xmlDocument);
+
+            using(var reader = XmlReader.Create(nodeReader,settings))
+            {                
+                reader.MoveToContent();
+
+                // LoadOptions.PreserveWhitespace doesn't work with XmlNodeReader
+                XDocument xdocument = XDocument.Load(reader);
+
+                return xdocument;
             }
         }
 
