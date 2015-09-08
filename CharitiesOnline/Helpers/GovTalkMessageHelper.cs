@@ -146,19 +146,15 @@ namespace CharitiesOnline.Helpers
             if ((passwordMethod == "MD5" || _configurationRepository.GetConfigurationValue<string>("SenderAuthenticationMethod") == "MD5") && passwordMethod.ToLower() != "clear")
             {
                 MD5Password = true;
+                CommonUtilityHelper helper = new CommonUtilityHelper(_configurationRepository, _loggingService);
+                userPassword = helper.MD5Hash(userPassword);
             }
             else
             {
                 MD5Password = false;
             }
 
-            if(MD5Password)
-            {
-                CommonUtilityHelper helper = new CommonUtilityHelper(_configurationRepository, _loggingService);
-                userPassword = helper.MD5Hash(userPassword);
-            }
-
-            XElement root = XElement.Parse(inputXDocument.ToString());
+            XElement root = XElement.Parse(inputXDocument.ToString(), LoadOptions.PreserveWhitespace);
             XNamespace GovTalk = "http://www.govtalk.gov.uk/CM/envelope";
 
             //The name of the password element is 'value'. 
@@ -220,9 +216,52 @@ namespace CharitiesOnline.Helpers
             _loggingService.LogInfo(this, "Password set.");
         }
 
-        public static string MessageQualifier(GovTalkMessageHeaderMessageDetailsQualifier qualifier)
+        public XmlDocument UpdateMessageForLocalTest(XmlDocument govtalkmessage)
         {
-            return qualifier.ToString();
+            #region DontDoThis
+            // DeSerialize XmlDocument govTalkMessage
+            // Change properties
+            // Serialize GovTalkMessage
+            //GovTalkMessage govTalkMessage = XmlSerializationHelpers.DeserializeMessage(govtalkmessage);
+            //govTalkMessage.Header.MessageDetails.GatewayTest = "1";
+            //govTalkMessage.Header.MessageDetails.GatewayTimestampSpecified = true;
+            //govTalkMessage.Header.MessageDetails.GatewayTimestamp = DateTime.Now;
+
+            // OK, so using this method to re-serialize specifically adds the \t whitespace
+            // Therefore possibly making any previously added IRmark incorrect.
+
+            // Avoid deserializing Body here ...
+
+            // govtalkmessage = XmlSerializationHelpers.SerializeGovTalkMessage(govTalkMessage);
+            #endregion DontDoThis
+
+            // XmlDocument to XDocument
+            // Add the elements
+            // XDocument to XmlDocument
+            XNamespace GovTalk = "http://www.govtalk.gov.uk/CM/envelope";
+            XElement GatewayTest = new XElement(GovTalk + "GatewayTest", "1");
+            XElement GatewayTimestamp = new XElement(GovTalk + "GatewayTimestamp", DateTime.Now);
+
+            XmlDocument ModifiedGovTalkMessage = new XmlDocument();
+            ModifiedGovTalkMessage.PreserveWhitespace = true;
+
+            XDocument InProcessXDocument = govtalkmessage.ToXDocument();
+            InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTest);
+            InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTimestamp);
+
+            ModifiedGovTalkMessage = InProcessXDocument.ToXmlDocument();
+
+            return ModifiedGovTalkMessage;
+        }
+
+        public void UpdateMessageForDevGatewayTest(XmlDocument govTalkMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateMessageForProductionGateway(XmlDocument govTalkMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 }
