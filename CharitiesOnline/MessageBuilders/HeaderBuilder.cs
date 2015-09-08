@@ -79,23 +79,25 @@ namespace CharitiesOnline.MessageBuilders
             MessageDetails.FunctionSpecified = true;
             MessageDetails.Function = GovTalkMessageHeaderMessageDetailsFunction.submit;
             MessageDetails.TransformationSpecified = true;
-            MessageDetails.Transformation = GovTalkMessageHeaderMessageDetailsTransformation.XML;
-
-            // @TODO: Does GatewayTest need to be omitted for live submit requests?
-
-            MessageDetails.GatewayTest = ReferenceDataManager.Settings["MessageDetailsGatewayTest"];
+            MessageDetails.Transformation = GovTalkMessageHeaderMessageDetailsTransformation.XML;           
 
             // @TODO: Build SubmitRequestLocalTestService
 
-            if (ReferenceDataManager.Settings["env"] == "local")
+            if (ReferenceDataManager.governmentGatewayEnvironment == GovernmentGatewayEnvironment.localtestservice)
             {
                 MessageDetails.GatewayTimestampSpecified = true;
                 MessageDetails.GatewayTimestamp = DateTime.Now;
+
             }
             else
             {
                 MessageDetails.GatewayTimestampSpecified = false;
                 MessageDetails.GatewayTimestamp = DateTime.MinValue;
+            }
+
+            if (ReferenceDataManager.governmentGatewayEnvironment == GovernmentGatewayEnvironment.localtestservice || ReferenceDataManager.governmentGatewayEnvironment == GovernmentGatewayEnvironment.devgateway)
+            {
+                MessageDetails.GatewayTest = ReferenceDataManager.Settings["MessageDetailsGatewayTest"];
             }
 
             Header.MessageDetails = MessageDetails;
