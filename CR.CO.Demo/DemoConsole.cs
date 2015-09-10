@@ -41,10 +41,6 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                TestFileNaming(loggingService, configurationRepository);
-
-                return;
-
                 GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
                 .AddLogger(loggingService)
                 .AddMessageIntention("GatewaySubmission")
@@ -60,36 +56,28 @@ namespace CharitiesOnline
                 ////// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
                 string csvFile = @"C:\Temp\testdata.csv";
 
-                TestGovTalkMessageCreation(csvFile, outputFilename);
+                #region Testing
+                //TestGovTalkMessageCreation(csvFile, outputFilename);
 
-                XmlDocument LiveXml = new XmlDocument();
-                LiveXml.PreserveWhitespace = true;
-                LiveXml.Load(outputFilename);
-
-                
-
-                XmlDocument LocalTestXml = new XmlDocument();
-                LocalTestXml.PreserveWhitespace = true;
-                LocalTestXml = helper.UpdateMessageForLocalTest(LiveXml);
-                LocalTestXml.Save(@"C:\Temp\Localsend.xml");
+                //XmlDocument LiveXml = new XmlDocument();
+                //LiveXml.PreserveWhitespace = true;
+                //LiveXml.Load(outputFilename);              
+                //XmlDocument LocalTestXml = new XmlDocument();
+                //LocalTestXml.PreserveWhitespace = true;
+                //LocalTestXml = helper.UpdateMessageForLocalTest(LiveXml);
+                //LocalTestXml.Save(@"C:\Temp\Localsend.xml");
+                #endregion Testing
 
                 //// Create a GovTalkMessage and save the Xml to disk
-                // string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                
-                //string submitMessageFilename = @"C:\Temp\test_SubmitRequest_20150904101453_200_.xml";
+                string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                                
                  
-                //XmlDocument submitMessageXml = new XmlDocument();
+                XmlDocument submitMessageXml = new XmlDocument();
 
                 //// It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
-                //submitMessageXml.PreserveWhitespace = true;
-                //submitMessageXml.Load(outputFilename);
+                submitMessageXml.PreserveWhitespace = true;
+                submitMessageXml.Load(outputFilename);
 
-                XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, LocalTestXml);
-                submitMessageReply.Save(@"C:\Temp\reply.xml");
-                //XmlDocument submitMessageReply = new XmlDocument();
-                //submitMessageReply.Load(@"");
-
-                //XmlDocument submitMessageReply = new XmlDocument();
-                //submitMessageReply.Load(submitMessageReply);
+                XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
 
                 DemonstrateReadMessage(loggingService, submitMessageReply);
             }
@@ -244,7 +232,19 @@ namespace CharitiesOnline
 
                     LocalHelp.ConsolePrintDataTable(responseTable);
                 }
-            }     
+            }
+
+            GovTalkMessageFileName ReplyNamer = new GovTalkMessageFileName.FileNameBuilder()
+            .AddLogger(loggingService)
+            .AddConfigurationRepository(configurationRepository)
+            .AddMessageIntention("ReplyMessage")
+            .AddCorrelationId(messageReader.GetCorrelationId())
+            .AddFilePath(@"C:\Temp\")
+            .BuildFileName();
+
+            string replyFileName = ReplyNamer.ToString();
+
+            messageToRead.Save(replyFileName);
         }
 
         public static void DemonstrateLocalProcess()
