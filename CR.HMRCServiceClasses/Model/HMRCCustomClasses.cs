@@ -270,4 +270,11 @@ namespace hmrcclasses
             }
         }
     }
+
+    public enum GovernmentGatewayEnvironment
+    {
+        localtestservice,
+        devgateway,
+        productiongateway
+    }
 }
