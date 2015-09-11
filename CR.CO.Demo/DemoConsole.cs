@@ -41,6 +41,14 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
+                XmlDocument compressedFile = new XmlDocument();
+                compressedFile.Load(@"C:\Temp\local_SubmitRequest_20150911151952_216_.xml");
+
+                TestDeserializeAndDecompress(compressedFile);
+
+                return;
+
+
                 GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
                 .AddLogger(loggingService)
                 .AddMessageIntention("GatewaySubmission")
@@ -824,11 +832,8 @@ namespace CharitiesOnline
             finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
         }
 
-        public static void TestDeserialize()
+        public static void TestDeserializeAndDecompress(XmlDocument xd)
         {
-            XmlDocument xd = new XmlDocument();
-            xd.Load(@"C:\CharitiesOnline\CharitiesValidSamples_February_2015\Compressed Data Samples\GAValidSample_GZIP.xml");
-
             GovTalkMessage gtm = XmlSerializationHelpers.DeserializeMessage(xd);
 
             XmlElement xelement = gtm.Body.Any[0];
@@ -842,6 +847,17 @@ namespace CharitiesOnline
             R68CompressedPart compressedPart = (R68CompressedPart)ire.R68.Items[0];
 
             string decompressed = CommonUtilityHelper.DecompressData(compressedPart.Value);
+
+            XmlDocument r68claim = new XmlDocument();
+            r68claim.LoadXml(decompressed);
+
+            R68Claim uncompressedR68 = XmlSerializationHelpers.DeserializeR68Claim(r68claim);
+
+            ire.R68.Items[0] = uncompressedR68;
+
+
+            
+
         }
 
         public static void TestSerialize()
@@ -915,6 +931,21 @@ namespace CharitiesOnline
             R68Claim r68claim = XmlSerializationHelpers.DeserializeR68Claim(claimXml);
 
             //Helpers.Deserialize<R68Claim>(claimXml.OuterXml, "R68Claim");
+
+        }
+
+        public static void TestDecompressMessage(XmlDocument compressedXmlDocument)
+        {
+            string contents = CommonUtilityHelper.DecompressData(compressedXmlDocument.XmlToBytes());
+
+            XmlDocument decompressedDocument = new XmlDocument();
+            decompressedDocument.LoadXml(contents);
+
+            DefaultMessageReader reader = new DefaultMessageReader(loggingService, configurationRepository, decompressedDocument.ToXDocument());
+
+            string[] results = reader.GetMessageResults<string[]>();
+
+            Console.WriteLine(reader.GetQualifier());
 
         }
 
