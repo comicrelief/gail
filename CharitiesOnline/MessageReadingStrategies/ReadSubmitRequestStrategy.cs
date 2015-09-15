@@ -19,7 +19,7 @@ namespace CharitiesOnline.MessageReadingStrategies
         private ILoggingService _loggingService;
         private string _qualifier;
         private string _function;
-        private bool _hasCompressedPart; // Does the message contain a compressedPart instead of  
+        private bool _hasCompressedPart; // Does the message contain a compressedPart instead of a Claim
         private bool _messageRead;
 
 
@@ -67,6 +67,10 @@ namespace CharitiesOnline.MessageReadingStrategies
             if(_body.R68.Items[0].GetType() == typeof(R68CompressedPart))
             {
                 _hasCompressedPart = true;
+            }
+            else
+            {
+                _hasCompressedPart = false;
             }
 
             _loggingService.LogInfo(this, "Message read. Message is SubmitRequest.");        
@@ -233,6 +237,11 @@ namespace CharitiesOnline.MessageReadingStrategies
         public bool HasErrors()
         {
             return false;
+        }
+
+        public bool HasCompressedPart()
+        {
+            return _hasCompressedPart;
         }
     }
 }
