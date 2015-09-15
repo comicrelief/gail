@@ -76,7 +76,7 @@ namespace CharitiesOnline.Helpers
 
             dt.Columns.Add(new DataColumn
             {
-                DataType = System.Type.GetType("System.Datetime"),
+                DataType = System.Type.GetType("System.DateTime"),
                 ColumnName = "Date"
             });
 
