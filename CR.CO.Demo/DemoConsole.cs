@@ -35,6 +35,8 @@ namespace CharitiesOnline
         {
             try
             {
+                TestReadMessage();
+
                 // The configurationRepository is intended to abstract the configurationManager type and allow
                 // for different configuration options to be applied. For example, a DatabaseConfigurationRepository could be provided
                 // if the requirement is to take reference values from a database.
@@ -91,7 +93,7 @@ namespace CharitiesOnline
             }
             catch (System.Net.WebException wex)
             { 
-                loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Exception occured in connecting to remote machine", wex);
+                loggingService.LogError(wex.Source, "Exception occured in connecting to remote machine", wex);
 
                 //Console.WriteLine("Exception occured in connecting to remote machine");
                 //Console.WriteLine(wex.InnerException.Message);
@@ -99,7 +101,7 @@ namespace CharitiesOnline
             }
             catch (Exception ex)
             {
-                loggingService.LogError(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, "Something went wrong", ex);
+                loggingService.LogError(ex.Source, "Something went wrong", ex);
                 //Console.WriteLine(ex);
             }
             finally
@@ -572,6 +574,9 @@ namespace CharitiesOnline
             XDocument xd = XDocument.Load(@"C:\Temp\GAValidSample_GZIP.xml");
 
             ReadSubmitRequestStrategy read = new ReadSubmitRequestStrategy(loggingService);
+
+            read.ReadMessage(xd);
+
             read.IsMatch(xd);
 
             DataTable dt = read.GetMessageResults<DataTable>();
@@ -846,17 +851,22 @@ namespace CharitiesOnline
 
             R68CompressedPart compressedPart = (R68CompressedPart)ire.R68.Items[0];
 
-            string decompressed = CommonUtilityHelper.DecompressData(compressedPart.Value);
+            string decompressedClaim = CommonUtilityHelper.DecompressData(compressedPart.Value);
+            string decompressedR68Claim = decompressedClaim.Replace("Claim", "R68Claim");
 
-            XmlDocument r68claim = new XmlDocument();
-            r68claim.LoadXml(decompressed);
+            XmlDocument r68claim = new XmlDocument();            
+            r68claim.LoadXml(decompressedR68Claim);
+            r68claim.DocumentElement.SetAttribute("xmlns", "http://www.govtalk.gov.uk/taxation/charities/r68/2");
 
-            R68Claim uncompressedR68 = XmlSerializationHelpers.DeserializeR68Claim(r68claim);
+            R68Claim uncompressedR68 = XmlSerializationHelpers.Deserialize<R68Claim>(r68claim.OuterXml, "R68Claim");
+                
+                // XmlSerializationHelpers.DeserializeR68Claim(r68claim);
 
             ire.R68.Items[0] = uncompressedR68;
 
+            gtm.Body.Any[0] = XmlSerializationHelpers.SerializeIREnvelope(ire);
 
-            
+            XmlDocument SerializedDecompressedGovTalkMessage = XmlSerializationHelpers.SerializeGovTalkMessage(gtm);            
 
         }
 
@@ -891,8 +901,6 @@ namespace CharitiesOnline
 
             byte[] bytes = Encoding.UTF8.GetBytes(xmlGad.OuterXml);
 
-
-
             xmlGad.Save(@"C:\Temp\GAD.xml");
 
             R68ClaimRepaymentGAD[] GADS = new R68ClaimRepaymentGAD[1];
@@ -918,8 +926,6 @@ namespace CharitiesOnline
             XmlDocument claimXml =
                 XmlSerializationHelpers.SerializeItem(claim);
 
-
-
             claimXml.Save(@"C:\Temp\R68Claim.xml");
         }
 
@@ -928,10 +934,12 @@ namespace CharitiesOnline
             XmlDocument claimXml = new XmlDocument();
             claimXml.Load(@"C:\Temp\R68Claim.xml");
 
-            R68Claim r68claim = XmlSerializationHelpers.DeserializeR68Claim(claimXml);
+            // Add namesapce to Xml 
+            // e.g. claimXml.DocumentElement.SetAttribute("xmlns","http://www.govtalk.gov.uk/taxation/charities/r68/2");
 
-            //Helpers.Deserialize<R68Claim>(claimXml.OuterXml, "R68Claim");
+            // R68Claim r68claim = XmlSerializationHelpers.DeserializeR68Claim(claimXml);
 
+            R68Claim otherway = XmlSerializationHelpers.Deserialize<R68Claim>(claimXml.OuterXml, "R68Claim");
         }
 
         public static void TestDecompressMessage(XmlDocument compressedXmlDocument)
