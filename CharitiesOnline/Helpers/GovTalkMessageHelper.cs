@@ -180,7 +180,7 @@ namespace CharitiesOnline.Helpers
             XElement NewMethod = MD5Password ? new XElement(GovTalk + "Method", "MD5") : new XElement(GovTalk + "Method", "clear");
             PassMethod.ReplaceWith(NewMethod);
 
-            XDocument outputXDocument = new XDocument(root);
+            XDocument outputXDocument = new XDocument(new XDeclaration(inputXDocument.Declaration), root);
             _loggingService.LogInfo(this, "Password added to XDocument.");
 
             return outputXDocument;
