@@ -34,29 +34,26 @@ namespace CharitiesOnline
         static void Main(string[] args)
         {
             try
-            {
-                TestReadMessage();
-
+            {                   
                 // The configurationRepository is intended to abstract the configurationManager type and allow
                 // for different configuration options to be applied. For example, a DatabaseConfigurationRepository could be provided
                 // if the requirement is to take reference values from a database.
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                XmlDocument compressedFile = new XmlDocument();
-                compressedFile.Load(@"C:\Temp\local_SubmitRequest_20150911151952_216_.xml");
+                // TestListRequest();
 
-                TestDeserializeAndDecompress(compressedFile);
+                //XmlDocument compressedFile = new XmlDocument();
+                //compressedFile.Load(@"C:\Temp\local_SubmitRequest_20150911151952_216_.xml");
 
-                return;
-
+                //TestDeserializeAndDecompress(compressedFile);
 
                 GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
                 .AddLogger(loggingService)
-                .AddMessageIntention("GatewaySubmission")
+                .AddMessageIntention("LocalTest")
                 .AddFilePath(@"C:\Temp\")
                 .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
-                .AddEnvironment("production")
+                .AddEnvironment("local")
                 .BuildFileName();
 
                 string outputFilename = FileNamer.ToString();
@@ -67,7 +64,7 @@ namespace CharitiesOnline
                 string csvFile = @"C:\Temp\testdata.csv";
 
                 #region Testing
-                //TestGovTalkMessageCreation(csvFile, outputFilename);
+                TestGovTalkMessageCreation(csvFile, outputFilename);
 
                 //XmlDocument LiveXml = new XmlDocument();
                 //LiveXml.PreserveWhitespace = true;
@@ -625,7 +622,7 @@ namespace CharitiesOnline
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
-            ReferenceDataManager.governmentGatewayEnvironment = GovernmentGatewayEnvironment.productiongateway;
+            ReferenceDataManager.governmentGatewayEnvironment = GovernmentGatewayEnvironment.localtestservice;
 
             DataTableRepaymentPopulater.SetLogger(loggingService);
 
@@ -822,6 +819,18 @@ namespace CharitiesOnline
             xd.Save(@"C:\Temp\listrequest-" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
             // Helpers.SerializeToFile(listRequestCreator.GetGovTalkMessage(), @"C:\Temp\listrequest-" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+            GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
+
+            XmlDocument outputXml = new XmlDocument();
+            outputXml.PreserveWhitespace = true;
+            outputXml = helper.AddPassword(xd.ToXDocument(), "ListRequestPassword").ToXmlDocument();
+            outputXml.Save(@"C:\Temp\listrequest-newpwd-" +
+                DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+            //XDocument listRequest = new XDocument();
+            //listRequest = helper.AddPassword(xd.ToXDocument(), "listrequestpassword");
+            //listRequest.Save(@"C:\Temp\XDocListRequest.xml");
 
         }
 
