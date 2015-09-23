@@ -40,23 +40,47 @@ namespace CharitiesOnline.MessageService
             if(response.StatusCode == HttpStatusCode.OK)
             {
                 _loggingService.LogInfo(this, "Web response received.");
+                _loggingService.LogDebug(this, "Content-Type is " + response.ContentType);
 
                 XmlDocument xmlReplyDoc = new XmlDocument();
                 using (Stream ResponseStream = response.GetResponseStream())
-                    using (System.Xml.XmlTextReader xmlReader = new XmlTextReader(ResponseStream))
+                {
+                    if(response.ContentType != "") //response Content-Type from LTS appears to be text/html
                     {
-                        xmlReplyDoc.Load(xmlReader);
-                        return xmlReplyDoc;
-                    }  
+                        using (System.Xml.XmlTextReader xmlReader = new XmlTextReader(ResponseStream))
+                        {
+                            xmlReplyDoc.Load(xmlReader);
+                            return xmlReplyDoc;
+                        }  
+                    }
+                    if(response.ContentType == "")
+                    {
+                        string result;
+
+                        StreamReader reader = new StreamReader(response.GetResponseStream());
+                        result = reader.ReadToEnd();
+
+                        throw new Exception(ExceptionMessage(response, result));
+                    }
+                    else
+                    {
+                        throw new Exception(ExceptionMessage(response));
+                    }                    
+                }                    
             }            
             else
             {
-                throw new Exception(String.Format("Something went at the server {0}. Status code {1}; Status message {2}", 
+                throw new Exception(ExceptionMessage(response));
+            }            
+        }
+
+        private string ExceptionMessage(HttpWebResponse response, string description = "")
+        {
+            return String.Format("Failed to get a valid XML response: {0}. Status code: {1}; Status message: {2}; Description: {3};",
                     response.ResponseUri,
-                    response.StatusCode, 
-                    response.StatusDescription));
-            }
-            
+                    response.StatusCode,
+                    response.StatusDescription,
+                    description);
         }
 
         private string ReadResponseStream(Stream responseStream)
