@@ -22,5 +22,33 @@ namespace CR.CO.Demo
                 Console.WriteLine("");
             }
         }
+
+        public static string GetSendURI(string uriType, 
+            hmrcclasses.GovernmentGatewayEnvironment gatewayEnvironment, 
+            CR.Infrastructure.Configuration.IConfigurationRepository _configurationRepository)
+        {
+            string env = gatewayEnvironment.ToString();
+
+            string uri = "";
+
+            switch (uriType)
+            {
+                case "Test":
+                    //uri = ConfigurationManager.AppSettings["SendURIlocaltestservice"];
+                    uri = _configurationRepository.GetConfigurationValue<string>("SendURIlocaltestservice");
+                    break;
+                case "Send":
+                    uri = _configurationRepository.GetConfigurationValue<string>(string.Concat("SendURI", env));
+                    break;
+                case "Poll":
+                    uri = _configurationRepository.GetConfigurationValue<string>(string.Concat("PollURI", env));
+                    break;
+                case "DataRequest":
+                    uri = _configurationRepository.GetConfigurationValue<string>(string.Concat("SendURI", env));
+                    break;
+            }
+
+            return uri;
+        }
     }
 }

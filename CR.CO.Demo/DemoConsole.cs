@@ -41,30 +41,51 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                // TestListRequest();
+                //XmlDocument deleteRequest = TestDeleteRequest();
+                XmlDocument deleteRequest = new XmlDocument();
+                deleteRequest.Load(@"C:\Temp\DeleteRequest_5779460693132893262__2015_09_23_16_17_08.xml");
+
+                GovernmentGatewayEnvironment gatewayEnv = GovernmentGatewayEnvironment.localtestservice;
+
+                // deleteRequest.Save(@"C:\Temp\DeleteRequest_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+                // XmlDocument deleteRequestReply = DemonstrateSendMessage(loggingService, deleteRequest, gatewayEnv);
+                // deleteRequestReply.Save(@"C:\Temp\DeleteRequestReply_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+                XmlDocument submitRequest = new XmlDocument();
+                submitRequest.Load(@"C:\Temp\local_SubmitRequest_20150923160525_228_.xml");
+
+                XmlDocument submitRequestReply = DemonstrateSendMessage(loggingService, submitRequest, gatewayEnv);
+                submitRequestReply.Save(@"C:\Temp\SubmitRequestReply_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+                return;
+
+                //XmlDocument StatusRequest = TestListRequest();
+
+                //StatusRequest.Save(@"C:\Temp\StatusRequest-" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
                 //XmlDocument compressedFile = new XmlDocument();
                 //compressedFile.Load(@"C:\Temp\local_SubmitRequest_20150911151952_216_.xml");
 
                 //TestDeserializeAndDecompress(compressedFile);
 
-                GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
-                .AddLogger(loggingService)
-                .AddMessageIntention("LocalTest")
-                .AddFilePath(@"C:\Temp\")
-                .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
-                .AddEnvironment("local")
-                .BuildFileName();
+                //GovTalkMessageFileName FileNamer = new GovTalkMessageFileName.FileNameBuilder()
+                //.AddLogger(loggingService)
+                //.AddMessageIntention("LocalTest")
+                //.AddFilePath(@"C:\Temp\")
+                //.AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
+                //.AddEnvironment("local")
+                //.BuildFileName();
 
-                string outputFilename = FileNamer.ToString();
+                //string outputFilename = FileNamer.ToString();
 
-                GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
+                //GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
 
-                ////// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
-                string csvFile = @"C:\Temp\testdata.csv";
+                //////// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
+                //string csvFile = @"C:\Temp\testdata.csv";
 
                 #region Testing
-                TestGovTalkMessageCreation(csvFile, outputFilename);
+                //TestGovTalkMessageCreation(csvFile, outputFilename);
 
                 //XmlDocument LiveXml = new XmlDocument();
                 //LiveXml.PreserveWhitespace = true;
@@ -76,15 +97,17 @@ namespace CharitiesOnline
                 #endregion Testing
 
                 //// Create a GovTalkMessage and save the Xml to disk
-                string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                                
+                //string submitMessageFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                                
                  
-                XmlDocument submitMessageXml = new XmlDocument();
+                //XmlDocument submitMessageXml = new XmlDocument();
 
-                //// It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
-                submitMessageXml.PreserveWhitespace = true;
-                submitMessageXml.Load(outputFilename);
+                ////// It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files
+                //submitMessageXml.PreserveWhitespace = true;
+                //submitMessageXml.Load(outputFilename);
 
-                XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, submitMessageXml);
+                //XmlDocument submitMessageReply = DemonstrateSendMessage(loggingService, StatusRequest, gatewayEnv);
+                XmlDocument submitMessageReply = new XmlDocument();
+                submitMessageReply.Load(@"C:\Temp\DeleteMessageResults_2014_03_05_15_37_11__8FC77A109658479C95AE4D7963095529_DeleteResponse.xml");
 
                 DemonstrateReadMessage(loggingService, submitMessageReply);
             }
@@ -98,7 +121,7 @@ namespace CharitiesOnline
             }
             catch (Exception ex)
             {
-                loggingService.LogError(ex.Source, "Something went wrong", ex);
+                loggingService.LogError(ex.Source, ex.Message, ex);
                 //Console.WriteLine(ex);
             }
             finally
@@ -181,9 +204,9 @@ namespace CharitiesOnline
         /// </summary>
         /// <param name="loggingService"></param>
         /// <param name="sendMessage"></param>
-        static XmlDocument DemonstrateSendMessage(ILoggingService loggingService, XmlDocument sendMessage)
+        static XmlDocument DemonstrateSendMessage(ILoggingService loggingService, XmlDocument sendMessage, GovernmentGatewayEnvironment gatewayEnv)
         {
-            string uri = configurationRepository.GetConfigurationValue<string>("SendURILocal");
+            string uri = LocalHelp.GetSendURI("DataRequest", gatewayEnv, configurationRepository);
 
             // Create a client to send the file to the target gateway
             CharitiesOnline.MessageService.Client client = new MessageService.Client(loggingService);
@@ -235,9 +258,18 @@ namespace CharitiesOnline
 
                 if(messageReader.GetQualifier() == "response")
                 {
-                    DataTable responseTable = messageReader.GetMessageResults<DataTable>();
+                    string body = messageReader.GetBodyType();
 
-                    LocalHelp.ConsolePrintDataTable(responseTable);
+                    if(body != null)
+                    {
+                        DataTable responseTable = messageReader.GetMessageResults<DataTable>();
+
+                        LocalHelp.ConsolePrintDataTable(responseTable);
+                    }
+                    else
+                    {
+                        Console.WriteLine("No body content");
+                    }                    
                 }
             }
 
@@ -791,21 +823,26 @@ namespace CharitiesOnline
 
         }
 
-        public static void TestDeleterequest()
+        public static XmlDocument TestDeleteRequest()
         {
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
             IConfigurationRepository configurationRepository = new ConfigFileConfigurationRepository();
             ILoggingService loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
             GovTalkMessageCreator deleteRequestCreator = new GovTalkMessageCreator(new DeleteRequestMessageBuilder(loggingService), loggingService);
-            deleteRequestCreator.SetCorrelationId("hjcjc");
+            deleteRequestCreator.SetCorrelationId("87E1E8A7F16147A6B87962E07933B406");                       
+
             deleteRequestCreator.CreateGovTalkMessage();
 
             XmlDocument xd = deleteRequestCreator.SerializeGovTalkMessage();
-            xd.Save(@"C:\Temp\deleterequest-" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+            GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
+            xd = helper.UpdateMessageForProductionGateway(xd);
+
+            return xd;
         }
 
-        public static void TestListRequest()
+        public static XmlDocument TestListRequest()
         {
             ReferenceDataManager.SetSource(ReferenceDataManager.SourceTypes.ConfigFile);
 
@@ -825,8 +862,11 @@ namespace CharitiesOnline
             XmlDocument outputXml = new XmlDocument();
             outputXml.PreserveWhitespace = true;
             outputXml = helper.AddPassword(xd.ToXDocument(), "ListRequestPassword").ToXmlDocument();
-            outputXml.Save(@"C:\Temp\listrequest-newpwd-" +
-                DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
+
+            return outputXml;
+
+            //outputXml.Save(@"C:\Temp\listrequest-newpwd-" +
+            //    DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
 
             //XDocument listRequest = new XDocument();
             //listRequest = helper.AddPassword(xd.ToXDocument(), "listrequestpassword");
