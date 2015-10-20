@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using hmrcclasses;
 using CharitiesOnline.Helpers;
 using CR.Infrastructure.Logging;
+using CR.Infrastructure.Configuration;
 
 namespace CharitiesOnline.MessageReadingStrategies
 {
@@ -17,14 +18,16 @@ namespace CharitiesOnline.MessageReadingStrategies
         private GovTalkMessage _message;
         private SuccessResponse _body;
         private ILoggingService _loggingService;
+        private IConfigurationRepository _configurationRepository;
         private string _correlationId;
         private string _qualifier;
         private string _function;
         private bool _messageRead;
 
-        public ReadResponseStrategy(ILoggingService loggingService)
+        public ReadResponseStrategy(ILoggingService loggingService, IConfigurationRepository configurationRepository)
         {
             _loggingService = loggingService;
+            _configurationRepository = configurationRepository;
         }
         public bool IsMatch(XDocument inMessage)
         {
@@ -43,19 +46,36 @@ namespace CharitiesOnline.MessageReadingStrategies
 
         public void ReadMessage(XDocument inMessage)
         {
-            _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
-            _messageRead = true;
-            _correlationId = _message.Header.MessageDetails.CorrelationID;
-            _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
-            _function = _message.Header.MessageDetails.Function.ToString();
+            try
+            {
+                _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
+                _messageRead = true;
+                _correlationId = _message.Header.MessageDetails.CorrelationID;
+                _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
+                _function = _message.Header.MessageDetails.Function.ToString();
 
-            XmlDocument successXml = new XmlDocument();
+                XmlDocument successXml = new XmlDocument();
+
+                successXml.LoadXml(_message.Body.Any[0].OuterXml);
+
+                _body = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
+
+                _loggingService.LogInfo(this, "Message read. Response type is Response.");
+            }
+            catch(Exception ex)
+            {
+                _loggingService.LogError(this, "Message Reading Exception", ex);
+
+                GovTalkMessageFileName FileNamer = new GovTalkMessageFileName(_loggingService, _configurationRepository);
+                string filename = FileNamer.DefaultFileName();
+
+                _loggingService.LogInfo(this, String.Concat("Attempting to save reply document to ", filename, "."));
+
+                inMessage.Save(filename);
+
+                throw ex;
+            }
             
-            successXml.LoadXml(_message.Body.Any[0].OuterXml);
-
-            _body = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
-
-            _loggingService.LogInfo(this, "Message read. Response type is Response.");
         }
 
         public T GetMessageResults<T>()

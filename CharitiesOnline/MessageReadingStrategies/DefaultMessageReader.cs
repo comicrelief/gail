@@ -32,7 +32,7 @@ namespace CharitiesOnline.MessageReadingStrategies
             _readers = new List<IMessageReadStrategy>();
             _readers.Add(new ReadSubmitRequestStrategy(_loggingService));
             _readers.Add(new ReadAcknowledgementStrategy(_loggingService));
-            _readers.Add(new ReadResponseStrategy(_loggingService));
+            _readers.Add(new ReadResponseStrategy(_loggingService, _configurationRepository));
             _readers.Add(new ReadErrorStrategy(_loggingService, _configurationRepository));
             _readers.Add(new ReadPollStrategy(_loggingService));
             _readers.Add(new ReadListResponseStrategy(_loggingService));
