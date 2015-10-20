@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using System.IO;
+
 using System.Data;
+
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
+using System.Xml.Serialization;
 
 using hmrcclasses;
 using CharitiesOnline.Helpers;
@@ -40,6 +45,20 @@ namespace CharitiesOnline
                 // if the requirement is to take reference values from a database.
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
+
+                XmlDocument xd = new XmlDocument();
+                xd.Load(@"C:\Temp\local_SubmitRequest_20151013111847_1260.xml");
+
+                XmlDocument deserializedDecompressedXml = TestDeserializeAndDecompress(xd);
+                deserializedDecompressedXml.Save(@"C:\Temp\local_SubmitRequest_20151013111847_1260_decompressed.xml");
+
+                string location = "/hd:GovTalkMessage[1]/hd:Body[1]/r68:IRenvelope[1]/r68:R68[1]/r68:Claim[1]/r68:Repayment[1]/r68:GAD[9958]/r68:Donor[1]/r68:Ttl[1]";
+                string xpath = location.Substring(0, location.IndexOf("/", location.IndexOf("GAD")));
+                DonorError error = GetGADError(@"C:\Temp\local_SubmitRequest_20151013111847_1260_decompressed.xml", xpath);
+
+                return;
+
+                DemonstrateReadMessage(loggingService, xd);
 
                 //XmlDocument deleteRequest = TestDeleteRequest();
                 XmlDocument deleteRequest = new XmlDocument();
@@ -813,7 +832,7 @@ namespace CharitiesOnline
 
             GovTalkMessageCreator submitPollCreator = new GovTalkMessageCreator(new SubmitPollMesageBuilder(loggingService), loggingService);
 
-            submitPollCreator.SetCorrelationId("52CB8A8AA58148859377830BAE5B99C9");
+            submitPollCreator.SetCorrelationId("FDE7675B3DCA4EFF89DACECA07751B98");
 
             submitPollCreator.CreateGovTalkMessage();
 
@@ -886,7 +905,7 @@ namespace CharitiesOnline
             finalXd.Save(@"C:\Temp\testGovTalkMsgWithIrMark" + DateTime.Now.ToString("_yyyy_MM_dd_HH_mm_ss", System.Globalization.CultureInfo.InvariantCulture) + ".xml");
         }
 
-        public static void TestDeserializeAndDecompress(XmlDocument xd)
+        public static XmlDocument TestDeserializeAndDecompress(XmlDocument xd)
         {
             GovTalkMessage gtm = XmlSerializationHelpers.DeserializeMessage(xd);
 
@@ -915,9 +934,54 @@ namespace CharitiesOnline
 
             gtm.Body.Any[0] = XmlSerializationHelpers.SerializeIREnvelope(ire);
 
-            XmlDocument SerializedDecompressedGovTalkMessage = XmlSerializationHelpers.SerializeGovTalkMessage(gtm);            
+            XmlDocument SerializedDecompressedGovTalkMessage = XmlSerializationHelpers.SerializeGovTalkMessage(gtm);
 
+            return SerializedDecompressedGovTalkMessage;
         }
+
+        public static DonorError GetGADError(string filename, string location)
+        {
+            XPathDocument doc = new XPathDocument(filename);
+            XPathNavigator nav = doc.CreateNavigator();
+
+            XmlNamespaceManager nsMgr = new XmlNamespaceManager(nav.NameTable);
+            nsMgr.AddNamespace("hd", @"http://www.govtalk.gov.uk/CM/envelope");
+            nsMgr.AddNamespace("r68", @"http://www.govtalk.gov.uk/taxation/charities/r68/2");
+
+            XPathNavigator GAD = nav.SelectSingleNode(location, nsMgr);
+
+            XmlRootAttribute GADROOT = new XmlRootAttribute();
+            GADROOT.ElementName = "GAD";
+            GADROOT.Namespace = "http://www.govtalk.gov.uk/taxation/charities/r68/2";
+            GADROOT.IsNullable = true;
+
+            XmlSerializer serializer = new XmlSerializer(typeof(R68ClaimRepaymentGAD), GADROOT);
+
+            XmlDocument GADXML = new XmlDocument();
+            GADXML.Load(GAD.ReadSubtree());
+
+            MemoryStream xmlStream = new MemoryStream();
+            GADXML.Save(xmlStream);
+            xmlStream.Seek(0, SeekOrigin.Begin);
+
+            //object tempobj = serializer.Deserialize(xmlStream);
+
+            R68ClaimRepaymentGAD Donation = (R68ClaimRepaymentGAD)serializer.Deserialize(xmlStream);
+            R68ClaimRepaymentGADDonor Donor = (R68ClaimRepaymentGADDonor)Donation.Item;
+
+            DonorError donorErr = new DonorError
+            {
+                Forename = Donor.Fore,
+                Surname = Donor.Sur,
+                Address1 = Donor.House,
+                Postcode = Donor.Item.GetType() == typeof(string) ? Donor.Item.ToString() : "", //@TODO: Does this work for Overseas?                                                    
+                DonationAmount = Donation.Total.ToString(),
+                DonationDate = Donation.Date.ToString()
+            };
+
+            return donorErr;
+        }
+
 
         public static void TestSerialize()
         {
