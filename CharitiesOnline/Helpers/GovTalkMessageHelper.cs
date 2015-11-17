@@ -258,15 +258,19 @@ namespace CharitiesOnline.Helpers
         {
             XNamespace GovTalk = "http://www.govtalk.gov.uk/CM/envelope";
             XElement GatewayTest = new XElement(GovTalk + "GatewayTest", "1");
-            XElement GatewayTimestamp = new XElement(GovTalk + "GatewayTimestamp", DateTime.Now);
 
             XmlDocument ModifiedGovTalkMessage = new XmlDocument();
             ModifiedGovTalkMessage.PreserveWhitespace = true;
 
             XDocument InProcessXDocument = govtalkmessage.ToXDocument();
-            InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTest);
-            InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTimestamp);
-
+            if (InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Element(GovTalk + "GatewayTest") == null)            
+                InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTest);
+            else if (InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Element(GovTalk + "GatewayTest").Value == "0")
+            {
+                InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Element(GovTalk + "GatewayTest").Remove();
+                InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTest);
+            }            
+                
             ModifiedGovTalkMessage = InProcessXDocument.ToXmlDocument();
 
             return ModifiedGovTalkMessage;

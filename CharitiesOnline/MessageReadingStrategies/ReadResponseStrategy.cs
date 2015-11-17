@@ -22,6 +22,7 @@ namespace CharitiesOnline.MessageReadingStrategies
         private string _correlationId;
         private string _qualifier;
         private string _function;
+        private DateTime? _gatewayTimestamp;
         private bool _messageRead;
 
         public ReadResponseStrategy(ILoggingService loggingService, IConfigurationRepository configurationRepository)
@@ -49,16 +50,39 @@ namespace CharitiesOnline.MessageReadingStrategies
             try
             {
                 _message = XmlSerializationHelpers.DeserializeMessage(inMessage.ToXmlDocument());
-                _messageRead = true;
                 _correlationId = _message.Header.MessageDetails.CorrelationID;
                 _qualifier = _message.Header.MessageDetails.Qualifier.ToString();
                 _function = _message.Header.MessageDetails.Function.ToString();
+                if(_message.Header.MessageDetails.GatewayTimestampSpecified)
+                    _gatewayTimestamp = _message.Header.MessageDetails.GatewayTimestamp;
 
                 XmlDocument successXml = new XmlDocument();
 
-                successXml.LoadXml(_message.Body.Any[0].OuterXml);
+                if(_message.Body.Any != null)
+                {
+                    successXml.LoadXml(_message.Body.Any[0].OuterXml);
 
-                _body = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
+                    _body = XmlSerializationHelpers.DeserializeSuccessResponse(successXml);
+                }
+                else
+                {
+
+                    MessageType messageType = new MessageType
+                    {
+                        Value = "No valid SuccessResponse contained in the Body element of this message. Contact Support."
+                    };
+
+                    SuccessResponse dummyResponse = new SuccessResponse
+                    {
+                        IRmarkReceipt = null,
+                        Message = new MessageType[] { messageType },
+                        AcceptedTime = (DateTime)_gatewayTimestamp
+                    };
+
+                    _body = dummyResponse;
+                }
+
+                _messageRead = true;
 
                 _loggingService.LogInfo(this, "Message read. Response type is Response.");
             }
@@ -99,8 +123,23 @@ namespace CharitiesOnline.MessageReadingStrategies
                 response[1] = string.Concat("Qualifier::", _message.Header.MessageDetails.Qualifier);
                 response[2] = string.Concat("ResponseEndPoint::", _message.Header.MessageDetails.ResponseEndPoint.Value);
                 response[3] = string.Concat("GatewayTimestamp::", _message.Header.MessageDetails.GatewayTimestamp.ToString());
-                response[4] = string.Concat("IRmarkReceipt::", _body.IRmarkReceipt.Message.Value);
-                response[5] = string.Concat("AcceptedTime::", _body.AcceptedTime.ToString());
+                // These two properties are potentially null
+                if(_body.IRmarkReceipt != null)
+                {
+                    response[4] = string.Concat("IRmarkReceipt::", _body.IRmarkReceipt.Message.Value);
+                }
+                else
+                {
+                    response[4] = "IRmarkReceipt::NONE";
+                }
+                if (_body.AcceptedTimeSpecified)
+                {
+                    response[5] = string.Concat("AcceptedTime::", _body.AcceptedTime.ToString());
+                }
+                else
+                {
+                    response[5] = "AcceptedTime::NOT_SPECIFIED";
+                }
 
                 _loggingService.LogInfo(this, string.Concat("Response CorrelationId is ", response[0]));
 

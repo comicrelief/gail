@@ -239,14 +239,15 @@ namespace CharitiesOnline.Helpers
         }
 
         private static void AddResponseRows(DataTable inputTable, hmrcclasses.SuccessResponse response, string correlationId)
-        {
+        {          
+
             inputTable.Rows.Add(new Object[]
                 {
                     correlationId,
-                    response.IRmarkReceipt.Message.Value,
-                    response.Message[0].code,
-                    response.Message[0].Value,
-                    response.AcceptedTime
+                    response.IRmarkReceipt != null ? response.IRmarkReceipt.Message.Value : "NO IRMARK RECEIPT",
+                    response.Message[0].code != null ? response.Message[0].code : "NO MESSAGE CODE VALUE",
+                    response.Message[0].Value != null ? response.Message[0].Value : "NO MESSAGE VALUE",
+                    response.AcceptedTime != null ? response.AcceptedTime : (DateTime?)null
                 });            
         }
     }
