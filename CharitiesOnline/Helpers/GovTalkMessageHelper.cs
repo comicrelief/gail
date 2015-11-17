@@ -254,9 +254,22 @@ namespace CharitiesOnline.Helpers
             return ModifiedGovTalkMessage;
         }
 
-        public void UpdateMessageForDevGatewayTest(XmlDocument govTalkMessage)
+        public XmlDocument UpdateMessageForDevGatewayTest(XmlDocument govtalkmessage)
         {
-            throw new NotImplementedException();
+            XNamespace GovTalk = "http://www.govtalk.gov.uk/CM/envelope";
+            XElement GatewayTest = new XElement(GovTalk + "GatewayTest", "1");
+            XElement GatewayTimestamp = new XElement(GovTalk + "GatewayTimestamp", DateTime.Now);
+
+            XmlDocument ModifiedGovTalkMessage = new XmlDocument();
+            ModifiedGovTalkMessage.PreserveWhitespace = true;
+
+            XDocument InProcessXDocument = govtalkmessage.ToXDocument();
+            InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTest);
+            InProcessXDocument.Root.Element(GovTalk + "Header").Element(GovTalk + "MessageDetails").Add(GatewayTimestamp);
+
+            ModifiedGovTalkMessage = InProcessXDocument.ToXmlDocument();
+
+            return ModifiedGovTalkMessage;
         }
 
         public XmlDocument UpdateMessageForProductionGateway(XmlDocument govTalkMessage)
