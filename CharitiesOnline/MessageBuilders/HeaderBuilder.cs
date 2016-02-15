@@ -81,8 +81,6 @@ namespace CharitiesOnline.MessageBuilders
             MessageDetails.TransformationSpecified = true;
             MessageDetails.Transformation = GovTalkMessageHeaderMessageDetailsTransformation.XML;           
 
-            // @TODO: Build SubmitRequestLocalTestService
-
             if (ReferenceDataManager.governmentGatewayEnvironment == GovernmentGatewayEnvironment.localtestservice)
             {
                 MessageDetails.GatewayTimestampSpecified = true;

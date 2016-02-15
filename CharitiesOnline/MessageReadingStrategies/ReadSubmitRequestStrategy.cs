@@ -194,7 +194,7 @@ namespace CharitiesOnline.MessageReadingStrategies
                 dr["Total"] = gad.Total;
                 dr["Date"] = gad.Date;
 
-                //sponsorship flag // @TODO: TEST Sponsorship indicator
+                //sponsorship flag 
                 if (gad.SponsoredSpecified)
                     dr["Sponsored"] = gad.Sponsored == r68_YesType.yes ? "Y" : "N";
 

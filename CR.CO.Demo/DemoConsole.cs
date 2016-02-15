@@ -335,8 +335,6 @@ namespace CharitiesOnline
 
             #endregion old
 
-            // @TODO Need a method in the reader for generating a good filepath for messages
-            // Made a utility to do it
             // Need to get correlationId
 
             GovTalkMessageFileName fileNamer = new GovTalkMessageFileName.FileNameBuilder()
