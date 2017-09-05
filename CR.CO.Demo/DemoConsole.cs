@@ -46,6 +46,15 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
+                TestReadMessage();
+                return;
+
+                TestAdjustment();
+                return;
+
+                TestDonorError();
+                return;
+
                 GovernmentGatewayEnvironment gatewayEnv = GovernmentGatewayEnvironment.localtestservice;
 
                 //GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
@@ -568,7 +577,7 @@ namespace CharitiesOnline
 
             // vep200pc
             // XDocument xd = XDocument.Load(@"C:\Temp\Compressed Data Samples\GAValidSample_GZIP.xml");
-            XDocument xd = XDocument.Load(@"C:\Temp\GAValidSample_GZIP.xml");
+            XDocument xd = XDocument.Load(@"C:\Temp\PAPERSPON910RND_SubmitRequest_20160811120400.xml");
 
             ReadSubmitRequestStrategy read = new ReadSubmitRequestStrategy(loggingService);
 
@@ -1024,16 +1033,26 @@ namespace CharitiesOnline
         public static void TestDonorError()
         {
             XmlDocument xd = new XmlDocument();
-            xd.Load(@"C:\Temp\local_SubmitRequest_20151013111847_1260.xml");
+            xd.Load(@"C:\Temp\TEST_PAPERSPON9_SubmitRequest_20160511135944.xml");
 
             XmlDocument deserializedDecompressedXml = TestDeserializeAndDecompress(xd);
-            deserializedDecompressedXml.Save(@"C:\Temp\local_SubmitRequest_20151013111847_1260_decompressed.xml");
+            deserializedDecompressedXml.Save(@"C:\Temp\TEST_PAPERSPON9_SubmitRequest_20160511135944_decompressed.xml");
 
-            string location = "/hd:GovTalkMessage[1]/hd:Body[1]/r68:IRenvelope[1]/r68:R68[1]/r68:Claim[1]/r68:Repayment[1]/r68:GAD[9958]/r68:Donor[1]/r68:Ttl[1]";
+            string location = "/hd:GovTalkMessage[1]/hd:Body[1]/r68:IRenvelope[1]/r68:R68[1]/r68:Claim[1]/r68:Repayment[1]/r68:GAD[149]/r68:Donor[1]/r68:House[1]";
             string xpath = location.Substring(0, location.IndexOf("/", location.IndexOf("GAD")));
-            DonorError error = GetGADError(@"C:\Temp\local_SubmitRequest_20151013111847_1260_decompressed.xml", xpath);
+            DonorError error = GetGADError(@"C:\Temp\TEST_PAPERSPON9_SubmitRequest_20160511135944_decompressed.xml", xpath);
 
             return;
+        }
+
+        public static void TestAdjustment()
+        {
+            XmlDocument xd = new XmlDocument();
+            xd.Load(@"C:\Temp\PAPERSPON910RND_SubmitRequest_20160811104842.xml");
+
+            XmlDocument deserializedDecompressedXml = TestDeserializeAndDecompress(xd);
+            deserializedDecompressedXml.Save(@"C:\Temp\PAPERSPON910RND_SubmitRequest_20160811104842_decompressed.xml");
+
         }
 
         #endregion TestingAndDevelopment
