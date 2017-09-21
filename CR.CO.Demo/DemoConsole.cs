@@ -46,21 +46,21 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
-                TestReadMessage();
-                return;
+                //TestReadMessage();
+                //return;
 
-                TestAdjustment();
-                return;
+                //TestAdjustment();
+                //return;
 
-                TestDonorError();
-                return;
+                //TestDonorError();
+                //return;
 
                 GovernmentGatewayEnvironment gatewayEnv = GovernmentGatewayEnvironment.localtestservice;
 
                 //GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
 
                 //////// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
-                string csvFile = configurationRepository.GetConfigurationValue<string>("TempFolder") + "testdata.csv";
+                string csvFile = configurationRepository.GetConfigurationValue<string>("TempFolder") + "sample2.csv";
 
                 #region Testing
                 //TestGovTalkMessageCreation(csvFile, outputFilename);
@@ -168,7 +168,7 @@ namespace CharitiesOnline
                 .AddFilePath(tempDirectory)
                 .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
                 .AddEnvironment("local")
-                .AddCustomNamePart("EmptyRepayment")
+                .AddCustomNamePart("TestAGG")
                 .BuildFileName();
             
             outputFilename = FileNamer.ToString();
