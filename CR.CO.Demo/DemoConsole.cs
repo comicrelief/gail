@@ -46,6 +46,11 @@ namespace CharitiesOnline
                 configurationRepository = new ConfigFileConfigurationRepository();
                 loggingService = new Log4NetLoggingService(configurationRepository, new ThreadContextService());
 
+                //string filein = @"C:\Temp\RND15PAPERSPON9_SubmitRequest_20160811172825.xml";
+                //string fileout = @"C:\Temp\decompressed_" + DateTime.Now.ToString("yyyymddhhmm") + ".xml";
+                //DoDecompress(filein, fileout);
+                //return;
+
                 //TestReadMessage();
                 //return;
 
@@ -1053,6 +1058,15 @@ namespace CharitiesOnline
             XmlDocument deserializedDecompressedXml = TestDeserializeAndDecompress(xd);
             deserializedDecompressedXml.Save(@"C:\Temp\PAPERSPON910RND_SubmitRequest_20160811104842_decompressed.xml");
 
+        }
+
+        public static void DoDecompress(string filein, string fileout)
+        {
+            XmlDocument xd = new XmlDocument();
+            xd.Load(filein);
+
+            XmlDocument deserializedDecompressedXml = TestDeserializeAndDecompress(xd);
+            deserializedDecompressedXml.Save(fileout);
         }
 
         #endregion TestingAndDevelopment
