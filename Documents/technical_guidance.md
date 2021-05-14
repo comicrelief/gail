@@ -57,11 +57,12 @@ See the included example .csv file.
 ## Step 3 – Decide on action
 
 Possible actions you can do with the tool are:
-•	Initiate the whole gift aid process
-•	Create a straightforward XML file out of your data table
-•	Send a data request to the Government Gateway
-•	Send a polling message to the Government Gateway (to check on claim progress)
-•	Create your own gift aid process using the individual steps that are available in the tool and required by the Government Gateway.  This is the process as provided by HMRC:
+
+- Initiate the whole gift aid process
+- Create a straightforward XML file out of your data table
+- Send a data request to the Government Gateway
+- Send a polling message to the Government Gateway (to check on claim progress)
+- Create your own gift aid process using the individual steps that are available in the tool and required by the Government Gateway.  This is the process as provided by HMRC:
 
 ![Request-Response sequence](images/charities_online_sequence.jpg)
 
@@ -75,9 +76,10 @@ The logging is implemented using [log4net](https://logging.apache.org/log4net/) 
 You need to initialize log4net in the calling application. An easy way is by declaring the attribute [assembly: log4net.Config.XmlConfigurator(Watch = true)] for the calling class, or alternatively create some other log4net set up method.
 
 Once that is done, a verbose narrative of events is written to a log file, so you need to decide what to do with the logs.  You could:
-•	Leave them as straightforward text files (e.g. on disk)
-•	Put them in a database table
-•	Display on a web page
+
+- Leave them as straightforward text files (e.g. on disk)
+- Put them in a database table
+- Display on a web page
 
 ## Step 5 – Configuration
 
