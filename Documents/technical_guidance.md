@@ -41,7 +41,7 @@ You can include more columns than this if you want, but these are the required o
 
 If you want to include aggregated donations in your submission, you must include a column called Type and for each row that is an aggregated donation, the value of Type must be AGG.  The rows for individual donations must have a type of GAD.  If you don’t have a type column the application will treat everything as an individual donor.
 
-You can include other income if you set the type value for the relevant rows to OtherInc.
+You can include [Other Income](https://www.gov.uk/guidance/schedule-spreadsheet-to-reclaim-tax-on-interest-and-other-income) if you set the type value for the relevant rows to OtherInc.
 The required fields are:
 
 |Name of Field|Description|Mandatory?|
