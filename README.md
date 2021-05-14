@@ -29,5 +29,5 @@ A Demonstration harness is provided in `CR.CO.Demo` which is a console applicati
 
 # Documentation
 
-See the [Technical Guidance](Documents\technical_guidance.md) for detailed instructions on use.
+See the [Technical Guidance](Documents/technical_guidance.md) for detailed instructions on use.
 

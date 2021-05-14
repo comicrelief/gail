@@ -6,7 +6,7 @@ Firstly, you need to create, or decide on, which application you want to use to 
 
 Here are some examples:
 
-![Here are some examples](images\gail_integration_options.jpg)
+![Here are some examples](images/gail_integration_options.jpg)
 
 
 ## Step 2 – Provide data table
@@ -63,7 +63,7 @@ Possible actions you can do with the tool are:
 •	Send a polling message to the Government Gateway (to check on claim progress)
 •	Create your own gift aid process using the individual steps that are available in the tool and required by the Government Gateway.  This is the process as provided by HMRC:
 
-![Request-Response sequence](images\charities_online_sequence.jpg)
+![Request-Response sequence](images/charities_online_sequence.jpg)
 
 The GAIL tool provides the core of the ‘Client Application’ step (although it doesn’t provide the whole of the ‘client application’ – it needs to be called by some other harnessing code).
 
