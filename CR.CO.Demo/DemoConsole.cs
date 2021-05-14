@@ -182,7 +182,7 @@ namespace CharitiesOnline
                 .AddFilePath(tempDirectory)
                 .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
                 .AddEnvironment("local")
-                .AddCustomNamePart("TestAGG")
+                .AddCustomNamePart("Test")
                 .BuildFileName();
             
             outputFilename = FileNamer.ToString();
