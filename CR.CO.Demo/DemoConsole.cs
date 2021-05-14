@@ -60,6 +60,8 @@ namespace CharitiesOnline
                 //TestDonorError();
                 //return;
 
+                // This sets the endpoint to the Local Test Service - see https://www.gov.uk/government/publications/local-test-service-and-lts-update-manager
+
                 GovernmentGatewayEnvironment gatewayEnv = GovernmentGatewayEnvironment.localtestservice;
 
                 //GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
@@ -81,8 +83,15 @@ namespace CharitiesOnline
 
                 //// Create a GovTalkMessage and save the Xml to disk
                     
-                string outputFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);                                
-                 
+                string outputFilename = DemonstrateCreateSubmitRequest(loggingService, configurationRepository, csvFile);
+
+                Console.Write("File created for Sample2.csv: " + outputFilename);
+
+                ////// If the LTS is running, comment this line
+                return;
+
+                ///// Send the file to the gatewayEnv endpoint
+                
                 XmlDocument submitMessageXml = new XmlDocument();
 
                 ////// It is important if the XML message is being loaded from disk to preserve whitespace, otherwise the IRmark will be out for non-compressed files

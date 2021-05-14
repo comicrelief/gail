@@ -25,7 +25,11 @@ To use the tool you would normally call controller methods to undertake whatever
 
 Git clone the repo. Build in Visual Studio version 12 or higher.
 
+# Getting Started
+
 A Demonstration harness is provided in `CR.CO.Demo` which is a console application that can be used to play around with the library, creating files and reading responses. This is a good place to start in learning how to use this application.
+
+If running in Debug mode, remember to check that the Solution startup project is set to `CR.CO.Demo`.
 
 # Documentation
 
