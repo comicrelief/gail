@@ -31,7 +31,7 @@ There are different required fields depending on the data that you are submittin
 -	Donations with aggregated details:
 
 |Name of Field|	Description|Mandatory?|
-|-------------|-----------------------|
+|-------------|------------|----------|
 |Description|A meaningful description of the donations|Yes|
 |Date|Donation date|Yes|
 |Total|Amount of the donation|Yes|
