@@ -67,7 +67,7 @@ namespace CharitiesOnline
                 //GovTalkMessageHelper helper = new GovTalkMessageHelper(configurationRepository, loggingService);
 
                 //////// Optionally, set this to a valid filepath for a CSV that contains GiftAid data in an acceptable format.
-                string csvFile = configurationRepository.GetConfigurationValue<string>("TempFolder") + "sample2.csv";
+                string csvFile = configurationRepository.GetConfigurationValue<string>("TempFolder") + "sample_other_inc.csv";
 
                 #region Testing
                 //TestGovTalkMessageCreation(csvFile, outputFilename);
@@ -182,7 +182,7 @@ namespace CharitiesOnline
                 .AddFilePath(tempDirectory)
                 .AddTimestamp(DateTime.Now.ToString("yyyyMMddHHmmss"))
                 .AddEnvironment("local")
-                .AddCustomNamePart("Test")
+                .AddCustomNamePart("Test_OInc")
                 .BuildFileName();
             
             outputFilename = FileNamer.ToString();

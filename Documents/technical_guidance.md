@@ -41,18 +41,7 @@ You can include more columns than this if you want, but these are the required o
 
 If you want to include aggregated donations in your submission, you must include a column called Type and for each row that is an aggregated donation, the value of Type must be AGG.  The rows for individual donations must have a type of GAD.  If you don’t have a type column the application will treat everything as an individual donor.
 
-You can include [Other Income](https://www.gov.uk/guidance/schedule-spreadsheet-to-reclaim-tax-on-interest-and-other-income) if you set the type value for the relevant rows to OtherInc.
-The required fields are:
-
-|Name of Field|Description|Mandatory?|
-|-------------|-----------|----------|
-|Payer|Full name of the other income payer|Yes|
-|OIDate|The date of payment|Yes|
-|Gross|The gross payment received|Yes|
-|Tax|The tax deducted|Yes|
-
-See the included example .csv file.
-
+To include [Other Income](https://www.gov.uk/guidance/schedule-spreadsheet-to-reclaim-tax-on-interest-and-other-income) you must set the values in the `app.config`. The properties that start `OtherInc` correspond to the `/R68/Claim/Repayment/OtherInc` elements (see the Charities Online specification for further details: https://www.gov.uk/government/publications/charities-technical-specifications-gift-aid-repayments-rim-artefacts)
 
 ## Step 3 – Decide on action
 
