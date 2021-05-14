@@ -31,6 +31,10 @@ A Demonstration harness is provided in `CR.CO.Demo` which is a console applicati
 
 If running in Debug mode, remember to check that the Solution startup project is set to `CR.CO.Demo`.
 
+Once the project is built make sure you have a sample data file in the location specified under the `TempFolder` App Setting in `app.config`. Then you can run the executable, or step-into the code (e.g. F10 in Visual Studio). 
+
+In the [`Sample Data`](Documents/sample_data) folder there is a sample csv file (`sample2.csv`) and an example of the XML file that should be produced by running the Demo console against this file - [example output] (Documents/sample_data/local_GatewaySubmission_20210514145055.xml)
+
 # Documentation
 
 See the [Technical Guidance](Documents/technical_guidance.md) for detailed instructions on use.

@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<GovTalkMessage xmlns="http://www.govtalk.gov.uk/CM/envelope">
+	<EnvelopeVersion>2.0</EnvelopeVersion>
+	<Header>
+		<MessageDetails>
+			<Class>HMRC-CHAR-CLM</Class>
+			<Qualifier>request</Qualifier>
+			<Function>submit</Function>
+			<Transformation>XML</Transformation>
+			<GatewayTest>1</GatewayTest>
+			<GatewayTimestamp>2021-05-14T14:50:54.6834881+01:00</GatewayTimestamp>
+		</MessageDetails>
+		<SenderDetails>
+			<IDAuthentication>
+				<SenderID>323412300001</SenderID>
+				<Authentication>
+					<Method>clear</Method>
+					<Role>principal</Role>
+					<Value>weirdpassword</Value>
+				</Authentication>
+			</IDAuthentication>
+		</SenderDetails>
+	</Header>
+	<GovTalkDetails>
+		<Keys>
+			<Key Type="CHARID">AA12345</Key>
+		</Keys>
+		<TargetDetails>
+			<Organisation>HMRC</Organisation>
+		</TargetDetails>
+		<ChannelRouting>
+			<Channel>
+				<URI>2420</URI>
+				<Product>Comic Relief GAIL</Product>
+				<Version>2.0</Version>
+			</Channel>
+		</ChannelRouting>
+	</GovTalkDetails>
+	<Body>
+		<IRenvelope xmlns="http://www.govtalk.gov.uk/taxation/charities/r68/2">
+			<IRheader>
+				<Keys>
+					<Key Type="CHARID">AA12345</Key>
+				</Keys>
+				<PeriodEnd>2014-10-31</PeriodEnd>
+				<DefaultCurrency>GBP</DefaultCurrency>
+				<IRmark Type="generic">fRKOHDv5aVyxN9bZx/BIednieQo=</IRmark>
+				<Sender>Individual</Sender>
+			</IRheader>
+			<R68>
+				<AuthOfficial>
+					<OffName>
+						<Fore>John</Fore>
+						<Sur>Smith</Sur>
+					</OffName>
+					<OffID>
+						<Postcode>AB12 3CD</Postcode>
+					</OffID>
+					<Phone>01234 567890</Phone>
+				</AuthOfficial>
+				<Declaration>yes</Declaration>
+				<Claim>
+					<OrgName>My Organisation</OrgName>
+					<HMRCref>AA12345</HMRCref>
+					<Regulator>
+						<RegName>CCEW</RegName>
+						<RegNo>A1234</RegNo>
+					</Regulator>
+					<Repayment>
+						<GAD>
+							<Donor>
+								<Ttl>Mr</Ttl>
+								<Fore>Testfirstname</Fore>
+								<Sur>Testlastname</Sur>
+								<House>1 The Street</House>
+								<Postcode>AB1 2CD</Postcode>
+							</Donor>
+							<Date>2021-05-14</Date>
+							<Total>5.00</Total>
+						</GAD>
+						<EarliestGAdate>2021-05-14</EarliestGAdate>
+					</Repayment>
+					<GASDS>
+						<ConnectedCharities>no</ConnectedCharities>
+						<CommBldgs>no</CommBldgs>
+					</GASDS>
+				</Claim>
+			</R68>
+		</IRenvelope>
+	</Body>
+</GovTalkMessage>
